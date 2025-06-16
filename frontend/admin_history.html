@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏历史 - 管理员</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: background 0.3s;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .filters {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            min-width: 120px;
+        }
+
+        .filter-group label {
+            font-size: 12px;
+            color: #666;
+            font-weight: bold;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+
+        .filter-btn:hover {
+            background: #5a6fd8;
+        }
+
+        .sessions-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .sessions-header {
+            background: #f8f9fa;
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sessions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .sessions-table th,
+        .sessions-table td {
+            padding: 12px 8px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+            vertical-align: top;
+        }
+
+        .sessions-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+            position: sticky;
+            top: 0;
+            font-size: 12px;
+        }
+
+        /* 交替行颜色 */
+        .sessions-table tbody tr:nth-child(even) {
+            background: #f9f9fb;
+        }
+
+        .sessions-table tbody tr:nth-child(odd) {
+            background: white;
+        }
+
+        .sessions-table tbody tr:hover {
+            background: #e3f2fd !important;
+            transition: background 0.2s;
+        }
+
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: bold;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-incomplete {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-solved {
+            background: #cce7ff;
+            color: #0c5460;
+        }
+
+        .client-id {
+            font-family: 'Courier New', monospace;
+            font-size: 10px;
+            background: #f8f9fa;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #666;
+            word-break: break-all;
+        }
+
+        .ip-address {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #666;
+        }
+
+        .version-badge {
+            background: #e2e3e5;
+            color: #383d41;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+        }
+
+        .evaluation-section {
+            max-width: 200px;
+        }
+
+        .rating-stars {
+            color: #ffc107;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .evaluation-text {
+            font-size: 11px;
+            color: #666;
+            line-height: 1.3;
+            max-height: 60px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+        }
+
+        .no-evaluation {
+            color: #999;
+            font-style: italic;
+            font-size: 11px;
+        }
+
+        .evaluation-badge {
+            background: #e8f5e8;
+            color: #2e7d2e;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-bottom: 4px;
+            display: inline-block;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #667eea;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .session-link {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 11px;
+        }
+
+        .session-link:hover {
+            text-decoration: underline;
+        }
+
+        .case-info {
+            font-size: 11px;
+            color: #666;
+        }
+
+        .time-info {
+            font-size: 11px;
+        }
+
+        .time-info small {
+            color: #999;
+            display: block;
+        }
+
+        .difficulty-feedback {
+            background: #fff3cd;
+            color: #856404;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-bottom: 2px;
+            display: inline-block;
+        }
+
+        .recommend-badge {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            margin-bottom: 2px;
+            display: inline-block;
+        }
+
+        .pagination {
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #eee;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #666;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .pagination button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>📚 游戏历史记录</h1>
+            <div class="header-actions">
+                <a href="/admin/dashboard" class="header-btn">返回仪表板</a>
+                <a href="#" class="header-btn" onclick="logout()">退出登录</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 筛选器 -->
+        <div class="filters">
+            <div class="filter-group">
+                <label>游戏状态</label>
+                <select id="statusFilter">
+                    <option value="">全部</option>
+                    <option value="completed">已完成</option>
+                    <option value="incomplete">未完成</option>
+                    <option value="solved">已解决</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>评价状态</label>
+                <select id="evaluationFilter">
+                    <option value="">全部</option>
+                    <option value="true">有评价</option>
+                    <option value="false">无评价</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>案件难度</label>
+                <select id="difficultyFilter">
+                    <option value="">全部</option>
+                    <option value="简单">简单</option>
+                    <option value="中等">中等</option>
+                    <option value="困难">困难</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>案件分类</label>
+                <select id="categoryFilter">
+                    <option value="">全部</option>
+                    <option value="谋杀案">谋杀案</option>
+                    <option value="盗窃案">盗窃案</option>
+                    <option value="失踪案">失踪案</option>
+                    <option value="诈骗案">诈骗案</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <button class="filter-btn" onclick="applyFilters()">筛选</button>
+            </div>
+        </div>
+
+        <!-- 会话列表 -->
+        <div class="sessions-container">
+            <div class="sessions-header">
+                <h3>会话列表</h3>
+                <span id="sessionsCount">共 0 条记录</span>
+            </div>
+            
+            <div id="sessionsContent">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>正在加载会话数据...</p>
+                </div>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentPage = 1;
+        const pageSize = 20;
+        let totalCount = 0;
+        let allSessions = [];
+        let appTimezone = 'Asia/Shanghai'; // 默认时区
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            checkAuth();
+            
+            // 获取应用配置（包括时区）
+            try {
+                const configResponse = await fetch('/api/config');
+                if (configResponse.ok) {
+                    const config = await configResponse.json();
+                    appTimezone = config.timezone;
+                }
+            } catch (error) {
+                console.warn('获取应用配置失败，使用默认时区:', error);
+            }
+            
+            loadSessions();
+        });
+
+        // 检查认证状态
+        function checkAuth() {
+            const token = localStorage.getItem('admin_token');
+            if (!token) {
+                window.location.href = '/admin';
+                return;
+            }
+        }
+
+        // 构建查询参数
+        function buildQueryParams() {
+            const params = new URLSearchParams();
+            params.append('limit', pageSize.toString());
+            params.append('offset', ((currentPage - 1) * pageSize).toString());
+
+            // 添加过滤条件
+            const evaluationFilter = document.getElementById('evaluationFilter').value;
+            if (evaluationFilter) {
+                params.append('has_evaluation', evaluationFilter);
+            }
+
+            return params.toString();
+        }
+
+        // 加载会话数据
+        async function loadSessions() {
+            const token = localStorage.getItem('admin_token');
+            if (!token) {
+                window.location.href = '/admin';
+                return;
+            }
+
+            try {
+                const queryParams = buildQueryParams();
+                const response = await fetch(`/api/admin/sessions?${queryParams}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('admin_token');
+                    window.location.href = '/admin';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+                allSessions = data.sessions;
+                totalCount = data.total_count;
+
+                renderSessions(allSessions);
+                renderPagination();
+                updateSessionsCount();
+            } catch (error) {
+                console.error('加载会话数据失败:', error);
+                showError('加载会话数据失败，请稍后重试');
+            }
+        }
+
+        // 渲染会话列表
+        function renderSessions(sessions) {
+            const container = document.getElementById('sessionsContent');
+            
+            if (sessions.length === 0) {
+                container.innerHTML = '<div class="loading"><p>没有找到会话记录</p></div>';
+                return;
+            }
+
+            const tableHTML = `
+                <table class="sessions-table">
+                    <thead>
+                        <tr>
+                            <th>会话ID</th>
+                            <th>玩家</th>
+                            <th>案件信息</th>
+                            <th>状态</th>
+                            <th>客户端ID</th>
+                            <th>IP地址</th>
+                            <th>版本</th>
+                            <th>开始时间</th>
+                            <th>游戏评价</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sessions.map(session => renderSessionRow(session)).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            container.innerHTML = tableHTML;
+        }
+
+        // 渲染单个会话行
+        function renderSessionRow(session) {
+            const startTime = new Date(session.start_time);
+
+            let statusBadge = '';
+            if (session.is_solved) {
+                statusBadge = '<span class="status-badge status-solved">已解决</span>';
+            } else if (session.is_completed) {
+                statusBadge = '<span class="status-badge status-completed">已完成</span>';
+            } else {
+                statusBadge = '<span class="status-badge status-incomplete">未完成</span>';
+            }
+
+            const clientId = session.client_id ? 
+                `<div class="client-id">${session.client_id.substring(0, 12)}...</div>` : 
+                '<span style="color: #ccc;">-</span>';
+
+            const ipAddress = session.ip_address ? 
+                `<div class="ip-address">${session.ip_address}</div>` : 
+                '<span style="color: #ccc;">-</span>';
+
+            const version = session.game_version ? 
+                `<span class="version-badge">${session.game_version}</span>` : 
+                '<span style="color: #ccc;">-</span>';
+
+            // 渲染评价信息
+            let evaluationHTML = '';
+            if (session.has_evaluation && session.evaluation) {
+                const rating = session.evaluation.rating;
+                const stars = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+                
+                evaluationHTML = `
+                    <div class="evaluation-section">
+                        <div class="evaluation-badge">已评价</div>
+                        <div class="rating-stars">${stars} (${rating}/5)</div>
+                        ${session.evaluation.difficulty_feedback ? 
+                            `<div class="difficulty-feedback">${getDifficultyText(session.evaluation.difficulty_feedback)}</div>` : ''
+                        }
+                        ${session.evaluation.would_recommend !== null ? 
+                            `<div class="recommend-badge">${session.evaluation.would_recommend ? '推荐' : '不推荐'}</div>` : ''
+                        }
+                        <div class="evaluation-text">${session.evaluation.reason}</div>
+                    </div>
+                `;
+            } else {
+                evaluationHTML = '<div class="no-evaluation">暂无评价</div>';
+            }
+
+            return `
+                <tr>
+                    <td>
+                        <a href="/replay.html?session_id=${session.session_id}" 
+                           class="session-link" target="_blank">
+                            ${session.session_id.substring(0, 8)}...
+                        </a>
+                    </td>
+                    <td>${session.player_name || '匿名玩家'}</td>
+                    <td>
+                        <div style="font-weight: bold; font-size: 12px;">${session.case_title}</div>
+                        <div class="case-info">${session.case_category} · ${session.case_difficulty}</div>
+                        <div class="case-info">轮数: ${session.total_rounds || 0} | 提示: ${session.hints_used || 0}</div>
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td>${clientId}</td>
+                    <td>${ipAddress}</td>
+                    <td>${version}</td>
+                    <td>
+                        <div class="time-info">
+                            ${startTime.toLocaleDateString('zh-CN', { timeZone: appTimezone })}
+                            <small>${startTime.toLocaleTimeString('zh-CN', { timeZone: appTimezone })}</small>
+                        </div>
+                    </td>
+                    <td>${evaluationHTML}</td>
+                    <td>
+                        <a href="/replay.html?session_id=${session.session_id}" 
+                           class="session-link" target="_blank">查看回放</a>
+                    </td>
+                </tr>
+            `;
+        }
+
+        // 获取难度反馈文本
+        function getDifficultyText(feedback) {
+            const textMap = {
+                'too_easy': '太简单',
+                'just_right': '刚好',
+                'too_hard': '太难'
+            };
+            return textMap[feedback] || feedback;
+        }
+
+        // 渲染分页
+        function renderPagination() {
+            const container = document.getElementById('pagination');
+            const totalPages = Math.ceil(totalCount / pageSize);
+
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+            
+            // 上一页
+            paginationHTML += `<button onclick="changePage(${currentPage - 1})" 
+                               ${currentPage === 1 ? 'disabled' : ''}>上一页</button>`;
+            
+            // 页码
+            for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+                paginationHTML += `<button onclick="changePage(${i})" 
+                                   ${i === currentPage ? 'class="active"' : ''}>${i}</button>`;
+            }
+            
+            // 下一页
+            paginationHTML += `<button onclick="changePage(${currentPage + 1})" 
+                               ${currentPage === totalPages ? 'disabled' : ''}>下一页</button>`;
+
+            container.innerHTML = paginationHTML;
+        }
+
+        // 更新会话计数
+        function updateSessionsCount() {
+            document.getElementById('sessionsCount').textContent = `共 ${totalCount} 条记录`;
+        }
+
+        // 切换页面
+        function changePage(page) {
+            const totalPages = Math.ceil(totalCount / pageSize);
+            if (page < 1 || page > totalPages) return;
+            
+            currentPage = page;
+            loadSessions();
+        }
+
+        // 应用筛选器
+        function applyFilters() {
+            currentPage = 1;
+            loadSessions();
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            const container = document.getElementById('sessionsContent');
+            container.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+
+        // 退出登录
+        async function logout() {
+            const token = localStorage.getItem('admin_token');
+            if (token) {
+                try {
+                    await fetch('/api/admin/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                } catch (error) {
+                    console.error('登出请求失败:', error);
+                }
+                
+                localStorage.removeItem('admin_token');
+            }
+            
+            window.location.href = '/admin';
+        }
+    </script>
+</body>
+</html> 

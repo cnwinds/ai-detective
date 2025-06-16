@@ -1,0 +1,1039 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# 故障排除和调试指南
+
+## 常见问题诊断
+
+### 项目结构问题
+
+#### 问题：模块导入失败
+**症状**: `ModuleNotFoundError: No module named 'xxx'`
+**排查步骤**:
+1. 检查backend目录是否有`__init__.py`文件
+2. 确认使用相对导入：`from .module_name import ClassName`
+3. 验证启动脚本中的导入路径：`from backend.module_name import ClassName`
+4. 检查Python路径设置和工作目录
+
+#### 问题：包结构错误
+**症状**: 导入成功但运行时出现属性错误
+**排查步骤**:
+1. 确认所有Python文件都在正确的目录中
+2. 检查[backend/__init__.py](mdc:backend/__init__.py)文件存在
+3. 验证相对导入路径的正确性
+4. 重新启动Python解释器清除缓存
+
+### 服务器启动问题
+
+#### 问题：FastAPI服务器无法启动
+**症状**: 运行[start_web_server.py](mdc:start_web_server.py)时出现错误
+**排查步骤**:
+1. 检查Python版本 (需要3.7+)
+2. 验证依赖安装: `pip install -r requirements.txt`
+3. 检查端口占用: `netstat -an | findstr :8000`
+4. 查看错误日志中的具体错误信息
+5. 确认backend包结构正确
+
+#### 问题：OpenAI API连接失败
+**症状**: AI对话功能不工作，返回API错误
+**排查步骤**:
+1. 检查[.env](mdc:.env)文件中的OPENAI_API_KEY
+2. 验证API密钥有效性和余额
+3. 检查网络连接和防火墙设置
+4. 查看[backend/ai_service.py](mdc:backend/ai_service.py)中的错误处理
+5. 确认[backend/config.py](mdc:backend/config.py)配置正确
+
+### 前端问题诊断
+
+#### 问题：页面无法加载或显示空白
+**症状**: 浏览器显示空白页面或加载失败
+**排查步骤**:
+1. 打开浏览器开发者工具查看控制台错误
+2. 检查网络标签页中的HTTP请求状态
+3. 验证静态文件路径是否正确
+4. 检查[frontend/index.html](mdc:frontend/index.html)中的资源引用
+5. 确认FastAPI服务器正常运行
+
+#### 问题：角色对话显示异常
+**症状**: 切换角色时对话历史显示错误或重复
+**排查步骤**:
+1. 检查`conversationHistory`数组结构
+2. 验证`showCharacterConversation()`方法逻辑
+3. 查看浏览器控制台中的JavaScript错误
+4. 确认角色ID和名称匹配正确
+5. 检查会话状态管理
+
+#### 问题：流式输出不工作
+**症状**: AI回答不是逐字显示，而是一次性出现
+**排查步骤**:
+1. 检查浏览器是否支持Server-Sent Events
+2. 验证流式API端点是否正常工作
+3. 查看网络请求中的响应类型
+4. 检查[frontend/static/js/app.js](mdc:frontend/static/js/app.js)中的流式处理逻辑
+
+### WebSocket连接问题
+
+#### 问题：实时通信失败
+**症状**: 游戏状态不同步，WebSocket连接断开
+**排查步骤**:
+1. 检查WebSocket连接URL是否正确
+2. 验证session_id是否有效
+3. 查看服务器端WebSocket处理逻辑
+4. 检查网络代理或防火墙设置
+5. 监控连接重试机制
+
+#### 问题：会话管理异常
+**症状**: 游戏状态丢失或会话过期
+**排查步骤**:
+1. 检查会话ID生成和存储
+2. 验证会话超时设置
+3. 查看服务器内存中的会话管理
+4. 检查浏览器本地存储
+
+## 调试技巧
+
+### 前端调试
+
+#### JavaScript调试
+```javascript
+// 在关键位置添加调试信息
+console.log('当前游戏状态:', this.gameState);
+console.log('对话历史:', this.conversationHistory);
+console.log('选中角色:', this.selectedCharacter);
+
+// 使用断点调试
+debugger; // 浏览器会在此处暂停执行
+
+// 检查DOM元素状态
+console.log('角色列表元素:', document.getElementById('character-list'));
+console.log('对话区域:', document.getElementById('conversation-area'));
+
+// 监控状态变化
+const originalUpdateState = this.updateGameState;
+this.updateGameState = function(newState) {
+    console.log('状态更新前:', this.gameState);
+    console.log('新状态:', newState);
+    originalUpdateState.call(this, newState);
+    console.log('状态更新后:', this.gameState);
+};
+```
+
+#### 网络请求调试
+```javascript
+// 添加详细的请求日志
+async askQuestion(question, character) {
+    console.log('发送问题:', { question, character, sessionId: this.sessionId });
+    
+    try {
+        const startTime = performance.now();
+        
+        const response = await fetch('/api/game/question', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                question, 
+                character_name: character, 
+                session_id: this.sessionId 
+            })
+        });
+        
+        const endTime = performance.now();
+        console.log(`请求耗时: ${endTime - startTime}ms`);
+        console.log('响应状态:', response.status, response.statusText);
+        
+        const result = await response.json();
+        console.log('响应数据:', result);
+        
+        return result;
+    } catch (error) {
+        console.error('请求失败详情:', {
+            error: error.message,
+            stack: error.stack,
+            url: '/api/game/question',
+            method: 'POST'
+        });
+        throw error;
+    }
+}
+
+// 流式响应调试
+async handleStreamResponse(url, data) {
+    console.log('开始流式请求:', { url, data });
+    
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let chunkCount = 0;
+        
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) {
+                console.log(`流式响应完成，共接收 ${chunkCount} 个数据块`);
+                break;
+            }
+            
+            chunkCount++;
+            const chunk = decoder.decode(value);
+            console.log(`接收数据块 ${chunkCount}:`, chunk);
+            
+            // 处理数据块...
+        }
+    } catch (error) {
+        console.error('流式请求失败:', error);
+        throw error;
+    }
+}
+```
+
+#### 性能调试
+```javascript
+// 性能测量
+console.time('页面渲染时间');
+this.renderGameScreen();
+console.timeEnd('页面渲染时间');
+
+// 内存使用监控
+function logMemoryUsage() {
+    if (performance.memory) {
+        console.log('内存使用情况:', {
+            used: Math.round(performance.memory.usedJSHeapSize / 1024 / 1024) + 'MB',
+            total: Math.round(performance.memory.totalJSHeapSize / 1024 / 1024) + 'MB',
+            limit: Math.round(performance.memory.jsHeapSizeLimit / 1024 / 1024) + 'MB'
+        });
+    }
+}
+
+// 定期监控内存
+setInterval(logMemoryUsage, 30000); // 每30秒检查一次
+
+// 事件监听器泄漏检测
+const originalAddEventListener = EventTarget.prototype.addEventListener;
+const eventListeners = new Map();
+
+EventTarget.prototype.addEventListener = function(type, listener, options) {
+    const key = `${this.constructor.name}-${type}`;
+    if (!eventListeners.has(key)) {
+        eventListeners.set(key, 0);
+    }
+    eventListeners.set(key, eventListeners.get(key) + 1);
+    console.log('事件监听器统计:', Object.fromEntries(eventListeners));
+    
+    return originalAddEventListener.call(this, type, listener, options);
+};
+```
+
+### 后端调试
+
+#### Python调试
+```python
+import logging
+import time
+import traceback
+from functools import wraps
+
+# 配置详细日志
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s',
+    handlers=[
+        logging.FileHandler('debug.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# 性能监控装饰器
+def monitor_performance(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        start_time = time.time()
+        logger.debug(f"开始执行 {func.__name__}, 参数: args={args}, kwargs={kwargs}")
+        
+        try:
+            result = await func(*args, **kwargs)
+            end_time = time.time()
+            logger.debug(f"{func.__name__} 执行成功，耗时: {end_time - start_time:.3f}秒")
+            return result
+        except Exception as e:
+            end_time = time.time()
+            logger.error(f"{func.__name__} 执行失败，耗时: {end_time - start_time:.3f}秒")
+            logger.error(f"错误详情: {str(e)}")
+            logger.error(f"堆栈跟踪: {traceback.format_exc()}")
+            raise
+    return wrapper
+
+# 在关键方法上使用监控
+@monitor_performance
+async def ask_question(request: QuestionRequest):
+    logger.debug(f"收到问题请求: {request.dict()}")
+    
+    # 检查会话
+    if request.session_id not in game_sessions:
+        logger.warning(f"会话不存在: {request.session_id}")
+        raise HTTPException(status_code=404, detail="游戏会话不存在")
+    
+    game_engine = game_sessions[request.session_id]
+    logger.debug(f"找到游戏会话，当前轮次: {game_engine.current_round}")
+    
+    try:
+        result = await game_engine.process_question(
+            request.character_name, 
+            request.question
+        )
+        logger.debug(f"问题处理完成: {result}")
+        return {"success": True, "data": result}
+        
+    except Exception as e:
+        logger.error(f"处理问题时出错: {str(e)}")
+        logger.error(f"游戏引擎状态: {game_engine.__dict__}")
+        raise
+
+# 会话状态监控
+def log_session_state(session_id: str):
+    if session_id in game_sessions:
+        engine = game_sessions[session_id]
+        logger.debug(f"会话 {session_id} 状态:")
+        logger.debug(f"  - 当前案例: {engine.current_case.title if engine.current_case else 'None'}")
+        logger.debug(f"  - 当前轮次: {engine.current_round}/{engine.max_rounds}")
+        logger.debug(f"  - 已用提示: {engine.hints_used}/{engine.max_hints}")
+        logger.debug(f"  - 对话历史长度: {len(engine.conversation_history)}")
+    else:
+        logger.warning(f"会话 {session_id} 不存在")
+
+# AI服务调试
+class DebugAIService(AIService):
+    async def get_response(self, prompt: str) -> str:
+        logger.debug(f"AI请求 - 提示长度: {len(prompt)}")
+        logger.debug(f"AI请求 - 提示内容: {prompt[:200]}...")
+        
+        start_time = time.time()
+        try:
+            response = await super().get_response(prompt)
+            end_time = time.time()
+            
+            logger.debug(f"AI响应 - 耗时: {end_time - start_time:.3f}秒")
+            logger.debug(f"AI响应 - 内容长度: {len(response)}")
+            logger.debug(f"AI响应 - 内容: {response[:200]}...")
+            
+            return response
+        except Exception as e:
+            end_time = time.time()
+            logger.error(f"AI请求失败 - 耗时: {end_time - start_time:.3f}秒")
+            logger.error(f"AI请求失败 - 错误: {str(e)}")
+            raise
+```
+
+#### API响应调试
+```python
+# 中间件记录所有请求
+@app.middleware("http")
+async def log_requests(request: Request, call_next):
+    start_time = time.time()
+    
+    # 记录请求信息
+    logger.info(f"请求开始: {request.method} {request.url}")
+    logger.debug(f"请求头: {dict(request.headers)}")
+    
+    # 记录请求体（如果是POST）
+    if request.method == "POST":
+        body = await request.body()
+        if body:
+            try:
+                body_str = body.decode('utf-8')
+                logger.debug(f"请求体: {body_str}")
+            except:
+                logger.debug(f"请求体: <binary data, {len(body)} bytes>")
+    
+    response = await call_next(request)
+    
+    # 记录响应信息
+    process_time = time.time() - start_time
+    logger.info(f"请求完成: {request.method} {request.url} - "
+               f"状态码: {response.status_code} - 耗时: {process_time:.3f}秒")
+    
+    return response
+
+# 详细的错误信息
+@app.exception_handler(Exception)
+async def debug_exception_handler(request: Request, exc: Exception):
+    error_id = str(uuid.uuid4())[:8]
+    
+    error_detail = {
+        "error_id": error_id,
+        "error_type": type(exc).__name__,
+        "error_message": str(exc),
+        "request_url": str(request.url),
+        "request_method": request.method,
+        "traceback": traceback.format_exc()
+    }
+    
+    logger.error(f"API错误 [{error_id}]: {error_detail}")
+    
+    # 开发环境返回详细错误，生产环境返回简化错误
+    if GameConfig.DEBUG_MODE:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": error_detail,
+                "debug": True
+            }
+        )
+    else:
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": "服务器内部错误",
+                "error_id": error_id
+            }
+        )
+```
+
+## 性能问题排查
+
+### 前端性能
+
+#### 页面加载缓慢
+**排查方法**:
+1. 使用浏览器性能分析工具（F12 → Performance）
+2. 检查资源加载时间和大小
+3. 分析JavaScript执行时间
+4. 检查CSS渲染阻塞
+
+```javascript
+// 资源加载监控
+window.addEventListener('load', () => {
+    const perfData = performance.getEntriesByType('navigation')[0];
+    console.log('页面加载性能:', {
+        DNS查询: perfData.domainLookupEnd - perfData.domainLookupStart,
+        TCP连接: perfData.connectEnd - perfData.connectStart,
+        请求响应: perfData.responseEnd - perfData.requestStart,
+        DOM解析: perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
+        总加载时间: perfData.loadEventEnd - perfData.navigationStart
+    });
+});
+
+// 资源加载详情
+performance.getEntriesByType('resource').forEach(resource => {
+    if (resource.duration > 1000) { // 超过1秒的资源
+        console.warn('慢资源:', {
+            name: resource.name,
+            duration: resource.duration,
+            size: resource.transferSize
+        });
+    }
+});
+```
+
+#### JavaScript执行缓慢
+**排查方法**:
+```javascript
+// 函数执行时间监控
+function timeFunction(fn, name) {
+    return function(...args) {
+        const start = performance.now();
+        const result = fn.apply(this, args);
+        const end = performance.now();
+        
+        if (end - start > 100) { // 超过100ms的函数
+            console.warn(`慢函数 ${name}: ${end - start}ms`);
+        }
+        
+        return result;
+    };
+}
+
+// 使用示例
+this.renderCharacterList = timeFunction(this.renderCharacterList, 'renderCharacterList');
+
+// 长任务监控
+if ('PerformanceObserver' in window) {
+    const observer = new PerformanceObserver((list) => {
+        for (const entry of list.getEntries()) {
+            if (entry.duration > 50) { // 超过50ms的长任务
+                console.warn('长任务检测:', {
+                    duration: entry.duration,
+                    startTime: entry.startTime
+                });
+            }
+        }
+    });
+    observer.observe({ entryTypes: ['longtask'] });
+}
+```
+
+### 后端性能
+
+#### API响应缓慢
+**排查方法**:
+```python
+import time
+import psutil
+import asyncio
+from collections import defaultdict
+
+# API性能统计
+api_stats = defaultdict(list)
+
+@app.middleware("http")
+async def performance_middleware(request: Request, call_next):
+    start_time = time.time()
+    start_memory = psutil.Process().memory_info().rss
+    
+    response = await call_next(request)
+    
+    end_time = time.time()
+    end_memory = psutil.Process().memory_info().rss
+    
+    duration = end_time - start_time
+    memory_delta = end_memory - start_memory
+    
+    # 记录API性能
+    endpoint = f"{request.method} {request.url.path}"
+    api_stats[endpoint].append({
+        'duration': duration,
+        'memory_delta': memory_delta,
+        'timestamp': start_time
+    })
+    
+    # 警告慢请求
+    if duration > 2.0:  # 超过2秒
+        logger.warning(f"慢请求: {endpoint} - {duration:.3f}秒")
+    
+    # 警告内存增长
+    if memory_delta > 10 * 1024 * 1024:  # 超过10MB
+        logger.warning(f"内存增长: {endpoint} - {memory_delta / 1024 / 1024:.1f}MB")
+    
+    return response
+
+# 定期报告性能统计
+async def report_performance_stats():
+    while True:
+        await asyncio.sleep(300)  # 每5分钟报告一次
+        
+        for endpoint, stats in api_stats.items():
+            if stats:
+                durations = [s['duration'] for s in stats]
+                avg_duration = sum(durations) / len(durations)
+                max_duration = max(durations)
+                
+                logger.info(f"性能统计 {endpoint}: "
+                           f"平均 {avg_duration:.3f}秒, "
+                           f"最大 {max_duration:.3f}秒, "
+                           f"调用次数 {len(stats)}")
+        
+        # 清理旧数据
+        cutoff_time = time.time() - 3600  # 保留1小时数据
+        for endpoint in api_stats:
+            api_stats[endpoint] = [
+                s for s in api_stats[endpoint] 
+                if s['timestamp'] > cutoff_time
+            ]
+
+# 启动性能监控
+asyncio.create_task(report_performance_stats())
+```
+
+#### 内存泄漏检测
+```python
+import gc
+import tracemalloc
+
+# 启用内存跟踪
+tracemalloc.start()
+
+# 内存使用监控
+class MemoryMonitor:
+    def __init__(self):
+        self.snapshots = []
+        self.baseline = None
+    
+    def take_snapshot(self, label: str):
+        snapshot = tracemalloc.take_snapshot()
+        self.snapshots.append((label, snapshot))
+        
+        if self.baseline is None:
+            self.baseline = snapshot
+        else:
+            # 比较内存使用
+            top_stats = snapshot.compare_to(self.baseline, 'lineno')
+            
+            logger.info(f"内存快照 {label}:")
+            for stat in top_stats[:5]:  # 显示前5个内存增长最大的位置
+                logger.info(f"  {stat}")
+    
+    def check_memory_growth(self):
+        current, peak = tracemalloc.get_traced_memory()
+        logger.info(f"当前内存使用: {current / 1024 / 1024:.1f}MB, "
+                   f"峰值: {peak / 1024 / 1024:.1f}MB")
+        
+        # 强制垃圾回收
+        collected = gc.collect()
+        if collected > 0:
+            logger.info(f"垃圾回收: 清理了 {collected} 个对象")
+
+memory_monitor = MemoryMonitor()
+
+# 在关键位置监控内存
+@app.post("/api/game/start")
+async def start_game_with_monitoring(case_index: int = 0):
+    memory_monitor.take_snapshot("game_start_begin")
+    
+    result = await start_game_original(case_index)
+    
+    memory_monitor.take_snapshot("game_start_end")
+    memory_monitor.check_memory_growth()
+    
+    return result
+```
+
+## 错误日志分析
+
+### 常见错误模式
+
+#### 前端错误
+```
+TypeError: Cannot read property 'xxx' of undefined
+→ 检查对象属性访问前是否进行了null检查
+→ 使用可选链操作符: obj?.property?.subProperty
+
+ReferenceError: xxx is not defined
+→ 检查变量声明和作用域
+→ 确认模块导入是否正确
+
+NetworkError: Failed to fetch
+→ 检查API端点和网络连接
+→ 验证CORS配置
+→ 检查服务器是否运行
+
+SyntaxError: Unexpected token
+→ 检查JSON格式是否正确
+→ 验证JavaScript语法
+→ 检查字符编码问题
+```
+
+#### 后端错误
+```
+KeyError: 'session_id'
+→ 检查请求参数是否完整
+→ 验证API接口定义
+→ 添加参数验证
+
+ConnectionError: OpenAI API
+→ 检查API密钥和网络连接
+→ 验证API配额和余额
+→ 检查代理设置
+
+ValidationError: Invalid request format
+→ 检查请求数据格式和类型
+→ 验证Pydantic模型定义
+→ 检查数据序列化
+
+ImportError: No module named 'xxx'
+→ 检查包结构和__init__.py文件
+→ 验证相对导入路径
+→ 确认依赖安装
+```
+
+### 日志分析工具
+
+#### 日志聚合和分析
+```python
+import re
+from collections import Counter, defaultdict
+from datetime import datetime, timedelta
+
+class LogAnalyzer:
+    def __init__(self, log_file: str):
+        self.log_file = log_file
+        self.error_patterns = {
+            'api_error': r'API错误.*?(\w+Error): (.+)',
+            'slow_request': r'慢请求: (.+) - ([\d.]+)秒',
+            'memory_warning': r'内存增长: (.+) - ([\d.]+)MB',
+            'session_error': r'会话.*?不存在: (.+)'
+        }
+    
+    def analyze_errors(self, hours: int = 24):
+        """分析最近N小时的错误"""
+        cutoff_time = datetime.now() - timedelta(hours=hours)
+        errors = defaultdict(list)
+        
+        with open(self.log_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                # 解析时间戳
+                timestamp_match = re.match(r'(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})', line)
+                if not timestamp_match:
+                    continue
+                
+                timestamp = datetime.strptime(timestamp_match.group(1), '%Y-%m-%d %H:%M:%S')
+                if timestamp < cutoff_time:
+                    continue
+                
+                # 匹配错误模式
+                for pattern_name, pattern in self.error_patterns.items():
+                    match = re.search(pattern, line)
+                    if match:
+                        errors[pattern_name].append({
+                            'timestamp': timestamp,
+                            'details': match.groups(),
+                            'line': line.strip()
+                        })
+        
+        return errors
+    
+    def generate_report(self):
+        """生成错误报告"""
+        errors = self.analyze_errors()
+        
+        print("=== 错误分析报告 ===")
+        print(f"分析时间范围: 最近24小时")
+        print()
+        
+        for error_type, error_list in errors.items():
+            if error_list:
+                print(f"{error_type.upper()}: {len(error_list)} 次")
+                
+                # 统计最常见的错误
+                if error_type == 'api_error':
+                    error_types = [e['details'][0] for e in error_list]
+                    common_errors = Counter(error_types).most_common(5)
+                    for error, count in common_errors:
+                        print(f"  - {error}: {count} 次")
+                
+                elif error_type == 'slow_request':
+                    endpoints = [e['details'][0] for e in error_list]
+                    slow_endpoints = Counter(endpoints).most_common(5)
+                    for endpoint, count in slow_endpoints:
+                        print(f"  - {endpoint}: {count} 次")
+                
+                print()
+
+# 使用示例
+analyzer = LogAnalyzer('debug.log')
+analyzer.generate_report()
+```
+
+## 测试和验证
+
+### 功能测试清单
+- [ ] 游戏启动和初始化
+- [ ] 案例选择和加载
+- [ ] 角色选择和切换
+- [ ] 问题提交和响应（标准和流式）
+- [ ] 证据收集和显示
+- [ ] 提示功能
+- [ ] 指控流程和结果
+- [ ] WebSocket实时通信
+- [ ] 会话管理和恢复
+- [ ] 错误处理和用户反馈
+
+### 兼容性测试
+- [ ] Chrome浏览器（最新版本）
+- [ ] Firefox浏览器（最新版本）
+- [ ] Safari浏览器（最新版本）
+- [ ] Edge浏览器（最新版本）
+- [ ] 移动端浏览器（iOS Safari, Android Chrome）
+- [ ] 不同屏幕分辨率（320px, 768px, 1024px, 1920px）
+- [ ] 网络条件（快速、慢速、间歇性连接）
+
+### 压力测试
+```python
+# 并发用户测试
+import asyncio
+import aiohttp
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+async def simulate_user_session(session_id: int):
+    """模拟用户会话"""
+    async with aiohttp.ClientSession() as session:
+        try:
+            # 1. 开始游戏
+            async with session.post('http://localhost:8000/api/game/start', 
+                                   json={'case_index': 0}) as response:
+                if response.status != 200:
+                    raise Exception(f"开始游戏失败: {response.status}")
+                
+                data = await response.json()
+                game_session_id = data['session_id']
+            
+            # 2. 进行多轮对话
+            characters = ['角色1', '角色2', '角色3', '角色4']  # 示例角色名称
+            questions = [
+                '你昨晚在做什么？',
+                '你知道受害者的情况吗？',
+                '你有什么要说的吗？'
+            ]
+            
+            for i in range(5):  # 5轮对话
+                character = characters[i % len(characters)]
+                question = questions[i % len(questions)]
+                
+                async with session.post('http://localhost:8000/api/game/question',
+                                       json={
+                                           'session_id': game_session_id,
+                                           'character_name': character,
+                                           'question': question
+                                       }) as response:
+                    if response.status != 200:
+                        raise Exception(f"提问失败: {response.status}")
+                
+                # 随机延迟
+                await asyncio.sleep(random.uniform(1, 3))
+            
+            print(f"用户 {session_id} 完成测试")
+            
+        except Exception as e:
+            print(f"用户 {session_id} 测试失败: {e}")
+
+async def stress_test(concurrent_users: int = 10):
+    """压力测试"""
+    print(f"开始压力测试: {concurrent_users} 并发用户")
+    start_time = time.time()
+    
+    tasks = [simulate_user_session(i) for i in range(concurrent_users)]
+    await asyncio.gather(*tasks, return_exceptions=True)
+    
+    end_time = time.time()
+    print(f"压力测试完成，耗时: {end_time - start_time:.2f}秒")
+
+# 运行压力测试
+if __name__ == "__main__":
+    asyncio.run(stress_test(20))  # 20个并发用户
+```
+
+### 自动化测试
+```javascript
+// 前端自动化测试（使用Playwright）
+const { test, expect } = require('@playwright/test');
+
+test.describe('AI侦探游戏', () => {
+    test('完整游戏流程', async ({ page }) => {
+        // 1. 访问游戏页面
+        await page.goto('http://localhost:8000');
+        
+        // 2. 等待页面加载
+        await expect(page.locator('#main-menu')).toBeVisible();
+        
+        // 3. 开始游戏
+        await page.click('#start-game-btn');
+        
+        // 4. 选择案例
+        await page.click('.case-card:first-child');
+        
+        // 5. 等待游戏界面加载
+        await expect(page.locator('#game-screen')).toBeVisible();
+        
+        // 6. 选择角色
+        await page.click('.character-card:first-child');
+        
+        // 7. 提问
+        await page.fill('#question-input', '你昨晚在做什么？');
+        await page.click('#ask-question-btn');
+        
+        // 8. 等待AI响应
+        await expect(page.locator('.ai-response')).toBeVisible({ timeout: 10000 });
+        
+        // 9. 检查对话历史
+        const conversationItems = page.locator('.conversation-item');
+        await expect(conversationItems).toHaveCount(1);
+        
+        // 10. 进行指控
+        await page.click('#accusation-btn');
+        await page.selectOption('#accused-select', '角色名称');
+await page.fill('#reasoning-textarea', '基于证据分析，我认为该角色是凶手');
+        await page.click('#submit-accusation-btn');
+        
+        // 11. 等待审判结果
+        await expect(page.locator('#trial-result')).toBeVisible({ timeout: 15000 });
+    });
+    
+    test('错误处理', async ({ page }) => {
+        // 测试网络错误处理
+        await page.route('**/api/game/question', route => route.abort());
+        
+        await page.goto('http://localhost:8000');
+        await page.click('#start-game-btn');
+        await page.click('.case-card:first-child');
+        await page.click('.character-card:first-child');
+        
+        await page.fill('#question-input', '测试问题');
+        await page.click('#ask-question-btn');
+        
+        // 检查错误消息
+        await expect(page.locator('.error-message')).toBeVisible();
+    });
+});
+```
+
+## 监控和维护
+
+### 实时监控
+```python
+# 健康检查端点
+@app.get("/health")
+async def health_check():
+    """系统健康检查"""
+    health_status = {
+        "status": "healthy",
+        "timestamp": datetime.now().isoformat(),
+        "version": "1.0.0",
+        "checks": {}
+    }
+    
+    # 检查AI服务
+    try:
+        await ai_service.get_response("测试", max_tokens=10)
+        health_status["checks"]["ai_service"] = "healthy"
+    except Exception as e:
+        health_status["checks"]["ai_service"] = f"unhealthy: {str(e)}"
+        health_status["status"] = "degraded"
+    
+    # 检查内存使用
+    memory_usage = psutil.virtual_memory().percent
+    if memory_usage > 90:
+        health_status["checks"]["memory"] = f"critical: {memory_usage}%"
+        health_status["status"] = "critical"
+    elif memory_usage > 80:
+        health_status["checks"]["memory"] = f"warning: {memory_usage}%"
+        if health_status["status"] == "healthy":
+            health_status["status"] = "degraded"
+    else:
+        health_status["checks"]["memory"] = f"healthy: {memory_usage}%"
+    
+    # 检查活跃会话数
+    active_sessions = len(game_sessions)
+    health_status["checks"]["active_sessions"] = active_sessions
+    
+    return health_status
+
+# 指标收集
+@app.get("/metrics")
+async def get_metrics():
+    """获取系统指标"""
+    return {
+        "active_sessions": len(game_sessions),
+        "total_requests": api_stats.get("total_requests", 0),
+        "average_response_time": calculate_average_response_time(),
+        "memory_usage": psutil.virtual_memory().percent,
+        "cpu_usage": psutil.cpu_percent(),
+        "uptime": time.time() - start_time
+    }
+```
+
+### 定期维护任务
+```python
+# 清理过期会话
+async def cleanup_expired_sessions():
+    """清理过期的游戏会话"""
+    current_time = time.time()
+    expired_sessions = []
+    
+    for session_id, engine in game_sessions.items():
+        # 检查会话最后活动时间
+        if hasattr(engine, 'last_activity'):
+            if current_time - engine.last_activity > 3600:  # 1小时无活动
+                expired_sessions.append(session_id)
+    
+    for session_id in expired_sessions:
+        del game_sessions[session_id]
+        logger.info(f"清理过期会话: {session_id}")
+    
+    if expired_sessions:
+        logger.info(f"清理了 {len(expired_sessions)} 个过期会话")
+
+# 日志轮转
+async def rotate_logs():
+    """轮转日志文件"""
+    log_files = ['debug.log', 'game.log']
+    
+    for log_file in log_files:
+        if os.path.exists(log_file):
+            file_size = os.path.getsize(log_file)
+            if file_size > 100 * 1024 * 1024:  # 100MB
+                timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+                backup_name = f"{log_file}.{timestamp}"
+                os.rename(log_file, backup_name)
+                logger.info(f"日志文件轮转: {log_file} -> {backup_name}")
+
+# 定期执行维护任务
+async def maintenance_scheduler():
+    """维护任务调度器"""
+    while True:
+        try:
+            await cleanup_expired_sessions()
+            await rotate_logs()
+            
+            # 强制垃圾回收
+            collected = gc.collect()
+            if collected > 0:
+                logger.debug(f"垃圾回收: 清理了 {collected} 个对象")
+            
+        except Exception as e:
+            logger.error(f"维护任务执行失败: {e}")
+        
+        # 每小时执行一次
+        await asyncio.sleep(3600)
+
+# 启动维护调度器
+asyncio.create_task(maintenance_scheduler())
+```
+
+### 备份和恢复
+```python
+# 配置备份
+def backup_configuration():
+    """备份配置文件"""
+    config_files = ['.env', 'backend/config.py']
+    backup_dir = f"backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    
+    os.makedirs(backup_dir, exist_ok=True)
+    
+    for config_file in config_files:
+        if os.path.exists(config_file):
+            shutil.copy2(config_file, backup_dir)
+    
+    logger.info(f"配置备份完成: {backup_dir}")
+
+# 会话状态备份
+def backup_game_sessions():
+    """备份游戏会话状态"""
+    if not game_sessions:
+        return
+    
+    backup_data = {}
+    for session_id, engine in game_sessions.items():
+        backup_data[session_id] = {
+            'current_case': engine.current_case.title if engine.current_case else None,
+            'current_round': engine.current_round,
+            'hints_used': engine.hints_used,
+            'conversation_history': engine.conversation_history,
+            'last_activity': getattr(engine, 'last_activity', time.time())
+        }
+    
+    backup_file = f"sessions_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    with open(backup_file, 'w', encoding='utf-8') as f:
+        json.dump(backup_data, f, ensure_ascii=False, indent=2)
+    
+    logger.info(f"会话备份完成: {backup_file}")
+```
+
+通过这些全面的故障排除和调试指南，您可以快速定位和解决项目中的各种问题，确保AI侦探推理游戏的稳定运行。
+
+
+
+
+

@@ -1,0 +1,22 @@
+# AI和核心依赖
+openai>=1.0.0
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# Web框架依赖
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
+websockets>=12.0
+
+# 数据库依赖
+mysql-connector-python>=8.0.0
+sqlalchemy>=2.0.0
+alembic>=1.12.0
+
+# 时区处理
+pytz>=2023.3
+
+# 可选依赖（用于命令行版本）
+colorama>=0.4.6
+rich>=13.0.0
+pyinstaller>=5.0.0

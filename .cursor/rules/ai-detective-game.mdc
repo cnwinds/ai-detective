@@ -1,0 +1,211 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# AI侦探推理游戏项目规则
+
+## 项目概述
+这是一个基于AI的侦探推理游戏，采用前后端分离架构。玩家扮演侦探，通过与AI驱动的角色对话来收集线索，分析证据，最终找出真凶。
+
+## 项目架构
+
+### 后端服务 (FastAPI)
+- **主应用**: [backend/app.py](mdc:backend/app.py) - FastAPI应用主文件，包含所有API端点和WebSocket
+- **游戏引擎**: [backend/game_engine.py](mdc:backend/game_engine.py) - 核心游戏逻辑和流程控制
+- **数据模型**: [backend/models.py](mdc:backend/models.py) - 游戏数据结构定义
+- **AI服务**: [backend/ai_service.py](mdc:backend/ai_service.py) - OpenAI API集成和流式响应
+- **案例数据**: [backend/case_data.py](mdc:backend/case_data.py) - 游戏案例定义和角色设定
+- **证据系统**: [backend/evidence_system.py](mdc:backend/evidence_system.py) - 智能证据管理和揭露
+- **指控系统**: [backend/accusation_system.py](mdc:backend/accusation_system.py) - 指控和审判逻辑
+- **配置管理**: [backend/config.py](mdc:backend/config.py) - 环境变量和游戏配置
+
+### 前端应用 (原生JavaScript)
+- **主页面**: [frontend/index.html](mdc:frontend/index.html) - 单页面应用结构，包含所有游戏界面
+- **应用逻辑**: [frontend/static/js/app.js](mdc:frontend/static/js/app.js) - DetectiveGameApp类，管理所有前端逻辑
+- **样式文件**: [frontend/static/css/style.css](mdc:frontend/static/css/style.css) - 现代化UI样式和响应式设计
+
+### 命令行版本 (Legacy)
+- **命令行主程序**: [legacy/detective_game.py](mdc:legacy/detective_game.py) - 原始命令行版本
+- **命令行界面**: [legacy/detective_ui.py](mdc:legacy/detective_ui.py) - Rich库界面组件
+- **命令行启动**: [legacy/start_detective.py](mdc:legacy/start_detective.py) - 命令行版本启动脚本
+
+### 启动和配置
+- **Web服务器**: [start_web_server.py](mdc:start_web_server.py) - Web版本启动脚本
+- **依赖管理**: [requirements.txt](mdc:requirements.txt) - Python依赖包列表
+- **环境配置**: [env.template](mdc:env.template) - 环境变量模板
+
+## API端点架构
+- `GET /api/cases` - 获取可用案例列表
+- `POST /api/game/start` - 开始新游戏会话
+- `POST /api/game/question` - 向角色提问（标准响应）
+- `POST /api/game/question/stream` - 向角色提问（流式响应）
+- `POST /api/game/hint` - 获取游戏提示
+- `POST /api/game/accusation` - 进行指控（标准响应）
+- `POST /api/game/accusation/stream` - 进行指控（流式响应）
+- `WebSocket /ws/{session_id}` - 实时通信和状态同步
+
+## 前端架构模式
+- **单页面应用**: 使用屏幕切换管理不同游戏状态
+- **状态管理**: DetectiveGameApp类集中管理游戏状态和会话
+- **对话历史**: 按角色分别存储和显示对话记录
+- **流式输出**: 支持AI回答的实时流式显示
+- **实时通信**: WebSocket用于游戏状态同步
+
+## 开发注意事项
+
+### 模块导入规则
+- 后端模块间使用相对导入：`from .module_name import ClassName`
+- 启动脚本使用绝对导入：`from backend.module_name import ClassName`
+- 所有后端文件都在backend包中，需要正确的包结构
+
+### 对话系统架构
+- 每个角色的对话历史独立存储在`conversationHistory`数组中
+- 切换角色时只显示该角色的对话记录
+- 支持流式和非流式两种对话模式
+- 对话后自动更新建议问题，显示加载状态
+
+### 游戏流程设计
+1. 案例选择 → 游戏初始化 → 会话创建
+2. 角色对话 → 信息收集 → 证据揭露
+3. 推理分析 → 线索整合 → 策略制定
+4. 指控阶段 → 审判流程 → 结果判定
+
+### AI系统集成
+- 使用OpenAI API进行角色对话生成
+- 支持流式响应提升用户体验
+- 智能证据揭露基于对话内容分析
+- 角色行为一致性通过prompt工程保证
+
+### UI/UX特性
+- 响应式设计，支持桌面和移动端
+- 渐变背景和卡片布局设计
+- 平滑动画和交互反馈
+- 模态框用于规则说明和消息提示
+- 加载状态和错误处理
+
+## 常见问题解决
+
+### 导入路径问题
+- 确保backend目录有`__init__.py`文件
+- 使用相对导入避免路径问题：`from .ai_service import AIService`
+- 检查启动脚本中的导入路径是否正确
+
+### 角色对话问题
+- 确保`showCharacterConversation()`正确过滤对话历史
+- 检查`conversationHistory`数组结构是否正确
+- 验证角色ID和名称匹配
+
+### API集成问题
+- 检查OpenAI API密钥配置在[backend/config.py](mdc:backend/config.py)
+- 确认FastAPI服务器正常运行
+- 验证WebSocket连接状态和会话管理
+
+### 前端状态管理
+- 使用`showScreen()`方法切换界面
+- 通过`gameState`对象管理游戏状态
+- 及时清理事件监听器避免内存泄漏
+- 正确处理异步操作和错误状态
+
+## 扩展开发指南
+
+### 新增角色
+1. 在[backend/case_data.py](mdc:backend/case_data.py)中添加Character对象
+2. 设定角色的性格、背景、秘密和知识
+3. 配置角色的证据知识和行为模式
+4. 测试角色对话的一致性和逻辑性
+
+### 新增案例
+1. 在案例数据中创建新的Case对象
+2. 定义完整的角色关系和时间线
+3. 设计多层次的证据系统
+4. 编写案例解决方案和关键线索
+
+### UI功能扩展
+1. 修改[frontend/static/css/style.css](mdc:frontend/static/css/style.css)调整样式
+2. 在[frontend/static/js/app.js](mdc:frontend/static/js/app.js)中添加新功能
+3. 更新[frontend/index.html](mdc:frontend/index.html)修改页面结构
+4. 确保响应式设计和跨浏览器兼容性
+
+### API端点扩展
+1. 在[backend/app.py](mdc:backend/app.py)中添加新的路由
+2. 定义相应的Pydantic模型进行数据验证
+3. 实现业务逻辑和错误处理
+4. 添加适当的日志记录和监控
+
+## 部署和维护
+
+### 开发环境
+- 使用`python start_web_server.py`启动开发服务器
+- 启用调试模式查看详细日志
+- 使用浏览器开发者工具调试前端
+
+### 生产环境
+- 配置适当的环境变量
+- 使用反向代理（如Nginx）
+- 实现日志轮转和监控
+- 定期备份配置和数据
+
+## 最新重构成果
+
+### AccusationSystem重构 (2024年最新)
+[backend/accusation_system.py](mdc:backend/accusation_system.py)经过重大重构，提升了代码质量和可维护性：
+
+**函数职责分离**：
+- `_build_conversation_context()` - 构建角色对话上下文（可复用）
+- `_build_testimonies_context()` - 构建证词上下文
+- `_build_evidence_context()` - 构建证据上下文
+- `_build_basic_evidence_info()` - 构建基本证据信息
+- `_generate_error_vote()` - 生成错误时的默认投票
+
+**业务逻辑内聚化**：
+- `add_vote_to_accusation()` - 解析投票结果并直接更新Accusation对象
+- `finalize_accusation_verdict()` - 完成指控的最终判决
+- `_generate_witness_testimony_stream()` - 生成证人证词的流式输出
+
+**对象封装优化**：
+- 使用`Accusation`对象封装指控相关的所有数据
+- 简化函数参数，从6个参数减少到4个参数
+- 提高类型安全性和代码可读性
+
+### 投票解析系统优化
+**简化的投票解析算法**：
+```python
+def _parse_vote_result(self, vote_text: str) -> tuple:
+    """使用最简单的算法解析投票结果"""
+    # 通过"理由："切割字符串
+    if "理由：" in vote_text:
+        vote_part, reason_part = vote_text.split("理由：", 1)
+    else:
+        vote_part = vote_text
+        reason_part = ""
+    
+    # 在投票部分判断支持/反对
+    vote_result = "支持" if "支持" in vote_part else "反对"
+    return vote_result, reason_part.strip() or "默认理由"
+```
+
+### 代码清理成果
+- **删除命令行版本遗留代码**：移除了约500行不再使用的命令行相关函数
+- **统一Web版本架构**：所有功能都专注于Web API和流式响应
+- **错误处理完善**：添加了全面的错误处理和日志系统
+- **案件真相输出优化**：只有指控正确时才显示真相，保持游戏平衡
+
+### 项目规范更新
+**工具脚本管理**：
+- 所有工具脚本放置在`tools/`目录下
+- 程序启动必须在项目根目录进行
+- 游戏启动方式：`python start_game.py`
+
+**Docker配置简化**：
+- 统一使用MySQL 5.7版本
+- 删除了MySQL 8.0相关配置文件
+- 简化了部署配置，避免版本选择复杂性
+
+**开发环境适配**：
+- 开发环境：Windows PowerShell
+- 生产环境：Linux
+- 提供Windows批处理脚本(.bat)和Linux bash脚本(.sh)两个版本
+
+
+

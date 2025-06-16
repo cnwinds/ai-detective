@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员登录 - AI侦探推理游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #333;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            max-width: 90vw;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .login-header h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .login-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: #ffeaea;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .success-message {
+            color: #27ae60;
+            text-align: center;
+            margin-top: 15px;
+            padding: 10px;
+            background: #eafaf1;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .back-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #667eea;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>🔐 管理员登录</h1>
+            <p>访问后台管理功能</p>
+        </div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="password">管理员密码：</label>
+                <input type="password" id="password" name="password" required 
+                       placeholder="请输入管理员密码" autocomplete="current-password">
+            </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                登录
+            </button>
+        </form>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p>正在验证...</p>
+        </div>
+
+        <div class="error-message" id="errorMessage"></div>
+        <div class="success-message" id="successMessage"></div>
+
+        <div class="back-link">
+            <a href="/">← 返回游戏首页</a>
+        </div>
+    </div>
+
+    <script>
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+        const passwordInput = document.getElementById('password');
+
+        // 页面加载时检查是否已登录
+        document.addEventListener('DOMContentLoaded', function() {
+            checkExistingLogin();
+        });
+
+        // 检查现有登录状态
+        async function checkExistingLogin() {
+            const token = localStorage.getItem('admin_token');
+            if (token) {
+                try {
+                    const response = await fetch('/api/admin/statistics?days=1', {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        // 已登录，直接跳转到仪表板
+                        window.location.href = '/admin/dashboard';
+                        return;
+                    }
+                } catch (error) {
+                    // 忽略错误，继续显示登录页面
+                }
+                
+                // token无效，清除
+                localStorage.removeItem('admin_token');
+            }
+        }
+
+        // 表单提交处理
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const password = passwordInput.value.trim();
+            if (!password) {
+                showError('请输入密码');
+                return;
+            }
+
+            await performLogin(password);
+        });
+
+        // 密码输入框回车处理
+        passwordInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                loginForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // 执行登录
+        async function performLogin(password) {
+            showLoading(true);
+            hideMessages();
+
+            try {
+                const response = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ password: password })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 保存token到localStorage
+                    localStorage.setItem('admin_token', data.token);
+                    
+                    showSuccess('登录成功，正在跳转...');
+                    
+                    // 延迟跳转
+                    setTimeout(() => {
+                        window.location.href = '/admin/dashboard';
+                    }, 1000);
+                } else {
+                    showError(data.message || '登录失败');
+                }
+            } catch (error) {
+                console.error('登录错误:', error);
+                showError('网络错误，请稍后重试');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // 显示/隐藏加载状态
+        function showLoading(show) {
+            loading.style.display = show ? 'block' : 'none';
+            loginBtn.disabled = show;
+            loginForm.style.display = show ? 'none' : 'block';
+        }
+
+        // 显示错误消息
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        // 显示成功消息
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        // 隐藏所有消息
+        function hideMessages() {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }
+    </script>
+</body>
+</html> 

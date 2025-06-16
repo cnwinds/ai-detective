@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏回放 - AI侦探推理游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .session-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .info-item {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #666;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .info-value {
+            color: #333;
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        .controls {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5a6fd8;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a626b;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .conversation-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .conversation-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #ddd;
+            opacity: 0.3;
+            transition: all 0.5s ease;
+        }
+
+        .conversation-item.active {
+            opacity: 1;
+            transform: scale(1.02);
+        }
+
+        .conversation-item.played {
+            opacity: 0.8;
+        }
+
+        .conversation-item.player {
+            background: #e1f5fe;
+            border-left-color: #2196f3;
+        }
+
+        .conversation-item.character {
+            background: #f1e6ff;
+            border-left-color: #9c27b0;
+        }
+
+        .conversation-item.system {
+            background: #fff8e1;
+            border-left-color: #ff9800;
+        }
+
+        .conversation-item.accusation {
+            background: #ffebee;
+            border-left-color: #f44336;
+            font-weight: bold;
+        }
+
+        .conversation-item.defense {
+            background: #e8f5e8;
+            border-left-color: #4caf50;
+        }
+
+        .conversation-item.testimony {
+            background: #e1f5fe;
+            border-left-color: #2196f3;
+        }
+
+        .conversation-item.vote {
+            background: #f1e6ff;
+            border-left-color: #9c27b0;
+        }
+
+        .conversation-item.verdict {
+            background: #fff3c4;
+            border-left-color: #ffc107;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .conversation-item.solution {
+            background: #e8f5e8;
+            border-left-color: #4caf50;
+            font-style: italic;
+        }
+
+        .speaker {
+            font-weight: bold;
+            color: #111;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: #555;
+            font-weight: normal;
+        }
+
+        .content {
+            color: #222;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .support {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .oppose {
+            color: #dc3545;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎬 游戏回放</h1>
+        <div id="sessionInfo" class="session-info">
+            <!-- 会话信息将在这里动态加载 -->
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-primary" id="playBtn" onclick="togglePlay()">▶️ 播放</button>
+        <button class="btn btn-secondary" onclick="resetReplay()">🔄 重置</button>
+        <button class="btn btn-secondary" onclick="goHome()">🏠 回到首页</button>
+    </div>
+
+    <div id="evaluationSection" class="header" style="display: none;">
+        <h3>🌟 游戏评价</h3>
+        <div id="evaluationContent">
+            <!-- 评价内容将在这里显示 -->
+        </div>
+    </div>
+
+    <div id="loadingDiv" class="loading">
+        <p>正在加载回放数据...</p>
+    </div>
+
+    <div id="errorDiv" class="error" style="display: none;">
+        <p id="errorMessage">加载失败</p>
+    </div>
+
+    <div id="conversationContainer" class="conversation-container" style="display: none;">
+        <!-- 对话内容将在这里动态加载 -->
+    </div>
+
+    <script>
+        let replayData = null;
+        let currentIndex = 0;
+        let isPlaying = false;
+        let appTimezone = 'Asia/Shanghai'; // 默认时区
+
+        // 获取URL参数
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        const sessionId = getUrlParameter('session_id');
+
+        // 页面加载时获取回放数据
+        document.addEventListener('DOMContentLoaded', async function() {
+            if (!sessionId) {
+                showError('缺少会话ID，请从会话列表中进入此页面');
+                return;
+            }
+            
+            // 先获取应用配置（包括时区）
+            try {
+                const configResponse = await fetch('/api/config');
+                if (configResponse.ok) {
+                    const config = await configResponse.json();
+                    appTimezone = config.timezone;
+                }
+            } catch (error) {
+                console.warn('获取应用配置失败，使用默认时区:', error);
+            }
+            
+            loadReplayData();
+        });
+
+        // 加载回放数据
+        async function loadReplayData() {
+            try {
+                const response = await fetch(`/api/game/${sessionId}/replay`);
+                if (!response.ok) {
+                    throw new Error('加载回放数据失败');
+                }
+                
+                replayData = await response.json();
+                displaySessionInfo();
+                displayConversations();
+                
+                document.getElementById('loadingDiv').style.display = 'none';
+                document.getElementById('conversationContainer').style.display = 'block';
+                
+            } catch (error) {
+                console.error('加载回放数据失败:', error);
+                showError('加载回放数据失败: ' + error.message);
+            }
+        }
+
+        // 计算对话轮数
+        function calculateConversationRounds() {
+            if (!replayData || !replayData.conversations) return 0;
+            
+            // 计算问答对的数量
+            const questions = replayData.conversations.filter(conv => 
+                conv.message_type === 'question' || 
+                (conv.speaker_type === 'player' && !conv.message_type)
+            );
+            
+            return questions.length;
+        }
+
+        // 显示会话信息
+        function displaySessionInfo() {
+            const info = replayData.session_info;
+            const container = document.getElementById('sessionInfo');
+            
+            const startTime = new Date(info.start_time).toLocaleString('zh-CN', { timeZone: appTimezone });
+            const endTime = info.end_time ? new Date(info.end_time).toLocaleString('zh-CN', { timeZone: appTimezone }) : '未完成';
+
+            container.innerHTML = `
+                <div class="info-item">
+                    <div class="info-label">案件标题</div>
+                    <div class="info-value">${info.case_title}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">开始时间</div>
+                    <div class="info-value">${startTime}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">结束时间</div>
+                    <div class="info-value">${endTime}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">对话轮数</div>
+                    <div class="info-value">${calculateConversationRounds()} 轮</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">游戏状态</div>
+                    <div class="info-value">${info.is_solved ? '✅ 已解决' : '❌ 未解决'}</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">使用提示</div>
+                    <div class="info-value">${info.hints_used || 0} 次</div>
+                </div>
+                ${info.client_id ? `
+                    <div class="info-item">
+                        <div class="info-label">客户端标识</div>
+                        <div class="info-value" style="font-family: monospace; font-size: 0.9em;">${info.client_id}</div>
+                    </div>
+                ` : ''}
+                ${info.ip_address ? `
+                    <div class="info-item">
+                        <div class="info-label">IP地址</div>
+                        <div class="info-value">${info.ip_address}</div>
+                    </div>
+                ` : ''}
+                ${info.game_version ? `
+                    <div class="info-item">
+                        <div class="info-label">游戏版本</div>
+                        <div class="info-value">${info.game_version}</div>
+                    </div>
+                ` : ''}
+            `;
+
+            // 显示评价信息
+            if (replayData.evaluation) {
+                displayEvaluation();
+            }
+        }
+
+        // 显示评价信息
+        function displayEvaluation() {
+            const evaluation = replayData.evaluation;
+            const container = document.getElementById('evaluationContent');
+            const section = document.getElementById('evaluationSection');
+            
+            const stars = '⭐'.repeat(evaluation.rating) + '☆'.repeat(5 - evaluation.rating);
+            const difficultyMap = {
+                'too_easy': '太简单',
+                'just_right': '刚好',
+                'too_hard': '太困难'
+            };
+            
+            container.innerHTML = `
+                <div class="session-info">
+                    <div class="info-item">
+                        <div class="info-label">评分</div>
+                        <div class="info-value">${stars} (${evaluation.rating}/5)</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">评价理由</div>
+                        <div class="info-value">${evaluation.reason}</div>
+                    </div>
+                    ${evaluation.difficulty_feedback ? `
+                        <div class="info-item">
+                            <div class="info-label">难度反馈</div>
+                            <div class="info-value">${difficultyMap[evaluation.difficulty_feedback] || evaluation.difficulty_feedback}</div>
+                        </div>
+                    ` : ''}
+                    ${evaluation.most_liked ? `
+                        <div class="info-item">
+                            <div class="info-label">最喜欢的部分</div>
+                            <div class="info-value">${evaluation.most_liked}</div>
+                        </div>
+                    ` : ''}
+                    ${evaluation.suggestions ? `
+                        <div class="info-item">
+                            <div class="info-label">改进建议</div>
+                            <div class="info-value">${evaluation.suggestions}</div>
+                        </div>
+                    ` : ''}
+                    ${evaluation.would_recommend !== null ? `
+                        <div class="info-item">
+                            <div class="info-label">是否推荐</div>
+                            <div class="info-value">${evaluation.would_recommend ? '✅ 是' : '❌ 否'}</div>
+                        </div>
+                    ` : ''}
+                    <div class="info-item">
+                        <div class="info-label">评价时间</div>
+                        <div class="info-value">${new Date(evaluation.created_at).toLocaleString('zh-CN', { timeZone: appTimezone })}</div>
+                    </div>
+                </div>
+            `;
+            
+            section.style.display = 'block';
+        }
+
+        // 显示对话内容
+        function displayConversations() {
+            const container = document.getElementById('conversationContainer');
+            const conversations = replayData.conversations;
+            
+            container.innerHTML = conversations.map((conv, index) => {
+                const speakerName = conv.speaker_name || getSpeakerDisplayName(conv.speaker_type, conv.message_type, conv.extra_data);
+                const time = new Date(conv.timestamp).toLocaleString('zh-CN', { timeZone: appTimezone });
+                const messageTypeClass = conv.message_type || conv.speaker_type;
+                
+                return `
+                    <div class="conversation-item ${messageTypeClass}" data-index="${index}">
+                        <div class="speaker">
+                            <span>${getMessageTypeIcon(conv.message_type)} ${speakerName}</span>
+                            <span class="timestamp">${time}</span>
+                        </div>
+                        <div class="content">${formatContent(conv.content, conv.message_type)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 获取发言者显示名称
+        function getSpeakerDisplayName(speakerType, messageType, extraData) {
+            if (messageType) {
+                const messageTypeNames = {
+                    'question': '👤 玩家提问',
+                    'answer': '🎭 角色回答',
+                    'accusation': '⚖️ 玩家指控',
+                    'defense': '🛡️ 被告辩护',
+                    'testimony': '👥 证人证词',
+                    'vote': '🗳️ 陪审团投票',
+                    'verdict': '⚖️ 最终判决',
+                    'solution': '🔍 案件真相'
+                };
+                
+                // 特殊处理玩家提问，显示被提问的角色
+                if (messageType === 'question' && extraData && extraData.character_target) {
+                    return `👤 玩家向 ${extraData.character_target} 提问`;
+                }
+                
+                if (messageTypeNames[messageType]) {
+                    return messageTypeNames[messageType];
+                }
+            }
+            
+            const names = {
+                'player': '👤 玩家',
+                'character': '🎭 角色',
+                'narrator': '📖 叙述者',
+                'system': '🖥️ 系统'
+            };
+            return names[speakerType] || speakerType;
+        }
+
+        // 获取消息类型图标
+        function getMessageTypeIcon(messageType) {
+            const icons = {
+                'question': '❓',
+                'answer': '💬',
+                'accusation': '⚖️',
+                'defense': '🛡️',
+                'testimony': '👥',
+                'vote': '🗳️',
+                'verdict': '⚖️',
+                'solution': '🔍'
+            };
+            return icons[messageType] || '';
+        }
+
+        // 格式化内容
+        function formatContent(content, messageType) {
+            // 对于投票内容，特殊格式化
+            if (messageType === 'vote' && content.includes('投票：')) {
+                // 先将换行符转换为HTML换行
+                let formattedContent = content.replace(/\n/g, '<br/>');
+                
+                // 查找投票和原因的分隔符
+                if (formattedContent.includes(' - ')) {
+                    const parts = formattedContent.split(' - ');
+                    const vote = parts[0];
+                    const reason = parts.slice(1).join(' - ');
+                    const voteClass = vote.includes('支持') ? 'support' : 'oppose';
+                    
+                    // 格式化：投票结果加粗，原因部分换行显示
+                    return `<strong class="${voteClass}">${vote}</strong><br/><strong>原因：</strong><br/>${reason}`;
+                } else {
+                    // 如果没有找到分隔符，尝试查找"原因："
+                    if (formattedContent.includes('原因：')) {
+                        const voteMatch = formattedContent.match(/^投票：(支持|反对)/);
+                        if (voteMatch) {
+                            const voteResult = voteMatch[0];
+                            const voteClass = voteResult.includes('支持') ? 'support' : 'oppose';
+                            const reasonPart = formattedContent.replace(/^投票：(支持|反对)<br\/>?/, '');
+                            
+                            return `<strong class="${voteClass}">${voteResult}</strong><br/>${reasonPart}`;
+                        }
+                    }
+                }
+                
+                // 如果格式不匹配，直接返回格式化后的内容
+                return formattedContent;
+            }
+            
+            // 对于判决内容，可以特殊格式化
+            if (messageType === 'verdict') {
+                return `<strong>${content}</strong>`;
+            }
+            
+            // 将换行符转换为HTML换行
+            return content.replace(/\n/g, '<br/>');
+        }
+
+        // 播放控制
+        function togglePlay() {
+            const playBtn = document.getElementById('playBtn');
+            
+            if (isPlaying) {
+                isPlaying = false;
+                playBtn.innerHTML = '▶️ 播放';
+            } else {
+                isPlaying = true;
+                playBtn.innerHTML = '⏸️ 暂停';
+                playNext();
+            }
+        }
+
+        // 播放下一个对话
+        function playNext() {
+            if (!isPlaying || !replayData || currentIndex >= replayData.conversations.length) {
+                isPlaying = false;
+                document.getElementById('playBtn').innerHTML = '▶️ 播放';
+                return;
+            }
+
+            // 高亮当前对话
+            const items = document.querySelectorAll('.conversation-item');
+            
+            // 将之前的设为已播放
+            if (currentIndex > 0) {
+                items[currentIndex - 1].classList.remove('active');
+                items[currentIndex - 1].classList.add('played');
+            }
+            
+            // 高亮当前项
+            if (items[currentIndex]) {
+                items[currentIndex].classList.add('active');
+                items[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            currentIndex++;
+
+            // 设置下次播放的延时
+            if (isPlaying) {
+                setTimeout(playNext, 2000);
+            }
+        }
+
+        // 重置播放
+        function resetReplay() {
+            isPlaying = false;
+            currentIndex = 0;
+            
+            // 重置所有对话项的状态
+            const items = document.querySelectorAll('.conversation-item');
+            items.forEach(item => {
+                item.classList.remove('active', 'played');
+            });
+            
+            // 重置播放按钮
+            document.getElementById('playBtn').innerHTML = '▶️ 播放';
+        }
+
+        // 导航功能
+        function goHome() {
+            window.location.href = '/';
+        }
+
+        function showError(message) {
+            document.getElementById('loadingDiv').style.display = 'none';
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorDiv').style.display = 'block';
+        }
+    </script>
+</body>
+</html> 

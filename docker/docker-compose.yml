@@ -1,0 +1,82 @@
+services:
+  # MySQL数据库服务
+  mysql:
+    image: mysql:5.7
+    container_name: ai-detective-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
+      MYSQL_DATABASE: ${DB_NAME:-ai_detective}
+      MYSQL_USER: ${DB_USER:-gameuser}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    restart: unless-stopped
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --sql-mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_PASSWORD:-password}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - ai-detective-network
+
+  # AI侦探游戏应用服务
+  ai-detective:
+    build: 
+      context: ..
+      dockerfile: docker/Dockerfile
+      args:
+        - PORT=${PORT:-8000}
+    container_name: ai-detective-game
+    ports:
+      - "${PORT:-8000}:${PORT:-8000}"
+    environment:
+      # AI配置 - 请根据实际情况修改
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      - OPENAI_MODEL=${OPENAI_MODEL:-deepseek-v3}
+      - LANGUAGE=${LANGUAGE:-chinese}
+      - DEBUG_MODE=${DEBUG_MODE:-false}
+      - NARRATOR_TEMP=${NARRATOR_TEMP:-0.8}
+      - CHARACTER_TEMP=${CHARACTER_TEMP:-0.9}
+      - MAX_HISTORY=${MAX_HISTORY:-10}
+      - MAX_ROUNDS=${MAX_ROUNDS:-30}
+      - MAX_HINTS=${MAX_HINTS:-3}
+      - HOST=${HOST:-0.0.0.0}
+      - PORT=${PORT:-8000}
+      # 数据库配置
+      - DB_HOST=mysql
+      - DB_PORT=${DB_PORT:-3306}
+      - DB_USER=${DB_USER:-gameuser}
+      - DB_PASSWORD=${DB_PASSWORD:-password}
+      - DB_NAME=${DB_NAME:-ai_detective}
+      # 管理员配置
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin123}
+    volumes:
+      # 可选：挂载日志目录
+      - ../logs:/app/logs
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${PORT:-8000}/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - ai-detective-network
+
+networks:
+  ai-detective-network:
+    driver: bridge
+
+# 数据卷用于持久化
+volumes:
+  mysql_data:
+    driver: local
+  ai-detective-logs:
+    driver: local 

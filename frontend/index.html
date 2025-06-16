@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕵️ 侦探推理游戏</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- 加载屏幕 -->
+        <div id="loading-screen" class="loading-screen">
+            <div class="loading-content">
+                <i class="fas fa-search loading-icon"></i>
+                <h2>正在加载游戏...</h2>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主菜单 -->
+        <div id="main-menu" class="screen active">
+            <div class="menu-container">
+                <div class="game-title">
+                    <h1><i class="fas fa-search"></i> 侦探推理游戏</h1>
+                    <p class="subtitle">运用你的推理能力，揭开谜团的真相</p>
+                </div>
+                
+                <div class="menu-buttons">
+                    <button id="start-game-btn" class="menu-btn primary">
+                        <i class="fas fa-play"></i>
+                        开始游戏
+                    </button>
+                    <button id="rules-btn" class="menu-btn">
+                        <i class="fas fa-book"></i>
+                        游戏规则
+                    </button>
+                    <button id="about-btn" class="menu-btn">
+                        <i class="fas fa-info-circle"></i>
+                        关于游戏
+                    </button>
+                </div>
+                
+                <div class="version-info">
+                    <span id="app-version">v1.5.0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 案例选择 -->
+        <div id="case-selection" class="screen">
+            <div class="container">
+                <h2><i class="fas fa-folder-open"></i> 选择案件</h2>
+                
+                <!-- 案例过滤器 -->
+                <div id="case-filters" class="case-filters">
+                    <!-- 过滤器将通过JavaScript动态生成 -->
+                </div>
+                
+                <div id="cases-list" class="cases-grid">
+                    <!-- 案例将通过JavaScript动态加载 -->
+                </div>
+                <button id="back-to-menu" class="btn secondary">
+                    <i class="fas fa-arrow-left"></i> 返回主菜单
+                </button>
+            </div>
+        </div>
+
+        <!-- 案情介绍界面 -->
+        <div id="case-intro-screen" class="screen">
+            <div class="container">
+                <div class="case-intro-content">
+                    <div class="case-intro-header">
+                        <h2 id="intro-case-title">案件标题</h2>
+                    </div>
+                    
+                    <div class="case-intro-body">
+                        <div class="intro-section" id="case-details-section" style="display: none;">
+                            <h3 id="case-details-title"><i class="fas fa-info-circle"></i> <span></span></h3>
+                            <div class="case-details-grid">
+                                <div class="detail-item">
+                                    <span class="detail-icon" id="victim-icon"></span>
+                                    <div class="detail-content">
+                                        <span class="detail-label" id="victim-label"></span>
+                                        <span class="detail-value" id="victim-name"></span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon" id="victim-age-icon"></span>
+                                    <div class="detail-content">
+                                        <span class="detail-label" id="victim-age-label"></span>
+                                        <span class="detail-value" id="victim-age-occupation"></span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon" id="death-time-icon"></span>
+                                    <div class="detail-content">
+                                        <span class="detail-label" id="death-time-label"></span>
+                                        <span class="detail-value" id="death-time"></span>
+                                    </div>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="detail-icon" id="death-location-icon"></span>
+                                    <div class="detail-content">
+                                        <span class="detail-label" id="death-location-label"></span>
+                                        <span class="detail-value" id="death-location"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="intro-section" id="description-section" style="display: none;">
+                            <h3 id="description-title"><i class="fas fa-scroll"></i> <span></span></h3>
+                            <div id="intro-description" class="typewriter-text">
+                                <!-- 案情描述将通过打字机效果显示 -->
+                            </div>
+                        </div>
+                        
+                        <div class="intro-section" id="characters-section" style="display: none;">
+                            <h3 id="characters-title"><i class="fas fa-users"></i> <span></span></h3>
+                            <div id="intro-characters" class="intro-characters-grid">
+                                <!-- 角色信息将动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <div class="intro-section" id="goals-section" style="display: none;">
+                            <h3 id="goals-title"><i class="fas fa-crosshairs"></i> <span></span></h3>
+                            <div class="investigation-goals">
+                                <div class="goal-item">
+                                    <i class="fas fa-search"></i>
+                                    <span></span>
+                                </div>
+                                <div class="goal-item">
+                                    <i class="fas fa-puzzle-piece"></i>
+                                    <span></span>
+                                </div>
+                                <div class="goal-item">
+                                    <i class="fas fa-gavel"></i>
+                                    <span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="case-intro-footer">
+                        <button id="start-investigation-btn" class="btn primary large" disabled>
+                            <i class="fas fa-play"></i>
+                            开始调查
+                        </button>
+                        <button id="skip-intro-btn" class="btn secondary">
+                            <i class="fas fa-forward"></i>
+                            跳过介绍
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏界面 -->
+        <div id="game-screen" class="screen">
+            <!-- 游戏头部 -->
+            <div class="game-header">
+                <div class="case-info">
+                    <h2 id="case-title">案例标题</h2>
+                    <p id="case-description">案例描述</p>
+                    <div class="case-victim-info">
+                        <div class="victim-detail">
+                            <i class="fas fa-user-injured"></i>
+                            <span><strong>受害者：</strong><span id="game-victim-name">-</span></span>
+                        </div>
+                        <div class="victim-detail">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span><strong>案发地点：</strong><span id="game-crime-scene">-</span></span>
+                        </div>
+                        <div class="victim-detail">
+                            <i class="fas fa-clock"></i>
+                            <span><strong>案发时间：</strong><span id="game-crime-time">-</span></span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 游戏主体 -->
+            <div class="game-body">
+                <!-- 左侧角色列表 -->
+                <div class="characters-panel">
+                    <h3><i class="fas fa-users"></i> 角色</h3>
+                    <div id="characters-list" class="characters-list">
+                        <!-- 角色列表将通过JavaScript动态生成 -->
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="get-hint-btn" class="btn hint-btn">
+                            <span class="button-text">
+                                <i class="fas fa-lightbulb"></i>
+                                获取提示
+                            </span>
+                            <span class="button-count">(<span id="hints-used">0</span>/<span id="max-hints">3</span>)</span>
+                        </button>
+                        <button id="make-accusation-btn" class="btn accusation-btn">
+                            <i class="fas fa-gavel"></i>
+                            进行指控
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 中间对话区域 -->
+                <div class="conversation-panel">
+                    <!-- 整合的对话标题和角色信息 -->
+                    <div class="conversation-header-integrated">
+                        <!-- 默认状态 -->
+                        <div id="default-header" class="default-conversation-header">
+                            <h3>
+                                <i class="fas fa-comments"></i> 
+                                选择一个角色开始对话
+                            </h3>
+                        </div>
+                        
+                        <!-- 选择角色后的状态 -->
+                        <div id="character-header" class="character-conversation-header" style="display: none;">
+                            <div class="character-header-main">
+                                <div class="character-avatar-small">
+                                    <i id="character-avatar-icon" class="fas fa-user"></i>
+                                </div>
+                                <div class="character-info-left-area">
+                                    <div class="character-title-line">
+                                        <h3 id="character-name-display">角色名</h3>
+                                        <span id="character-type-display" class="character-type-badge-small"></span>
+                                    </div>
+                                    <p id="character-occupation-display" class="character-occupation-small">职业</p>
+                                </div>
+                                <div class="character-background-right">
+                                    <span class="background-label-inline">
+                                        背景：
+                                    </span>
+                                    <span id="character-background-text" class="background-text-inline"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="conversation-area" class="conversation-area">
+                        <div class="welcome-message">
+                            <i class="fas fa-arrow-left"></i>
+                            <p>点击左侧角色开始询问</p>
+                        </div>
+                    </div>
+
+                    <div id="question-input-area" class="question-input-area" style="display: none;">
+                        <div class="suggested-questions">
+                            <h4>参考问题：</h4>
+                            <div id="suggested-questions-list" class="suggested-questions-list">
+                                <!-- 参考问题将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                        
+                        <div class="question-input">
+                            <textarea id="question-input" placeholder="输入你的问题..." rows="3"></textarea>
+                            <button id="ask-question-btn" class="btn primary">
+                                <span class="button-text">
+                                    <i class="fas fa-paper-plane"></i>
+                                    提问
+                                </span>
+                                <span class="button-count">(<span id="current-round">0</span>/<span id="max-rounds">30</span>)</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右侧信息面板 -->
+                <div class="info-panel">
+                    <div class="evidence-section">
+                        <h3><i class="fas fa-search"></i> 发现的证据</h3>
+                        <div id="evidence-list" class="evidence-list">
+                            <p class="no-evidence">暂无发现的证据</p>
+                        </div>
+                    </div>
+                    
+                    <div class="hints-section">
+                        <h3><i class="fas fa-lightbulb"></i> 获取的提示</h3>
+                        <div id="hints-list" class="hints-list">
+                            <p class="no-hints">暂无获取的提示</p>
+                        </div>
+                    </div>
+                    
+                    <div class="notes-section">
+                        <h3><i class="fas fa-sticky-note"></i> 笔记</h3>
+                        <textarea id="notes-area" placeholder="记录你的推理和发现..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 指控界面 -->
+        <div id="accusation-screen" class="screen">
+            <div class="container">
+                <h2><i class="fas fa-gavel"></i> 进行指控</h2>
+                
+                <div class="accusation-form">
+                    <div class="form-group">
+                        <label for="accused-select">选择被指控者：</label>
+                        <select id="accused-select" class="form-control">
+                            <option value="">请选择...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="accusation-reasoning">指控理由：</label>
+                        <textarea id="accusation-reasoning" class="form-control" rows="5" 
+                                placeholder="详细说明你的指控理由和证据..."></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button id="submit-accusation-btn" class="btn primary">
+                            <i class="fas fa-gavel"></i>
+                            提交指控
+                        </button>
+                        <button id="cancel-accusation-btn" class="btn secondary">
+                            <i class="fas fa-times"></i>
+                            取消
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 审判结果界面 -->
+        <div id="trial-result-screen" class="screen">
+            <div class="container">
+                <h2><i class="fas fa-balance-scale"></i> 审判结果</h2>
+                <div id="trial-result-content">
+                    <!-- 审判结果将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 规则说明弹窗 -->
+        <div id="rules-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-book"></i> 游戏规则</h3>
+                    <button class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="rules-content">
+                        <h4>🎯 游戏目标</h4>
+                        <p>通过与案件相关人员对话，收集线索和证据，最终找出真正的凶手。</p>
+                        
+                        <h4>🎮 游戏流程</h4>
+                        <ol>
+                            <li>选择案例开始游戏</li>
+                            <li>与不同角色对话，询问相关问题</li>
+                            <li>收集证据和线索</li>
+                            <li>分析信息，形成推理</li>
+                            <li>进行指控，参与审判</li>
+                        </ol>
+                        
+                        <h4>⚡ 游戏限制</h4>
+                        <ul>
+                            <li>最多进行30轮对话</li>
+                            <li>最多使用3次提示</li>
+                            <li>使用指控会进入审判流程</li>
+                        </ul>
+                        
+                        <h4>💡 游戏技巧</h4>
+                        <ul>
+                            <li>仔细观察角色的回答，寻找矛盾之处</li>
+                            <li>关注时间线和不在场证明</li>
+                            <li>合理使用提示功能</li>
+                            <li>做好笔记，记录重要信息</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关于游戏弹窗 -->
+        <div id="about-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-info-circle"></i> 关于游戏</h3>
+                    <button class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="about-content">
+                        <h4>🕵️ 侦探推理游戏</h4>
+                        <p>这是一款基于AI的互动式推理游戏，玩家扮演侦探角色，通过与案件相关人员对话来收集线索，最终揭开案件真相。</p>
+                        
+                        <h4>✨ 特色功能</h4>
+                        <ul>
+                            <li>智能AI角色对话系统</li>
+                            <li>动态证据发现机制</li>
+                            <li>完整的审判投票流程</li>
+                            <li>多样化的案例内容</li>
+                        </ul>
+                        
+                        <h4>🛠️ 技术实现</h4>
+                        <p>游戏采用前后端分离架构，后端使用FastAPI提供API服务，前端使用现代Web技术构建交互界面。</p>
+                        
+                        <div class="version-info">
+                            <p><strong>版本：</strong>1.0.0</p>
+                            <p><strong>更新时间：</strong>2024年</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 通用提示弹窗 -->
+        <div id="message-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="message-title">提示</h3>
+                    <button class="close-btn">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="message-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js?v=1.4"></script>
+</body>
+</html> 

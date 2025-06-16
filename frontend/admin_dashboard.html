@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员仪表板 - AI侦探推理游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .header-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: background 0.3s;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .stat-card .icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-card .label {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .chart-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .chart-header h3 {
+            color: #333;
+            font-size: 20px;
+        }
+
+        .time-selector {
+            display: flex;
+            gap: 10px;
+        }
+
+        .time-btn {
+            padding: 6px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #666;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .time-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .chart-container {
+            height: 300px;
+            position: relative;
+        }
+
+        .daily-stats-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .daily-stats-table th,
+        .daily-stats-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .daily-stats-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .daily-stats-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #eee;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s;
+        }
+
+        .breakdown-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .breakdown-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .breakdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .breakdown-label {
+            font-weight: 500;
+        }
+
+        .breakdown-stats {
+            text-align: right;
+        }
+
+        .breakdown-count {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .breakdown-rate {
+            font-size: 12px;
+            color: #666;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #667eea;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .activity-section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .activity-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .activity-tab {
+            padding: 8px 16px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #666;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .activity-tab.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .activity-content {
+            display: none;
+        }
+
+        .activity-content.active {
+            display: block;
+        }
+
+        .user-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .user-info {
+            flex: 1;
+        }
+
+        .user-id {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .user-stats {
+            text-align: right;
+        }
+
+        .user-stats-item {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1>📊 管理员仪表板</h1>
+            <div class="header-actions">
+                <a href="/admin/history" class="header-btn">游戏历史</a>
+                <a href="#" class="header-btn" onclick="logout()">退出登录</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- 总体统计卡片 -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>正在加载统计数据...</p>
+            </div>
+        </div>
+
+        <!-- 每日趋势图表 -->
+        <div class="chart-section">
+            <div class="chart-header">
+                <h3>📈 每日游戏趋势</h3>
+                <div class="time-selector">
+                    <button class="time-btn active" data-days="7">7天</button>
+                    <button class="time-btn" data-days="30">30天</button>
+                    <button class="time-btn" data-days="90">90天</button>
+                </div>
+            </div>
+            <div class="chart-container" id="chartContainer">
+                <canvas id="trendChart" width="800" height="300"></canvas>
+            </div>
+            
+            <!-- 每日详细数据表格 -->
+            <table class="daily-stats-table" id="dailyStatsTable">
+                <thead>
+                    <tr>
+                        <th>日期</th>
+                        <th>游戏局数</th>
+                        <th>唯一用户</th>
+                        <th>唯一IP</th>
+                        <th>完成率</th>
+                        <th>成功率</th>
+                    </tr>
+                </thead>
+                <tbody id="dailyStatsBody">
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 分类统计 -->
+        <div class="breakdown-section">
+            <div class="breakdown-card">
+                <h3>🎯 难度分布</h3>
+                <div id="difficultyBreakdown"></div>
+            </div>
+            <div class="breakdown-card">
+                <h3>📚 案件分类</h3>
+                <div id="categoryBreakdown"></div>
+            </div>
+        </div>
+
+        <!-- 用户活动统计 -->
+        <div class="activity-section">
+            <h3>👥 用户活动统计</h3>
+            <div class="activity-tabs">
+                <button class="activity-tab active" data-tab="users">活跃用户</button>
+                <button class="activity-tab" data-tab="ips">IP统计</button>
+            </div>
+            <div class="activity-content active" id="usersContent">
+                <div class="user-list" id="activeUsersList"></div>
+            </div>
+            <div class="activity-content" id="ipsContent">
+                <div class="user-list" id="ipStatsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentDays = 7;
+        let statsData = null;
+        let trendChart = null;
+        let appTimezone = 'Asia/Shanghai'; // 默认时区
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', async function() {
+            checkAuth();
+            
+            // 获取应用配置（包括时区）
+            try {
+                const configResponse = await fetch('/api/config');
+                if (configResponse.ok) {
+                    const config = await configResponse.json();
+                    appTimezone = config.timezone;
+                }
+            } catch (error) {
+                console.warn('获取应用配置失败，使用默认时区:', error);
+            }
+            
+            initEventListeners();
+            loadStatistics();
+        });
+
+        // 检查认证状态
+        function checkAuth() {
+            const token = localStorage.getItem('admin_token');
+            if (!token) {
+                window.location.href = '/admin';
+                return;
+            }
+        }
+
+        // 初始化事件监听器
+        function initEventListeners() {
+            // 时间选择按钮
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentDays = parseInt(this.dataset.days);
+                    loadStatistics();
+                });
+            });
+
+            // 活动标签
+            document.querySelectorAll('.activity-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.activity-tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.activity-content').forEach(c => c.classList.remove('active'));
+                    
+                    this.classList.add('active');
+                    document.getElementById(this.dataset.tab + 'Content').classList.add('active');
+                });
+            });
+        }
+
+        // 加载统计数据
+        async function loadStatistics() {
+            const token = localStorage.getItem('admin_token');
+            if (!token) {
+                window.location.href = '/admin';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/admin/statistics?days=${currentDays}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.status === 401) {
+                    localStorage.removeItem('admin_token');
+                    window.location.href = '/admin';
+                    return;
+                }
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                statsData = await response.json();
+                renderStatistics();
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+                showError('加载统计数据失败，请稍后重试');
+            }
+        }
+
+        // 渲染统计数据
+        function renderStatistics() {
+            renderOverallStats();
+            renderDailyTrend();
+            renderBreakdowns();
+            renderUserActivity();
+        }
+
+        // 渲染总体统计
+        function renderOverallStats() {
+            const stats = statsData.overall_stats;
+            const recent = stats.recent_7days;
+
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = `
+                <div class="stat-card">
+                    <div class="icon">🎮</div>
+                    <div class="value">${stats.total_games}</div>
+                    <div class="label">总游戏局数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">👤</div>
+                    <div class="value">${stats.total_unique_users}</div>
+                    <div class="label">唯一用户数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">🌐</div>
+                    <div class="value">${stats.total_unique_ips}</div>
+                    <div class="label">唯一IP数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">✅</div>
+                    <div class="value">${stats.overall_completion_rate}%</div>
+                    <div class="label">总完成率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">🏆</div>
+                    <div class="value">${stats.overall_success_rate}%</div>
+                    <div class="label">总成功率</div>
+                </div>
+                <div class="stat-card">
+                    <div class="icon">🔥</div>
+                    <div class="value">${recent.games}</div>
+                    <div class="label">近7天游戏</div>
+                </div>
+            `;
+        }
+
+        // 渲染每日趋势
+        function renderDailyTrend() {
+            const dailyStats = statsData.daily_stats;
+            
+            // 渲染图表（简单的线性图表）
+            renderTrendChart(dailyStats);
+            
+            // 渲染表格
+            const tbody = document.getElementById('dailyStatsBody');
+            tbody.innerHTML = dailyStats.map(day => `
+                <tr>
+                    <td>${day.date}</td>
+                    <td>${day.total_games}</td>
+                    <td>${day.unique_users}</td>
+                    <td>${day.unique_ips}</td>
+                    <td>
+                        ${day.completion_rate}%
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${day.completion_rate}%"></div>
+                        </div>
+                    </td>
+                    <td>
+                        ${day.success_rate}%
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${day.success_rate}%"></div>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // 简单的趋势图表渲染
+        function renderTrendChart(data) {
+            const canvas = document.getElementById('trendChart');
+            const ctx = canvas.getContext('2d');
+            
+            // 清除画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            if (data.length === 0) return;
+            
+            const width = canvas.width - 80;
+            const height = canvas.height - 60;
+            const maxGames = Math.max(...data.map(d => d.total_games)) || 1;
+            
+            // 绘制坐标轴
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(40, 20);
+            ctx.lineTo(40, height + 20);
+            ctx.lineTo(width + 40, height + 20);
+            ctx.stroke();
+            
+            // 绘制数据线
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            
+            data.reverse().forEach((day, index) => {
+                const x = 40 + (index / (data.length - 1)) * width;
+                const y = 20 + height - (day.total_games / maxGames) * height;
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+                
+                // 绘制数据点
+                ctx.fillStyle = '#667eea';
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, 2 * Math.PI);
+                ctx.fill();
+            });
+            
+            ctx.stroke();
+            
+            // 添加标签
+            ctx.fillStyle = '#666';
+            ctx.font = '12px Arial';
+            ctx.textAlign = 'center';
+            
+            // Y轴标签
+            for (let i = 0; i <= 5; i++) {
+                const value = Math.round((maxGames / 5) * i);
+                const y = 20 + height - (i / 5) * height;
+                ctx.textAlign = 'right';
+                ctx.fillText(value.toString(), 35, y + 4);
+            }
+            
+            data.reverse(); // 恢复原顺序
+        }
+
+        // 渲染分类统计
+        function renderBreakdowns() {
+            const stats = statsData.overall_stats;
+            
+            // 难度分布
+            const difficultyContainer = document.getElementById('difficultyBreakdown');
+            difficultyContainer.innerHTML = stats.difficulty_breakdown.map(item => `
+                <div class="breakdown-item">
+                    <div class="breakdown-label">${item.difficulty}</div>
+                    <div class="breakdown-stats">
+                        <div class="breakdown-count">${item.games_count} 局</div>
+                        <div class="breakdown-rate">成功率 ${item.success_rate}%</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // 案件分类
+            const categoryContainer = document.getElementById('categoryBreakdown');
+            categoryContainer.innerHTML = stats.category_breakdown.map(item => `
+                <div class="breakdown-item">
+                    <div class="breakdown-label">${item.category}</div>
+                    <div class="breakdown-stats">
+                        <div class="breakdown-count">${item.games_count} 局</div>
+                        <div class="breakdown-rate">成功率 ${item.success_rate}%</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染用户活动
+        function renderUserActivity() {
+            const activity = statsData.user_activity;
+            
+            // 活跃用户
+            const usersContainer = document.getElementById('activeUsersList');
+            usersContainer.innerHTML = activity.active_users.map(user => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <div class="user-id">${user.client_id}</div>
+                        <div>游戏次数: ${user.game_count}</div>
+                    </div>
+                    <div class="user-stats">
+                        <div class="user-stats-item">完成: ${user.completed_count}</div>
+                        <div class="user-stats-item">成功率: ${user.success_rate}%</div>
+                        <div class="user-stats-item">最后游戏: ${new Date(user.last_game).toLocaleDateString('zh-CN', { timeZone: appTimezone })}</div>
+                    </div>
+                </div>
+            `).join('');
+            
+            // IP统计
+            const ipsContainer = document.getElementById('ipStatsList');
+            ipsContainer.innerHTML = activity.ip_statistics.map(ip => `
+                <div class="user-item">
+                    <div class="user-info">
+                        <div class="user-id">${ip.ip_address}</div>
+                        <div>游戏次数: ${ip.game_count}</div>
+                    </div>
+                    <div class="user-stats">
+                        <div class="user-stats-item">用户数: ${ip.unique_users}</div>
+                                        <div class="user-stats-item">首次访问: ${new Date(ip.first_access).toLocaleDateString('zh-CN', { timeZone: appTimezone })}</div>
+                <div class="user-stats-item">最后访问: ${new Date(ip.last_access).toLocaleDateString('zh-CN', { timeZone: appTimezone })}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+
+        // 退出登录
+        async function logout() {
+            const token = localStorage.getItem('admin_token');
+            if (token) {
+                try {
+                    await fetch('/api/admin/logout', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                } catch (error) {
+                    console.error('登出请求失败:', error);
+                }
+                
+                localStorage.removeItem('admin_token');
+            }
+            
+            window.location.href = '/admin';
+        }
+    </script>
+</body>
+</html> 

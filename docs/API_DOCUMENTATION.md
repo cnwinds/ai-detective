@@ -1,0 +1,598 @@
+# AI侦探推理游戏 API 接口文档
+
+## 📋 目录
+- [基础信息](#基础信息)
+- [前端页面接口](#前端页面接口)
+- [游戏核心接口](#游戏核心接口)
+- [数据查询接口](#数据查询接口)
+- [管理员接口](#管理员接口)
+- [系统接口](#系统接口)
+- [数据模型](#数据模型)
+- [错误码说明](#错误码说明)
+
+## 🌐 基础信息
+
+**Base URL**: `http://localhost:8000`  
+**Content-Type**: `application/json`  
+**时区配置**: 支持通过环境变量 `TIMEZONE` 配置，默认为 `Asia/Shanghai`
+
+---
+
+## 🎨 前端页面接口
+
+### 1. 主页
+```http
+GET /
+```
+**说明**: 返回游戏主页面  
+**响应**: HTML页面
+
+### 2. 游戏历史页面
+```http
+GET /game_history.html
+```
+**说明**: 返回游戏历史记录页面  
+**响应**: HTML页面
+
+### 3. 游戏评价页面
+```http
+GET /evaluation.html
+```
+**说明**: 返回游戏评价页面  
+**响应**: HTML页面
+
+### 4. 游戏回放页面
+```http
+GET /replay.html
+```
+**说明**: 返回游戏回放页面  
+**响应**: HTML页面  
+**查询参数**: 
+- `session_id`: 游戏会话ID
+
+### 5. 流式测试页面
+```http
+GET /test_stream.html
+```
+**说明**: 返回流式响应测试页面（开发调试用）  
+**响应**: HTML页面
+
+---
+
+## 🎮 游戏核心接口
+
+### 1. 获取案例列表
+```http
+GET /api/cases
+```
+**说明**: 获取所有可用的游戏案例  
+**查询参数**:
+- `category` (可选): 案例分类筛选
+- `difficulty` (可选): 难度筛选
+
+**响应示例**:
+```json
+{
+  "cases": [
+    {
+      "id": 0,
+      "title": "神秘的图书馆命案",
+      "description": "一个安静的夜晚，图书馆发生了令人震惊的命案...",
+      "category": "murder",
+      "difficulty": "medium",
+      "estimated_time": "30-45分钟"
+    }
+  ]
+}
+```
+
+### 2. 获取分类信息
+```http
+GET /api/categories
+```
+**说明**: 获取案例分类和难度选项  
+
+**响应示例**:
+```json
+{
+  "categories": [
+    {"value": "murder", "name": "谋杀案"},
+    {"value": "theft", "name": "盗窃案"}
+  ],
+  "difficulties": [
+    {"value": "easy", "name": "简单"},
+    {"value": "medium", "name": "中等"},
+    {"value": "hard", "name": "困难"}
+  ]
+}
+```
+
+### 3. 开始游戏
+```http
+POST /api/game/start
+```
+**说明**: 开始新的游戏会话  
+
+**请求体**:
+```json
+{
+  "case_index": 0,
+  "client_id": "optional_client_identifier"
+}
+```
+
+**响应示例**:
+```json
+{
+  "session_id": "uuid-string",
+  "case_title": "神秘的图书馆命案",
+  "current_round": 1,
+  "max_rounds": 30,
+  "hints_used": 0,
+  "max_hints": 3,
+  "characters": [...],
+  "conversation_history": {}
+}
+```
+
+### 4. 获取游戏状态
+```http
+GET /api/game/{session_id}/state
+```
+**说明**: 获取指定会话的当前游戏状态  
+
+**路径参数**:
+- `session_id`: 游戏会话ID
+
+### 5. 提问（流式响应）
+```http
+POST /api/game/question/stream
+```
+**说明**: 向角色提问并获取流式响应  
+
+**请求体**:
+```json
+{
+  "session_id": "uuid-string",
+  "character_name": "角色名称",
+  "question": "你的问题"
+}
+```
+
+**响应**: Server-Sent Events (SSE) 流式数据
+
+### 6. 提问（普通响应）
+```http
+POST /api/game/question
+```
+**说明**: 向角色提问并获取完整响应  
+
+**请求体**: 同上
+
+**响应示例**:
+```json
+{
+  "character_name": "角色名称",
+  "response": "角色的回答",
+  "round_number": 2
+}
+```
+
+### 7. 获取提示
+```http
+POST /api/game/hint
+```
+**说明**: 获取游戏提示  
+
+**请求体**:
+```json
+{
+  "session_id": "uuid-string"
+}
+```
+
+**响应示例**:
+```json
+{
+  "hint": "提示内容",
+  "hints_used": 1,
+  "max_hints": 3
+}
+```
+
+### 8. 获取调查总结
+```http
+POST /api/game/investigation/summary
+```
+**说明**: 获取当前调查进度总结  
+
+**请求体**:
+```json
+{
+  "session_id": "uuid-string"
+}
+```
+
+### 9. 提交指控（流式审判）
+```http
+POST /api/game/accusation/stream
+```
+**说明**: 提交指控并获取流式审判过程  
+
+**请求体**:
+```json
+{
+  "session_id": "uuid-string",
+  "accused_name": "被指控者姓名",
+  "reasoning": "指控理由"
+}
+```
+
+**响应**: Server-Sent Events (SSE) 流式审判数据
+
+### 10. 结束游戏
+```http
+DELETE /api/game/{session_id}
+```
+**说明**: 结束指定的游戏会话  
+
+**路径参数**:
+- `session_id`: 游戏会话ID
+
+---
+
+## 📊 数据查询接口
+
+### 1. 提交游戏评价
+```http
+POST /api/game/evaluation
+```
+**说明**: 提交游戏结束后的评价  
+
+**请求体**:
+```json
+{
+  "session_id": "uuid-string",
+  "rating": 5,
+  "reason": "评价理由",
+  "difficulty_feedback": "just_right",
+  "most_liked": "最喜欢的部分",
+  "suggestions": "改进建议",
+  "would_recommend": true
+}
+```
+
+**响应示例**:
+```json
+{
+  "evaluation_id": 123,
+  "session_id": "uuid-string",
+  "rating": 5,
+  "reason": "评价理由",
+  "created_at": "2025-06-15T11:30:00+08:00"
+}
+```
+
+### 2. 获取游戏回放
+```http
+GET /api/game/{session_id}/replay
+```
+**说明**: 获取指定会话的完整回放数据  
+
+**路径参数**:
+- `session_id`: 游戏会话ID
+
+**响应示例**:
+```json
+{
+  "session_info": {
+    "session_id": "uuid-string",
+    "player_name": "玩家名称",
+    "case_title": "案例标题",
+    "start_time": "2025-06-15T10:00:00+08:00",
+    "end_time": "2025-06-15T10:45:00+08:00",
+    "is_completed": true,
+    "is_solved": true
+  },
+  "conversations": [...],
+  "evaluation": {...}
+}
+```
+
+### 3. 获取会话列表
+```http
+GET /api/game/sessions
+```
+**说明**: 获取游戏会话列表  
+
+**查询参数**:
+- `limit` (默认50): 返回数量限制
+- `offset` (默认0): 偏移量
+
+### 4. 获取评价统计
+```http
+GET /api/game/statistics
+```
+**说明**: 获取游戏评价统计数据  
+
+**响应示例**:
+```json
+{
+  "total_evaluations": 100,
+  "average_rating": 4.2,
+  "rating_distribution": {
+    "5_stars": 45,
+    "4_stars": 30,
+    "3_stars": 15,
+    "2_stars": 8,
+    "1_star": 2
+  },
+  "recommendation_rate": 85.5
+}
+```
+
+---
+
+## 👨‍💼 管理员接口
+
+### 1. 管理员登录
+```http
+POST /api/admin/login
+```
+**说明**: 管理员身份验证  
+
+**请求体**:
+```json
+{
+  "password": "管理员密码"
+}
+```
+
+**响应示例**:
+```json
+{
+  "success": true,
+  "token": "jwt-token-string",
+  "message": "登录成功"
+}
+```
+
+### 2. 管理员登出
+```http
+POST /api/admin/logout
+```
+**说明**: 管理员登出  
+**认证**: 需要Bearer Token
+
+### 3. 获取管理统计数据
+```http
+GET /api/admin/statistics
+```
+**说明**: 获取详细的管理统计数据  
+**认证**: 需要Bearer Token
+
+**查询参数**:
+- `days` (默认30): 统计天数
+
+**响应示例**:
+```json
+{
+  "daily_stats": [...],
+  "overall_stats": {
+    "total_games": 500,
+    "total_unique_users": 200,
+    "overall_completion_rate": 75.5,
+    "overall_success_rate": 45.2
+  },
+  "user_activity": {...}
+}
+```
+
+### 4. 获取管理会话列表
+```http
+GET /api/admin/sessions
+```
+**说明**: 获取详细的会话管理列表  
+**认证**: 需要Bearer Token
+
+**查询参数**:
+- `limit` (默认50): 返回数量限制
+- `offset` (默认0): 偏移量
+- `has_evaluation` (可选): 筛选是否有评价
+
+### 5. 管理页面
+```http
+GET /admin
+GET /admin/dashboard
+GET /admin/history
+```
+**说明**: 返回管理后台页面  
+**响应**: HTML页面
+
+---
+
+## ⚙️ 系统接口
+
+### 1. 健康检查
+```http
+GET /api/health
+```
+**说明**: 系统健康状态检查  
+
+**响应示例**:
+```json
+{
+  "status": "healthy",
+  "timestamp": "2025-06-15T11:30:00+08:00",
+  "version": "1.7.0",
+  "cases_count": 5
+}
+```
+
+### 2. 版本信息
+```http
+GET /api/version
+```
+**说明**: 获取应用版本信息  
+
+**响应示例**:
+```json
+{
+  "version": "1.7.0",
+  "build_date": "2025-06-15",
+  "environment": "production"
+}
+```
+
+### 3. 应用配置
+```http
+GET /api/config
+```
+**说明**: 获取应用配置信息（包括时区设置）  
+
+**响应示例**:
+```json
+{
+  "timezone": "Asia/Shanghai",
+  "timezone_offset": 8,
+  "version": "1.7.0"
+}
+```
+
+### 4. 数据库初始化
+```http
+POST /api/database/init
+```
+**说明**: 初始化数据库（调试用）  
+
+### 5. 流式测试
+```http
+POST /api/test/stream
+```
+**说明**: 测试流式响应功能（开发调试用）  
+
+---
+
+## 📋 数据模型
+
+### GameSessionResponse
+```typescript
+interface GameSessionResponse {
+  session_id: string;
+  case_title: string;
+  current_round: number;
+  max_rounds: number;
+  hints_used: number;
+  max_hints: number;
+  characters: Character[];
+  conversation_history: Record<string, Conversation[]>;
+}
+```
+
+### Character
+```typescript
+interface Character {
+  name: string;
+  occupation: string;
+  character_type: string;
+  background: string;
+  personality: string;
+  relationship_to_victim: string;
+}
+```
+
+### Conversation
+```typescript
+interface Conversation {
+  id: number;
+  round_number: number;
+  timestamp: string;
+  speaker_type: string;
+  speaker_name: string;
+  message_type: string;
+  content: string;
+  extra_data?: any;
+}
+```
+
+---
+
+## ❌ 错误码说明
+
+| 状态码 | 说明 | 示例 |
+|--------|------|------|
+| 200 | 请求成功 | 正常响应 |
+| 400 | 请求参数错误 | 缺少必需参数 |
+| 401 | 未授权 | 管理员token无效 |
+| 404 | 资源不存在 | 会话ID不存在 |
+| 500 | 服务器内部错误 | 数据库连接失败 |
+
+### 错误响应格式
+```json
+{
+  "detail": "错误描述信息"
+}
+```
+
+---
+
+## 🔧 使用示例
+
+### JavaScript 前端调用示例
+```javascript
+// 开始游戏
+const startGame = async (caseIndex) => {
+  const response = await fetch('/api/game/start', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ case_index: caseIndex })
+  });
+  return await response.json();
+};
+
+// 获取应用配置
+const getConfig = async () => {
+  const response = await fetch('/api/config');
+  const config = await response.json();
+  console.log('当前时区:', config.timezone);
+};
+
+// 流式提问
+const askQuestionStream = async (sessionId, characterName, question) => {
+  const response = await fetch('/api/game/question/stream', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      session_id: sessionId,
+      character_name: characterName,
+      question: question
+    })
+  });
+  
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    
+    const chunk = decoder.decode(value);
+    console.log('收到响应片段:', chunk);
+  }
+};
+```
+
+---
+
+## 📝 注意事项
+
+1. **时区处理**: 所有时间相关的API都会根据 `TIMEZONE` 环境变量返回对应时区的时间
+2. **流式响应**: 部分接口支持Server-Sent Events，需要正确处理流式数据
+3. **认证机制**: 管理员接口需要在请求头中包含 `Authorization: Bearer <token>`
+4. **错误处理**: 建议对所有API调用进行适当的错误处理
+5. **会话管理**: 游戏会话有生命周期，长时间不活动可能被清理
+
+---
+
+*文档版本: v1.7.0*  
+*最后更新: 2025-06-15* 

@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>游戏评价 - AI侦探推理游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .evaluation-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .rating-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .star {
+            font-size: 30px;
+            color: #ddd;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .star:hover,
+        .star.active {
+            color: #ffd700;
+        }
+
+        .rating-text {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 20px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-btn {
+            background: #f0f0f0;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-right: 10px;
+        }
+
+        .back-btn:hover {
+            background: #e0e0e0;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #c3e6cb;
+            display: none;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .evaluation-container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .star {
+                font-size: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="evaluation-container">
+        <h1 class="title">游戏评价</h1>
+        <p class="subtitle">您的反馈将帮助我们改进游戏体验</p>
+        
+        <div class="success-message" id="successMessage">
+            感谢您的评价！您的反馈对我们非常重要。
+        </div>
+        
+        <div class="error-message" id="errorMessage">
+            提交失败，请重试。
+        </div>
+        
+        <form id="evaluationForm">
+            <div class="form-group">
+                <label class="form-label">整体评分 <span style="color: red;">*</span></label>
+                <div class="rating-container">
+                    <span class="star" data-rating="1">★</span>
+                    <span class="star" data-rating="2">★</span>
+                    <span class="star" data-rating="3">★</span>
+                    <span class="star" data-rating="4">★</span>
+                    <span class="star" data-rating="5">★</span>
+                </div>
+                <div class="rating-text" id="ratingText">请选择评分</div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="reason">评价原因 <span style="color: red;">*</span></label>
+                <textarea class="form-textarea" id="reason" name="reason" 
+                          placeholder="请详细说明您的评分原因，如游戏的优点、不足或建议..."></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="difficulty">难度反馈</label>
+                <select class="form-select" id="difficulty" name="difficulty">
+                    <option value="">请选择</option>
+                    <option value="too_easy">太简单了</option>
+                    <option value="just_right">难度刚好</option>
+                    <option value="too_hard">太难了</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="mostLiked">最喜欢的方面</label>
+                <textarea class="form-textarea" id="mostLiked" name="mostLiked" 
+                          placeholder="您最喜欢游戏的哪个方面？（可选）"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label" for="suggestions">改进建议</label>
+                <textarea class="form-textarea" id="suggestions" name="suggestions" 
+                          placeholder="您对游戏有什么改进建议？（可选）"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <div class="checkbox-group">
+                    <input type="checkbox" id="recommend" name="recommend">
+                    <label for="recommend">我会向朋友推荐这个游戏</label>
+                </div>
+            </div>
+            
+            <div style="margin-top: 30px;">
+                <button type="button" class="back-btn" onclick="goBack()">返回游戏</button>
+                <button type="submit" class="submit-btn" id="submitBtn">提交评价</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // 获取URL参数
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+        
+        const sessionId = getUrlParameter('session_id');
+        let selectedRating = 0;
+        
+        // 评分交互
+        const stars = document.querySelectorAll('.star');
+        const ratingText = document.getElementById('ratingText');
+        const ratingTexts = ['', '很不满意', '不满意', '一般', '满意', '非常满意'];
+        
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                selectedRating = parseInt(this.dataset.rating);
+                updateStars();
+                ratingText.textContent = ratingTexts[selectedRating];
+            });
+            
+            star.addEventListener('mouseover', function() {
+                const rating = parseInt(this.dataset.rating);
+                highlightStars(rating);
+            });
+        });
+        
+        document.querySelector('.rating-container').addEventListener('mouseleave', function() {
+            updateStars();
+        });
+        
+        function highlightStars(rating) {
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+        
+        function updateStars() {
+            highlightStars(selectedRating);
+        }
+        
+        // 表单提交
+        document.getElementById('evaluationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!sessionId) {
+                showError('缺少会话ID，无法提交评价');
+                return;
+            }
+            
+            if (selectedRating === 0) {
+                showError('请选择评分');
+                return;
+            }
+            
+            const reason = document.getElementById('reason').value.trim();
+            if (!reason) {
+                showError('请填写评价原因');
+                return;
+            }
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = '提交中...';
+            
+            try {
+                const response = await fetch('/api/game/evaluation', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        session_id: sessionId,
+                        rating: selectedRating,
+                        reason: reason,
+                        difficulty_feedback: document.getElementById('difficulty').value || null,
+                        most_liked: document.getElementById('mostLiked').value.trim() || null,
+                        suggestions: document.getElementById('suggestions').value.trim() || null,
+                        would_recommend: document.getElementById('recommend').checked
+                    })
+                });
+                
+                if (response.ok) {
+                    showSuccess();
+                    // 3秒后跳转回首页
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 3000);
+                } else {
+                    const error = await response.json();
+                    showError(error.detail || '提交失败');
+                }
+            } catch (error) {
+                console.error('提交评价失败:', error);
+                showError('网络错误，请重试');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '提交评价';
+            }
+        });
+        
+        function showSuccess() {
+            document.getElementById('successMessage').style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('evaluationForm').style.display = 'none';
+        }
+        
+        function showError(message) {
+            const errorElement = document.getElementById('errorMessage');
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+        
+        function goBack() {
+            if (sessionId) {
+                window.location.href = `/?session_id=${sessionId}`;
+            } else {
+                window.location.href = '/';
+            }
+        }
+        
+        // 页面加载时检查会话ID
+        if (!sessionId) {
+            showError('缺少会话ID，请从游戏中进入此页面');
+            document.getElementById('evaluationForm').style.display = 'none';
+        }
+    </script>
+</body>
+</html> 

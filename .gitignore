@@ -1,0 +1,16 @@
+__pycache__
+.vscode
+*.pyc
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+build/
+dist/
+*.egg-info/
+*.egg
+*.whl
+*.dist-info
+
+.env
+

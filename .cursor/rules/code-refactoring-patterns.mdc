@@ -1,0 +1,308 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 代码重构模式和最佳实践
+
+## 重构原则
+
+### 函数职责单一化
+每个函数应该只完成一个明确的功能。如果函数包含的子功能代码超过5行，应该提取为独立的子函数。
+
+**示例：重构前的复杂函数**
+```python
+# 重构前：_generate_vote_stream函数包含多个职责
+async def _generate_vote_stream(self, voter, accused, accuser_reasoning, defense_text, witness_testimonies, case, conversation_history):
+    # 构建对话上下文（10+行代码）
+    voter_conversations = conversation_history.get(voter.name, [])
+    if voter_conversations:
+        conversation_context = "【我与侦探的完整对话记录】\n"
+        for i, conv in enumerate(voter_conversations, 1):
+            conversation_context += f"第{i}轮对话：\n"
+            # ... 更多代码
+    
+    # 构建证词上下文（5+行代码）
+    testimonies_context = ""
+    for witness, testimony in witness_testimonies:
+        # ... 更多代码
+    
+    # 构建证据上下文（10+行代码）
+    # ... 更多代码
+    
+    # 生成AI提示词（50+行代码）
+    # ... 更多代码
+```
+
+**重构后：职责分离**
+```python
+# 重构后：每个子功能独立为函数
+def _build_conversation_context(self, voter: Character, conversation_history: Dict) -> str:
+    """专门构建对话上下文"""
+    # 单一职责：构建对话上下文
+
+def _build_testimonies_context(self, voter: Character, accusation: Accusation) -> str:
+    """专门构建证词上下文"""
+    # 单一职责：构建证词上下文
+
+async def _build_evidence_context(self, case: Case, voter: Character) -> str:
+    """专门构建证据上下文"""
+    # 单一职责：构建证据上下文
+
+async def _generate_vote_stream(self, voter, accusation, case, conversation_history):
+    """主函数：清晰的流程控制"""
+    conversation_context = self._build_conversation_context(voter, conversation_history)
+    testimonies_context = self._build_testimonies_context(voter, accusation)
+    evidence_info = await self._build_evidence_context(case, voter)
+    # 清晰的主流程
+```
+
+### 对象封装优化
+利用数据对象来简化函数参数，提高代码的可维护性和类型安全性。
+
+**重构前：参数过多**
+```python
+async def _generate_vote_stream(self, voter, accused, accuser_reasoning, defense_text, witness_testimonies, case, conversation_history):
+    # 6个参数，难以管理
+```
+
+**重构后：使用对象封装**
+```python
+async def _generate_vote_stream(self, voter, accusation, case, conversation_history):
+    # 使用accusation对象封装相关数据
+    # accusation.accused - 被告
+    # accusation.accuser_reasoning - 指控理由  
+    # accusation.accused_defense - 被告辩护
+    # accusation.witness_testimonies - 证人证词
+```
+
+### 业务逻辑内聚化
+相关的业务逻辑应该封装在同一个类中，避免在调用方进行复杂的状态管理。
+
+**重构前：外部状态管理**
+```python
+# app.py中的复杂投票处理
+votes = []
+vote_summary = {"support": 0, "oppose": 0, "total": len(witnesses)}
+
+for voter in witnesses:
+    vote, reason = game.accusation_system._parse_vote_result(vote_data)
+    votes.append({"voter_name": voter.name, "vote": vote, "reason": reason})
+    if vote == "支持":
+        vote_summary["support"] += 1
+    else:
+        vote_summary["oppose"] += 1
+
+# 手动计算判决
+total_votes = vote_summary["total"]
+final_verdict = vote_summary["support"] > total_votes / 2
+is_correct = final_verdict and accused.is_guilty
+```
+
+**重构后：业务逻辑内聚**
+```python
+# AccusationSystem内部处理
+def add_vote_to_accusation(self, accusation, voter, vote_text):
+    """解析投票并更新指控对象"""
+    vote, reason = self._parse_vote_result(vote_text)
+    accusation.votes.append((voter, vote, reason))
+    # 自动更新统计
+    if vote == "支持":
+        accusation.vote_summary["support"] += 1
+    else:
+        accusation.vote_summary["oppose"] += 1
+
+def finalize_accusation_verdict(self, accusation):
+    """完成最终判决"""
+    total_votes = accusation.vote_summary["total"]
+    final_verdict = accusation.vote_summary["support"] > total_votes / 2
+    is_correct = final_verdict and accusation.accused.is_guilty
+    accusation.final_verdict = final_verdict
+    return final_verdict, is_correct
+
+# app.py中的简化调用
+vote_info = game.accusation_system.add_vote_to_accusation(accusation, voter, vote_data)
+final_verdict, is_correct = game.accusation_system.finalize_accusation_verdict(accusation)
+```
+
+## 代码复用模式
+
+### DRY原则应用
+避免重复代码，提取公共逻辑为可复用的函数。
+
+**重构前：重复的对话上下文构建**
+```python
+# _generate_vote_stream中的重复代码
+voter_conversations = conversation_history.get(voter.name, [])
+if voter_conversations:
+    conversation_context = "【我与侦探的完整对话记录】\n"
+    for i, conv in enumerate(voter_conversations, 1):
+        conversation_context += f"第{i}轮对话：\n"
+        conversation_context += f"侦探问：{conv['question']}\n"
+        conversation_context += f"我答：{conv['response']}\n\n"
+else:
+    conversation_context = "【我与侦探没有进行过对话】"
+
+# _generate_witness_testimony_stream中的相同代码
+witness_conversations = conversation_history.get(witness.name, [])
+if witness_conversations:
+    conversation_context = "【我与侦探的完整对话记录】\n"
+    for i, conv in enumerate(witness_conversations, 1):
+        conversation_context += f"第{i}轮对话：\n"
+        conversation_context += f"侦探问：{conv['question']}\n"
+        conversation_context += f"我答：{conv['response']}\n\n"
+else:
+    conversation_context = "【我与侦探没有进行过对话】"
+```
+
+**重构后：提取公共函数**
+```python
+def _build_conversation_context(self, character: Character, conversation_history: Dict) -> str:
+    """构建角色的对话上下文 - 可复用函数"""
+    character_conversations = conversation_history.get(character.name, []) if conversation_history else []
+    
+    if not character_conversations:
+        return "【我与侦探没有进行过对话】"
+    
+    conversation_context = "【我与侦探的完整对话记录】\n"
+    for i, conv in enumerate(character_conversations, 1):
+        conversation_context += f"第{i}轮对话：\n"
+        conversation_context += f"侦探问：{conv['question']}\n"
+        conversation_context += f"我答：{conv['response']}\n\n"
+    
+    return conversation_context
+
+# 在多个函数中复用
+async def _generate_vote_stream(self, voter, accusation, case, conversation_history):
+    conversation_context = self._build_conversation_context(voter, conversation_history)
+    # ...
+
+async def _generate_witness_testimony_stream(self, witness, accused, accuser_reasoning, case, conversation_history):
+    conversation_context = self._build_conversation_context(witness, conversation_history)
+    # ...
+```
+
+### 错误处理标准化
+统一的错误处理模式，提供一致的用户体验。
+
+```python
+async def _generate_error_vote(self, voter: Character, accusation: Accusation):
+    """标准化的错误处理"""
+    if voter.is_guilty:
+        async def error_stream():
+            yield f"支持指控。我觉得{accusation.accused.name}确实很可疑，侦探的分析有道理。"
+    else:
+        async def error_stream():
+            yield f"反对指控。我认为证据还不够充分，不能仅凭这些就断定{accusation.accused.name}是凶手。"
+    
+    async for chunk in error_stream():
+        yield chunk
+
+# 在主函数中使用
+try:
+    async for chunk in self.ai_service.get_stream_response(prompt):
+        if chunk:
+            yield chunk
+except Exception as e:
+    logger.error(f"生成投票流式分析时出错 - 投票者: {voter.name}, 被告: {accusation.accused.name}, 错误: {str(e)}", exc_info=True)
+    async for chunk in self._generate_error_vote(voter, accusation):
+        yield chunk
+```
+
+## 重构检查清单
+
+### 函数级别检查
+- [ ] 函数是否只有一个明确的职责？
+- [ ] 函数参数是否超过4个？（考虑使用对象封装）
+- [ ] 函数体是否超过30行？（考虑拆分子函数）
+- [ ] 是否有重复的代码块？（提取为公共函数）
+- [ ] 错误处理是否统一？
+
+### 类级别检查
+- [ ] 类的职责是否清晰？
+- [ ] 相关的数据和操作是否在同一个类中？
+- [ ] 类的接口是否简洁易用？
+- [ ] 是否有适当的封装？
+
+### 系统级别检查
+- [ ] 模块间的依赖关系是否清晰？
+- [ ] 是否有循环依赖？
+- [ ] 配置和常量是否集中管理？
+- [ ] 日志记录是否完整？
+
+## 重构实践案例
+
+### 案例1：投票系统重构
+**问题**：[backend/accusation_system.py](mdc:backend/accusation_system.py)中的`_generate_vote_stream`函数过于复杂
+
+**解决方案**：
+1. 提取`_build_conversation_context`函数处理对话上下文
+2. 提取`_build_testimonies_context`函数处理证词上下文
+3. 提取`_build_evidence_context`函数处理证据上下文
+4. 提取`_generate_error_vote`函数处理错误情况
+5. 主函数只保留核心流程控制
+
+**效果**：
+- 代码行数从100+行减少到30行
+- 每个子函数职责单一，易于测试和维护
+- 提高了代码的可读性和可复用性
+
+### 案例2：指控对象封装
+**问题**：[backend/app.py](mdc:backend/app.py)中投票处理逻辑分散，状态管理复杂
+
+**解决方案**：
+1. 在`AccusationSystem`中添加`add_vote_to_accusation`方法
+2. 添加`finalize_accusation_verdict`方法处理最终判决
+3. 利用`Accusation`对象封装所有相关数据
+4. 简化调用方的代码逻辑
+
+**效果**：
+- 投票处理逻辑集中在`AccusationSystem`中
+- `app.py`中的代码大幅简化
+- 数据一致性得到保证
+- 易于扩展和维护
+
+### 案例3：对话上下文复用
+**问题**：多个函数中存在相同的对话上下文构建代码
+
+**解决方案**：
+1. 提取`_build_conversation_context`公共函数
+2. 在`_generate_vote_stream`和`_generate_witness_testimony_stream`中复用
+3. 确保所有地方的对话格式一致
+
+**效果**：
+- 消除了代码重复
+- 保证了对话格式的一致性
+- 修改对话格式时只需要改一个地方
+
+## 重构工具和技巧
+
+### 代码分析工具
+- 使用IDE的代码复杂度分析功能
+- 查找重复代码的工具
+- 静态代码分析工具
+
+### 重构步骤
+1. **识别问题**：找出复杂、重复或职责不清的代码
+2. **制定计划**：确定重构的目标和步骤
+3. **小步重构**：每次只做一个小的改动
+4. **测试验证**：确保重构后功能正常
+5. **代码审查**：检查重构效果和代码质量
+
+### 重构时机
+- 添加新功能前
+- 修复bug时
+- 代码审查发现问题时
+- 性能优化时
+- 定期的代码清理
+
+## 最佳实践总结
+
+1. **保持函数简短**：一个函数最好不超过30行
+2. **单一职责原则**：每个函数只做一件事
+3. **减少参数数量**：超过4个参数考虑使用对象
+4. **消除重复代码**：提取公共逻辑为函数
+5. **统一错误处理**：使用一致的错误处理模式
+6. **合理使用对象**：封装相关数据和操作
+7. **保持接口简洁**：对外提供简单易用的接口
+8. **及时重构**：不要让技术债务积累

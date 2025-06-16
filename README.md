@@ -45,7 +45,7 @@ ai-detective/
 │   ├── 📄 README.md           # Docker使用说明
 │   └── 📄 DOCKER_DEPLOYMENT.md # 详细部署文档
 │
-├── 📄 start_web_server.py     # Web服务器启动脚本
+├── 📄 start_game.py           # Web服务器启动脚本
 ├── 📄 update_version.py       # 版本更新工具
 ├── 📄 requirements.txt        # Python依赖
 ├── 📄 env.template            # 环境变量模板
@@ -60,7 +60,7 @@ ai-detective/
 
 | 文件 | 描述 | 用途 |
 |------|------|------|
-| `start_web_server.py` | 服务器启动脚本 | 启动Web应用 |
+| `start_game.py` | 服务器启动脚本 | 启动Web应用 |
 | `requirements.txt` | Python依赖列表 | 安装项目依赖 |
 | `env.example` | 环境变量示例 | 配置API密钥等 |
 

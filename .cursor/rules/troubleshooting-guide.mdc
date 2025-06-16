@@ -28,7 +28,7 @@ alwaysApply: false
 ### 服务器启动问题
 
 #### 问题：FastAPI服务器无法启动
-**症状**: 运行[start_web_server.py](mdc:start_web_server.py)时出现错误
+**症状**: 运行@start_game.py时出现错误
 **排查步骤**:
 1. 检查Python版本 (需要3.7+)
 2. 验证依赖安装: `pip install -r requirements.txt`

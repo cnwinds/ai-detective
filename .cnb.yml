@@ -1,0 +1,22 @@
+# .cnb.yml
+$:
+  vscode:
+    - name: vscode
+      runner:
+        cpus: 2
+      services:
+        - vscode
+      stages:
+        - name: 软链 .env 文件到工作目录（仓库根目录）
+          # ./ 是工作目录，默认为 /workspace
+          script: |
+            if [ -e "/root/.cnb/.env" ]; then
+                ln -sf /root/.cnb/.env ./.env 
+            else
+                echo "文件不存在"
+            fi
+            if [ -e "/root/.cnb/.env.docker" ]; then
+                ln -sf /root/.cnb/.env.docker ./docker/.env 
+            else
+                echo "文件不存在"
+            fi

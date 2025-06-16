@@ -140,24 +140,6 @@ python update_version.py 1.7.0
 - Python 3.7+ 或 Docker
 - OpenAI 兼容API密钥（必需）
 
-### ⚠️ 权限问题解决
-
-如果在Linux/macOS环境下遇到脚本无执行权限的问题：
-
-```bash
-# 方法一：使用便捷脚本（推荐）
-./setup-permissions.sh
-
-# 方法二：手动设置权限
-chmod +x docker/*.sh
-chmod +x *.sh
-
-# 方法三：使用bash直接运行
-bash docker/deploy.sh
-```
-
-**注意**：Windows用户不需要设置执行权限，可以直接运行 `.bat` 文件。
-
 ### 方式一：直接运行（推荐）
 
 ```bash
@@ -165,21 +147,17 @@ bash docker/deploy.sh
 git clone <repository-url>
 cd ai-detective
 
-# 2. 设置脚本执行权限（Linux/macOS）
-./setup-permissions.sh
-# 或者 Windows 用户运行：setup-permissions.bat
-
-# 3. 安装依赖
+# 2. 安装依赖
 pip install -r requirements.txt
 
-# 4. 设置API密钥
+# 3. 设置API密钥
 cp env.template .env
 # 编辑 .env 文件，填入你的 OpenAI API 密钥
 
-# 5. 启动游戏
-python start_web_server.py
+# 4. 启动游戏
+python start_game.py
 
-# 6. 打开浏览器访问 http://localhost:8000
+# 5. 打开浏览器访问 http://localhost:8000
 ```
 
 ### 方式二：Docker运行
@@ -189,26 +167,21 @@ python start_web_server.py
 git clone <repository-url>
 cd ai-detective
 
-# 2. 设置脚本执行权限（Linux/macOS）
-./setup-permissions.sh
-# 或者 Windows 用户运行：setup-permissions.bat
-
-# 3. 设置API密钥
+# 2. 设置API密钥
 cp env.template .env
 # 编辑 .env 文件，填入你的 OpenAI API 密钥
 
-# 4. 启动容器
+# 3. 启动容器
 cd docker
 ./deploy.sh          # Linux/macOS
 # 或者 Windows 用户运行：deploy.bat
 
-# 5. 打开浏览器访问 http://localhost:8000
+# 4. 打开浏览器访问 http://localhost:8000
 ```
-
 
 ## 🎯 游戏玩法
 
-### Web版本
+### 核心玩法
 
 1. **选择案例**：从可用案例中选择一个开始调查
 2. **角色对话**：点击角色头像与不同角色对话
@@ -216,28 +189,6 @@ cd docker
 4. **分析推理**：根据收集的信息分析案件
 5. **指控真凶**：当你确信找到真凶时进行指控
 6. **审判环节**：观看AI角色的辩护和投票过程
-
-## 🔧 API接口
-
-### 主要端点
-
-- `GET /api/cases` - 获取可用案例列表
-- `POST /api/game/start` - 开始新游戏
-- `POST /api/game/question` - 向角色提问
-- `POST /api/game/question/stream` - 流式对话接口
-- `POST /api/game/hint` - 获取游戏提示
-- `POST /api/game/accusation` - 进行指控
-- `WebSocket /ws/{session_id}` - 实时通信
-
-### 数据格式
-
-```json
-{
-  "session_id": "uuid",
-  "character_name": "角色名称",
-  "question": "你的问题"
-}
-```
 
 ## 🎨 前端特性
 
@@ -270,6 +221,23 @@ cd docker
 - **动态结果**：根据证据强度和角色立场决定结果
 
 ## 🛠️ 开发指南
+
+### Ubuntu环境启动游戏
+
+```bash
+python3 -m venv myenv       # 创建虚拟环境
+source myenv/bin/activate  # 激活环境（Linux/macOS）
+# Windows 使用 `myenv\Scripts\activate`
+pip install -r requirements.txt
+```
+
+### 调试模式
+
+启用调试模式获取详细日志：
+
+```bash
+python start_game.py --debug
+```
 
 ### 添加新案例
 
@@ -334,14 +302,6 @@ cp env.template .env
    - 清除浏览器缓存
    - 检查控制台错误信息
    - 确认API服务正常运行
-
-### 调试模式
-
-启用调试模式获取详细日志：
-
-```bash
-python start_web_server.py --debug
-```
 
 ## 📄 许可证
 

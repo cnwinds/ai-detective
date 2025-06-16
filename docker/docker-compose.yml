@@ -8,6 +8,8 @@ services:
       MYSQL_DATABASE: ${DB_NAME:-ai_detective}
       MYSQL_USER: ${DB_USER:-gameuser}
       MYSQL_PASSWORD: ${DB_PASSWORD:-password}
+    ports:
+      - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
       - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro

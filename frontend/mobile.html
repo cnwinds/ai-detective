@@ -1,0 +1,1637 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>🕵️ AI侦探推理游戏 - 手机版</title>
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AI侦探">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* 屏幕管理 */
+        .mobile-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: none;
+            flex-direction: column;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .mobile-screen.active {
+            display: flex;
+        }
+
+        .mobile-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .logo-section {
+            margin-bottom: 40px;
+            animation: fadeInDown 1s ease-out;
+        }
+
+        .game-logo {
+            font-size: 4rem;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            animation: pulse 3s infinite;
+        }
+
+        .game-title {
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .game-subtitle {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .feature-item i {
+            margin-right: 12px;
+            font-size: 1.2rem;
+            color: #FFD700;
+            min-width: 24px;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 280px;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        .btn-mobile {
+            padding: 16px 24px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-mobile i {
+            font-size: 1.2rem;
+        }
+
+        .download-hint {
+            margin-top: 30px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            animation: fadeInUp 1s ease-out 0.9s both;
+        }
+
+        .download-hint p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 10px;
+        }
+
+        .download-hint .hint-icon {
+            color: #FFD700;
+            margin-right: 8px;
+        }
+
+        .footer-info {
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            text-align: center;
+        }
+
+        .stats-section {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+            animation: fadeInUp 1s ease-out 0.5s both;
+        }
+
+        .stat-item {
+            text-align: center;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        /* 动画效果 */
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 360px) {
+            .mobile-container {
+                padding: 15px;
+            }
+            
+            .game-logo {
+                font-size: 3rem;
+            }
+            
+            .game-title {
+                font-size: 1.6rem;
+            }
+            
+            .game-subtitle {
+                font-size: 1rem;
+            }
+            
+            .feature-item {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .btn-mobile {
+                padding: 14px 20px;
+                font-size: 1rem;
+            }
+        }
+
+                 @media (max-height: 640px) {
+             .mobile-container {
+                 justify-content: flex-start;
+                 padding-top: 20px;
+                 min-height: auto;
+             }
+             
+             .logo-section {
+                 margin-bottom: 20px;
+             }
+             
+             .stats-section {
+                 margin: 15px 0;
+             }
+             
+             .feature-list {
+                 margin-bottom: 20px;
+             }
+             
+             .download-hint {
+                 margin-top: 20px;
+             }
+         }
+
+        /* PWA相关样式 */
+        .pwa-banner {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .pwa-banner.show {
+            transform: translateY(0);
+        }
+
+        .pwa-banner button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+
+        /* 加载动画 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .loading-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top: 3px solid #4CAF50;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 案情介绍页面样式 */
+        .intro-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+        }
+
+        .intro-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+            color: white;
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .intro-content::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .intro-content::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 2px;
+        }
+
+        .intro-content::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        .intro-section {
+            margin-bottom: 30px;
+            opacity: 0;
+            animation: fadeInUp 0.5s ease-out forwards;
+        }
+
+        .intro-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .intro-subtitle {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 25px 0 15px 0;
+            color: #FFD700;
+            border-left: 4px solid #FFD700;
+            padding-left: 12px;
+        }
+
+        .intro-text {
+            margin-bottom: 15px;
+            text-align: justify;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        }
+
+        .intro-detail {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 3px solid #FFD700;
+        }
+
+        .intro-detail strong {
+            color: #FFD700;
+        }
+
+        .character-intro {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .character-intro h4 {
+            color: #FFD700;
+            margin: 0 0 8px 0;
+            font-size: 1.1rem;
+        }
+
+        .character-intro p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        .intro-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px 20px;
+            display: flex;
+            gap: 15px;
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .intro-btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .skip-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .skip-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .start-btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+        }
+
+        .start-btn:hover:not(:disabled) {
+            background: linear-gradient(45deg, #45a049, #4CAF50);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.4);
+        }
+
+        .start-btn:disabled {
+            background: rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        /* 打字机光标效果 */
+        .typewriter-cursor {
+            display: inline-block;
+            width: 2px;
+            height: 1.2em;
+            background: #FFD700;
+            animation: blink 1s infinite;
+            margin-left: 2px;
+            vertical-align: text-bottom;
+        }
+
+        @keyframes blink {
+            0%, 50% { opacity: 1; }
+            51%, 100% { opacity: 0; }
+        }
+
+        /* 滚动跟随效果 */
+        .scroll-target {
+            scroll-margin-top: 20px;
+        }
+
+        /* 案例选择页面样式 */
+        .screen-header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .screen-header h2 {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .back-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .header-spacer {
+            width: 36px;
+        }
+
+        .cases-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .cases-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .case-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .case-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .case-card h3 {
+            color: #64b5f6;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+        }
+
+        .case-card p {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin-bottom: 12px;
+        }
+
+        .case-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .badge-difficulty {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border: 1px solid rgba(255, 193, 7, 0.3);
+        }
+
+        .badge-category {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+            border: 1px solid rgba(76, 175, 80, 0.3);
+        }
+
+        /* 游戏界面样式 */
+        .game-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, #0f0f23 0%, #16213e 100%);
+        }
+
+        .game-header {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .game-header h2 {
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0;
+            flex: 1;
+        }
+
+        .game-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .header-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .tab-navigation {
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            padding: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .tab-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            padding: 12px 8px;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .tab-btn.active {
+            color: #64b5f6;
+            background: rgba(100, 181, 246, 0.1);
+        }
+
+        .tab-btn i {
+            font-size: 1.1rem;
+        }
+
+        .tab-btn span {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .unread-badge {
+            position: absolute;
+            top: 4px;
+            right: 50%;
+            transform: translateX(10px);
+            background: #ff4444;
+            color: white;
+            font-size: 0.6rem;
+            padding: 2px 5px;
+            border-radius: 8px;
+            min-width: 16px;
+            text-align: center;
+        }
+
+        .content-panels {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .content-panel {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            flex-direction: column;
+            background: transparent;
+        }
+
+        .content-panel.active {
+            display: flex;
+        }
+
+        .panel-header {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h3 {
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+        }
+
+        .action-btn.primary:hover {
+            background: linear-gradient(45deg, #45a049, #4CAF50);
+        }
+
+        /* 角色面板 */
+        .characters-grid {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            align-content: start;
+        }
+
+        .character-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .character-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .character-card.selected {
+            border-color: #64b5f6;
+            background: rgba(100, 181, 246, 0.2);
+        }
+
+        .character-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            color: #64b5f6;
+            font-size: 1.2rem;
+        }
+
+        .character-name {
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .character-occupation {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.75rem;
+            margin-bottom: 4px;
+        }
+
+        .character-type {
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            display: inline-block;
+        }
+
+        /* 对话面板 */
+        .conversation-area {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+            scroll-behavior: smooth;
+        }
+
+        .welcome-message {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 40px 20px;
+        }
+
+        .welcome-message i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .question-input-area {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .suggested-questions {
+            margin-bottom: 10px;
+        }
+
+        .suggested-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .suggested-question {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .suggested-question:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        .input-area textarea {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 10px;
+            color: white;
+            font-size: 0.9rem;
+            resize: none;
+            outline: none;
+        }
+
+        .input-area textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .send-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* 证据面板 */
+        .evidence-list {
+            flex: 1;
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .no-evidence {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            padding: 40px 20px;
+        }
+
+        .no-evidence i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        /* 笔记面板 */
+        .notes-area {
+            flex: 1;
+            padding: 15px;
+        }
+
+        .notes-area textarea {
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            font-size: 0.9rem;
+            resize: none;
+            outline: none;
+            line-height: 1.5;
+        }
+
+        .notes-area textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* 模态框 */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #333;
+            font-size: 1.1rem;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .close-btn:hover {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .modal-body {
+            padding: 20px;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* 消息提示 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 25px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 10001;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast i {
+            font-size: 1rem;
+        }
+
+        .toast span {
+            font-size: 0.9rem;
+        }
+
+        /* 对话相关样式 */
+        .conversation-item {
+            margin-bottom: 15px;
+        }
+
+        .question {
+            background: rgba(100, 181, 246, 0.2);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 15px 15px 5px 15px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .response {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 15px 15px 15px 5px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .response.streaming {
+            border-bottom: 2px solid #FFD700;
+        }
+
+        .cursor {
+            animation: blink 1s infinite;
+            color: #FFD700;
+        }
+
+        /* 证据相关样式 */
+        .evidence-item {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border-left: 3px solid #4CAF50;
+        }
+
+        .evidence-name {
+            color: #4CAF50;
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+
+        .evidence-description {
+            color: white;
+            font-size: 0.85rem;
+            line-height: 1.4;
+            margin-bottom: 5px;
+        }
+
+        .evidence-significance {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 主菜单屏幕 -->
+    <div class="mobile-screen active" id="main-menu">
+        <div class="mobile-container">
+        <!-- Logo区域 -->
+        <div class="logo-section">
+            <div class="game-logo">🕵️</div>
+            <h1 class="game-title">AI侦探推理</h1>
+            <p class="game-subtitle">运用智慧解开谜团<br>体验沉浸式推理</p>
+        </div>
+
+        <!-- 数据展示 -->
+        <div class="stats-section">
+            <div class="stat-item">
+                <div class="stat-number">12+</div>
+                <div class="stat-label">精彩案例</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">AI</div>
+                <div class="stat-label">智能对话</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">∞</div>
+                <div class="stat-label">推理乐趣</div>
+            </div>
+        </div>
+
+        <!-- 特色功能 -->
+        <div class="feature-list">
+            <div class="feature-item">
+                <i class="fas fa-brain"></i>
+                <span>AI驱动的智能角色对话系统</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-search"></i>
+                <span>多元化证据收集与分析</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-users"></i>
+                <span>丰富的角色背景故事</span>
+            </div>
+            <div class="feature-item">
+                <i class="fas fa-mobile-alt"></i>
+                <span>完美适配手机屏幕体验</span>
+            </div>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div class="action-buttons">
+            <button class="btn-mobile btn-primary" id="start-game-main-btn">
+                <i class="fas fa-play"></i>
+                <span>立即开始游戏</span>
+            </button>
+            <button class="btn-mobile btn-secondary" id="rules-btn">
+                <i class="fas fa-info-circle"></i>
+                <span>了解游戏规则</span>
+            </button>
+            <button class="btn-mobile btn-secondary" id="about-btn">
+                <i class="fas fa-question-circle"></i>
+                <span>关于游戏</span>
+            </button>
+        </div>
+
+        <!-- 使用提示 -->
+        <div class="download-hint">
+            <p><i class="fas fa-lightbulb hint-icon"></i>建议添加到主屏幕，获得更好的游戏体验</p>
+            <p><i class="fas fa-wifi hint-icon"></i>需要网络连接以获得最佳AI对话体验</p>
+        </div>
+    </div>
+    </div>
+
+    <!-- 页面底部信息 -->
+    <div class="footer-info">
+        <div id="mobile-version-info">AI Detective Game v1.0.0</div>
+    </div>
+
+    <!-- 案例选择页面 -->
+    <div class="mobile-screen" id="case-selection">
+        <div class="screen-header">
+            <button class="back-btn" id="back-to-menu">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h2>选择案例</h2>
+            <div class="header-spacer"></div>
+        </div>
+        <div class="cases-container">
+            <div class="cases-list" id="cases-list">
+                <!-- 案例列表将通过JavaScript动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- PWA安装提示横幅 -->
+    <div class="pwa-banner" id="pwaBanner">
+        <span>🚀 安装到主屏幕，随时享受推理乐趣！</span>
+        <button id="installBtn">安装</button>
+        <button id="dismissBtn" style="background: transparent; border: 1px solid #ccc;">稍后</button>
+    </div>
+
+    <!-- 加载遮罩 -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- 案情介绍页面 -->
+    <div class="mobile-screen" id="case-intro-screen">
+        <div class="intro-container">
+            <!-- 案情内容区域 -->
+            <div class="intro-content" id="intro-content">
+                <!-- 内容将通过JavaScript动态生成 -->
+            </div>
+            
+            <!-- 底部固定按钮 -->
+            <div class="intro-footer">
+                <button class="intro-btn skip-btn" id="skip-intro-btn">
+                    <i class="fas fa-forward"></i>
+                    跳过介绍
+                </button>
+                <button class="intro-btn start-btn" id="start-game-btn" disabled>
+                    <i class="fas fa-play"></i>
+                    开始游戏
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏界面 -->
+    <div class="mobile-screen" id="game-screen">
+        <div class="game-container">
+            <!-- 游戏头部 -->
+            <div class="game-header">
+                <h2 id="game-case-title">案件标题</h2>
+                <div class="game-actions">
+                    <button id="case-info-btn" class="header-btn">
+                        <i class="fas fa-info-circle"></i>
+                    </button>
+                    <button id="menu-btn" class="header-btn">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 标签导航 -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" id="characters-tab">
+                    <i class="fas fa-users"></i>
+                    <span>角色</span>
+                </button>
+                <button class="tab-btn" id="chat-tab">
+                    <i class="fas fa-comments"></i>
+                    <span>对话</span>
+                    <div class="unread-badge" id="unread-badge" style="display: none;">1</div>
+                </button>
+                <button class="tab-btn" id="evidence-tab">
+                    <i class="fas fa-search"></i>
+                    <span>证据</span>
+                </button>
+                <button class="tab-btn" id="notes-tab">
+                    <i class="fas fa-sticky-note"></i>
+                    <span>笔记</span>
+                </button>
+            </div>
+            
+            <!-- 内容面板 -->
+            <div class="content-panels">
+                <!-- 角色面板 -->
+                <div class="content-panel active" id="characters-panel">
+                    <div class="panel-header">
+                        <h3>相关人员</h3>
+                        <div class="action-buttons">
+                            <button id="get-hint-btn" class="action-btn">
+                                <i class="fas fa-lightbulb"></i>
+                                提示
+                            </button>
+                            <button id="make-accusation-btn" class="action-btn primary">
+                                <i class="fas fa-gavel"></i>
+                                指控
+                            </button>
+                        </div>
+                    </div>
+                    <div class="characters-grid" id="characters-grid">
+                        <!-- 角色卡片将通过JavaScript动态生成 -->
+                    </div>
+                </div>
+                
+                <!-- 对话面板 -->
+                <div class="content-panel" id="chat-panel">
+                    <div class="panel-header">
+                        <h3 id="chat-character-name">选择角色开始对话</h3>
+                        <button id="clear-chat-btn" class="action-btn">
+                            <i class="fas fa-trash"></i>
+                            清空
+                        </button>
+                    </div>
+                    <div class="conversation-area" id="conversation-area">
+                        <div class="welcome-message">
+                            <i class="fas fa-comments"></i>
+                            <p>选择一个角色开始询问</p>
+                        </div>
+                    </div>
+                    <div class="question-input-area">
+                        <div class="suggested-questions" id="suggested-questions" style="display: none;">
+                            <div class="suggested-list" id="suggested-list">
+                                <!-- 推荐问题将动态生成 -->
+                            </div>
+                        </div>
+                        <div class="input-area">
+                            <textarea id="question-input" placeholder="输入你想问的问题..." rows="2"></textarea>
+                            <button id="send-question-btn" class="send-btn">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 证据面板 -->
+                <div class="content-panel" id="evidence-panel">
+                    <div class="panel-header">
+                        <h3>发现的证据</h3>
+                    </div>
+                    <div class="evidence-list" id="evidence-list">
+                        <div class="no-evidence">
+                            <i class="fas fa-search"></i>
+                            <p>暂无发现的证据</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 笔记面板 -->
+                <div class="content-panel" id="notes-panel">
+                    <div class="panel-header">
+                        <h3>调查笔记</h3>
+                        <button id="clear-notes-btn" class="action-btn">
+                            <i class="fas fa-trash"></i>
+                            清空
+                        </button>
+                    </div>
+                    <div class="notes-area">
+                        <textarea id="notes-area" placeholder="记录你的推理和发现..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modal-title">标题</h3>
+                <button id="close-modal" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                内容
+            </div>
+        </div>
+    </div>
+
+    <!-- 消息提示 -->
+    <div class="toast" id="toast">
+        <i id="toast-icon" class="fas fa-info-circle"></i>
+        <span id="toast-message">消息内容</span>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="static/js/mobile.js"></script>
+    <script>
+        // PWA安装功能
+        let deferredPrompt;
+        const pwaBanner = document.getElementById('pwaBanner');
+        const installBtn = document.getElementById('installBtn');
+        const dismissBtn = document.getElementById('dismissBtn');
+
+        // 监听PWA安装提示事件
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // 检查是否已经安装或之前已拒绝
+            if (!localStorage.getItem('pwa-dismissed')) {
+                setTimeout(() => {
+                    pwaBanner.classList.add('show');
+                }, 2000);
+            }
+        });
+
+        // 安装按钮点击事件
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                
+                if (outcome === 'accepted') {
+                    console.log('用户接受了PWA安装');
+                } else {
+                    console.log('用户拒绝了PWA安装');
+                }
+                
+                deferredPrompt = null;
+                pwaBanner.classList.remove('show');
+            }
+        });
+
+        // 稍后按钮点击事件
+        dismissBtn.addEventListener('click', () => {
+            pwaBanner.classList.remove('show');
+            localStorage.setItem('pwa-dismissed', 'true');
+        });
+
+        // 检测PWA安装状态
+        window.addEventListener('appinstalled', () => {
+            console.log('PWA安装成功');
+            pwaBanner.classList.remove('show');
+        });
+
+        // 移动端应用初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            new MobileDetectiveApp();
+        });
+
+        // 显示游戏规则
+        function showGameRules() {
+            const modal = document.createElement('div');
+            modal.className = 'game-rules-modal';
+            modal.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(0, 0, 0, 0.8);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 10000;
+                    padding: 20px;
+                ">
+                    <div style="
+                        background: white;
+                        border-radius: 20px;
+                        padding: 30px;
+                        max-width: 400px;
+                        max-height: 80vh;
+                        overflow-y: auto;
+                        position: relative;
+                    ">
+                        <button onclick="this.closest('.game-rules-modal').remove()" style="
+                            position: absolute;
+                            top: 15px;
+                            right: 15px;
+                            background: none;
+                            border: none;
+                            font-size: 24px;
+                            cursor: pointer;
+                            color: #999;
+                        ">×</button>
+                        
+                        <h2 style="margin-bottom: 20px; color: #333; text-align: center;">
+                            <i class="fas fa-book" style="margin-right: 10px; color: #667eea;"></i>
+                            游戏规则
+                        </h2>
+                        
+                        <div style="color: #666; line-height: 1.6;">
+                            <h3 style="color: #667eea; margin: 15px 0 10px 0;">🎯 游戏目标</h3>
+                            <p>通过与AI角色对话，收集证据，推理出真相并指控正确的嫌疑人。</p>
+                            
+                            <h3 style="color: #667eea; margin: 15px 0 10px 0;">🕵️ 游戏流程</h3>
+                            <ol style="padding-left: 20px;">
+                                <li>选择感兴趣的案件</li>
+                                <li>阅读案情介绍</li>
+                                <li>与相关角色对话询问</li>
+                                <li>收集关键证据</li>
+                                <li>分析推理得出结论</li>
+                                <li>提出指控</li>
+                            </ol>
+                            
+                            <h3 style="color: #667eea; margin: 15px 0 10px 0;">💡 游戏技巧</h3>
+                            <ul style="padding-left: 20px;">
+                                <li>仔细观察每个细节</li>
+                                <li>多角度询问不同角色</li>
+                                <li>注意前后矛盾的地方</li>
+                                <li>善用提示功能</li>
+                            </ul>
+                            
+                            <h3 style="color: #667eea; margin: 15px 0 10px 0;">🎮 操作说明</h3>
+                            <p>点击角色卡片开始对话，输入你想询问的问题，系统会智能回复。收集到的证据会自动保存在右侧面板中。</p>
+                        </div>
+                        
+                        <div style="text-align: center; margin-top: 25px;">
+                            <button onclick="this.closest('.game-rules-modal').remove()" style="
+                                background: #667eea;
+                                color: white;
+                                border: none;
+                                padding: 12px 30px;
+                                border-radius: 25px;
+                                cursor: pointer;
+                                font-size: 16px;
+                            ">明白了</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // 页面加载完成后的处理
+        document.addEventListener('DOMContentLoaded', () => {
+            // 检查是否为移动设备
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            
+            if (!isMobile) {
+                // 非移动设备显示提示
+                const hint = document.createElement('div');
+                hint.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    left: 50%;
+                    transform: translateX(-50%);
+                    background: rgba(255, 193, 7, 0.9);
+                    color: #333;
+                    padding: 10px 20px;
+                    border-radius: 20px;
+                    z-index: 1000;
+                    font-size: 14px;
+                `;
+                hint.innerHTML = '<i class="fas fa-mobile-alt"></i> 此页面专为手机优化，建议在移动设备上访问';
+                document.body.appendChild(hint);
+                
+                setTimeout(() => {
+                    hint.style.opacity = '0';
+                    setTimeout(() => hint.remove(), 300);
+                }, 3000);
+            }
+        });
+
+        // 服务工作者注册 (PWA支持)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch((registrationError) => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html> 

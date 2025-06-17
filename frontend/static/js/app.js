@@ -47,10 +47,34 @@ class DetectiveGameApp {
                 versionElement.textContent = `v${versionInfo.version}`;
             }
             
+            // 更新关于游戏弹窗中的版本信息
+            this.updateAboutModalVersion(versionInfo);
+            
             this.log(`版本信息加载成功: ${versionInfo.version}`);
         } catch (error) {
             this.logError('加载版本信息失败:', error);
             // 如果加载失败，保持默认版本号
+        }
+    }
+    
+    // 更新关于弹窗中的版本信息
+    updateAboutModalVersion(versionInfo) {
+        try {
+            // 查找关于弹窗中的版本信息区域
+            const aboutModal = document.getElementById('about-modal');
+            if (aboutModal) {
+                const versionInfoDiv = aboutModal.querySelector('.version-info');
+                if (versionInfoDiv) {
+                    // 更新版本信息内容
+                    versionInfoDiv.innerHTML = `
+                        <p><strong>版本：</strong>${versionInfo.version}</p>
+                        <p><strong>构建日期：</strong>${versionInfo.build_date}</p>
+                        <p><strong>构建编号：</strong>${versionInfo.build_number}</p>
+                    `;
+                }
+            }
+        } catch (error) {
+            this.logError('更新关于弹窗版本信息失败:', error);
         }
     }
     
@@ -249,38 +273,78 @@ class DetectiveGameApp {
         const filtersContainer = document.getElementById('case-filters');
         if (!filtersContainer) return;
         
+        this.selectedFilters = {
+            category: '',
+            difficulty: ''
+        };
+        
         filtersContainer.innerHTML = `
-            <div class="filter-group">
-                <label for="category-filter">分类:</label>
-                <select id="category-filter">
-                    <option value="">全部分类</option>
+            <div class="filter-section">
+                <div class="filter-label">案件分类</div>
+                <div class="filter-tags" id="category-tags">
+                    <div class="filter-tag active" data-value="">全部</div>
                     ${categories.categories.map(cat => 
-                        `<option value="${cat.value}">${cat.name}</option>`
+                        `<div class="filter-tag" data-value="${cat.value}">${cat.name}</div>`
                     ).join('')}
-                </select>
+                </div>
             </div>
-            <div class="filter-group">
-                <label for="difficulty-filter">难度:</label>
-                <select id="difficulty-filter">
-                    <option value="">全部难度</option>
+            <div class="filter-section">
+                <div class="filter-label">难度等级</div>
+                <div class="filter-tags" id="difficulty-tags">
+                    <div class="filter-tag active" data-value="">全部</div>
                     ${categories.difficulties.map(diff => 
-                        `<option value="${diff.value}">${diff.name}</option>`
+                        `<div class="filter-tag" data-value="${diff.value}">${diff.name}</div>`
                     ).join('')}
-                </select>
+                </div>
             </div>
-            <button id="apply-filters-btn" class="btn btn-primary">应用过滤</button>
-            <button id="clear-filters-btn" class="btn btn-secondary">清除过滤</button>
+
         `;
         
         // 绑定过滤器事件
-        document.getElementById('apply-filters-btn').addEventListener('click', () => this.applyFilters());
-        document.getElementById('clear-filters-btn').addEventListener('click', () => this.clearFilters());
+        this.bindFilterEvents();
+    }
+    
+    // 绑定过滤器事件
+    bindFilterEvents() {
+        // 分类过滤器
+        document.querySelectorAll('#category-tags .filter-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                this.selectFilterTag('category', tag);
+            });
+        });
+        
+        // 难度过滤器
+        document.querySelectorAll('#difficulty-tags .filter-tag').forEach(tag => {
+            tag.addEventListener('click', () => {
+                this.selectFilterTag('difficulty', tag);
+            });
+        });
+        
+
+    }
+    
+    // 选择过滤标签
+    selectFilterTag(type, selectedTag) {
+        const container = document.getElementById(`${type}-tags`);
+        const allTags = container.querySelectorAll('.filter-tag');
+        
+        // 移除所有active状态
+        allTags.forEach(tag => tag.classList.remove('active'));
+        
+        // 添加选中状态
+        selectedTag.classList.add('active');
+        
+        // 更新过滤器状态
+        this.selectedFilters[type] = selectedTag.dataset.value;
+        
+        // 立即应用过滤
+        this.applyFilters();
     }
     
     // 应用过滤器
     async applyFilters() {
-        const category = document.getElementById('category-filter').value;
-        const difficulty = document.getElementById('difficulty-filter').value;
+        const category = this.selectedFilters.category;
+        const difficulty = this.selectedFilters.difficulty;
         
         this.showLoadingScreen();
         
@@ -303,8 +367,22 @@ class DetectiveGameApp {
     
     // 清除过滤器
     async clearFilters() {
-        document.getElementById('category-filter').value = '';
-        document.getElementById('difficulty-filter').value = '';
+        // 重置过滤器状态
+        this.selectedFilters = {
+            category: '',
+            difficulty: ''
+        };
+        
+        // 重置UI状态
+        document.querySelectorAll('.filter-tag').forEach(tag => {
+            tag.classList.remove('active');
+        });
+        
+        // 激活"全部"选项
+        document.querySelectorAll('.filter-tag[data-value=""]').forEach(tag => {
+            tag.classList.add('active');
+        });
+        
         await this.applyFilters();
     }
     
@@ -330,21 +408,25 @@ class DetectiveGameApp {
             const shortDescription = this.truncateDescription(caseData.description, 120);
             
             caseCard.innerHTML = `
-                <div class="case-header">
-                    <h3>${caseData.title}</h3>
-                    <div class="case-badges">
-                        <span class="badge badge-category">${categoryName}</span>
-                        <span class="badge badge-difficulty badge-${caseData.difficulty}">${difficultyName}</span>
+                <div class="case-badges-top">
+                    <span class="badge-top badge-category">${categoryName}</span>
+                    <span class="badge-top badge-difficulty badge-${caseData.difficulty}">${difficultyName}</span>
+                </div>
+                <div class="case-content">
+                    <div class="case-title-row">
+                        <h3>${caseData.title}</h3>
                     </div>
-                </div>
-                <p class="case-description">${shortDescription}</p>
-                <div class="case-meta">
-                    <span>受害者: ${caseData.victim_name}</span>
-                    <span>地点: ${caseData.crime_scene}</span>
-                </div>
-                <div class="case-meta">
-                    <span>时间: ${caseData.time_of_crime}</span>
-                    <span>角色: ${caseData.characters.length}人</span>
+                    <div class="case-description">${shortDescription}</div>
+                    <div class="case-footer">
+                        <div class="case-meta-info">
+                            <span class="meta-item"><i class="fas fa-user-injured"></i>${caseData.victim_name}</span>
+                            <span class="meta-item"><i class="fas fa-map-marker-alt"></i>${caseData.crime_scene}</span>
+                            <span class="meta-item"><i class="fas fa-clock"></i>${caseData.time_of_crime}</span>
+                        </div>
+                        <div class="case-stats">
+                            <span class="stats-item"><i class="fas fa-users"></i>${caseData.characters.length}人</span>
+                        </div>
+                    </div>
                 </div>
             `;
             

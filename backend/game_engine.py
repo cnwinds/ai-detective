@@ -246,17 +246,15 @@ class DetectiveGameEngine:
         total_conversations = sum(len(convs) for convs in self.conversation_history.values())
         talked_characters = [name for name, convs in self.conversation_history.items() if convs]
         untouched_characters = [char.name for char in self.current_case.characters 
-                              if char.name not in talked_characters]
+                              if char.name not in talked_characters and char.name != self.current_case.victim_name]
         
         if total_conversations == 0:
             return "建议先与所有在场人员都对话一轮，了解基本情况和每个人的不在场证明。"
-        elif total_conversations < len(self.current_case.characters):
+        elif len(untouched_characters) > 0:
             untouched_names = "、".join(untouched_characters)
             return f"你还没有与{untouched_names}对话过，他们可能掌握关键信息。"
         else:
             return await self._analyze_conversations_for_hint()
-
-
 
     async def _analyze_conversations_for_hint(self) -> str:
         """分析对话内容生成提示"""
@@ -296,4 +294,4 @@ class DetectiveGameEngine:
             response = await self.ai_service.get_fast_response(prompt)
             return response.strip()
         except Exception as e:
-            return "重新审视每个人的动机，谁最有理由伤害受害者？" 
+            return "重新审视每个人的动机，谁最有理由伤害受害者？"

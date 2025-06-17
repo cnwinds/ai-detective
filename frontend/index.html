@@ -44,7 +44,7 @@
                 </div>
                 
                 <div class="version-info">
-                    <span id="app-version">v1.5.0</span>
+                    <span id="app-version"></span>
                 </div>
             </div>
         </div>
@@ -402,7 +402,7 @@
                         
                         <div class="version-info">
                             <p><strong>版本：</strong>1.0.0</p>
-                            <p><strong>更新时间：</strong>2024年</p>
+                            <p><strong>更新时间：</strong>2025年</p>
                         </div>
                     </div>
                 </div>
@@ -423,6 +423,21 @@
         </div>
     </div>
 
-    <script src="/static/js/app.js?v=1.4"></script>
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/ui.js"></script>
+    <script src="/static/js/api.js"></script>
+    <script src="/static/js/game.js"></script>
+    <script src="/static/js/app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const versionMeta = document.querySelector('meta[name="app-version"]');
+            if (versionMeta) {
+                const versionSpan = document.getElementById('app-version');
+                if (versionSpan) {
+                    versionSpan.textContent = 'v' + versionMeta.getAttribute('content');
+                }
+            }
+        });
+    </script>
 </body>
-</html> 
+</html>

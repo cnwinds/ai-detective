@@ -15,7 +15,7 @@
 <body>
     <div id="mobile-app">
         <!-- 加载屏幕 -->
-        <div class="mobile-screen" id="loading-screen">
+        <div class="mobile-screen active" id="loading-screen">
             <div class="loading-container">
                 <div class="loading-logo">🕵️</div>
                 <div class="loading-text">
@@ -29,7 +29,7 @@
         </div>
 
         <!-- 主菜单屏幕 -->
-        <div class="mobile-screen active" id="main-menu">
+        <div class="mobile-screen" id="main-menu">
             <div class="mobile-container">
                 <!-- Logo区域 -->
                 <div class="logo-section">
@@ -143,119 +143,168 @@
 
         <!-- 游戏界面 -->
         <div class="mobile-screen" id="game-screen">
-            <div class="game-container">
-                <!-- 游戏头部 -->
-                <div class="game-header">
-                    <h2 id="game-case-title">案件标题</h2>
-                    <div class="game-actions">
-                        <button id="case-info-btn" class="header-btn">
-                            <i class="fas fa-info-circle"></i>
-                        </button>
-                        <button id="menu-btn" class="header-btn">
-                            <i class="fas fa-bars"></i>
-                        </button>
-                    </div>
-                </div>
+            <div class="game-layout">
+                <!-- 左侧菜单按钮 -->
+                <button class="sidebar-menu-btn" id="sidebar-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
                 
-                <!-- 标签导航 -->
-                <div class="tab-navigation">
-                    <button class="tab-btn active" id="characters-tab">
-                        <i class="fas fa-users"></i>
-                        <span>角色</span>
-                    </button>
-                    <button class="tab-btn" id="chat-tab">
-                        <i class="fas fa-comments"></i>
-                        <span>对话</span>
-                        <div class="unread-badge" id="unread-badge" style="display: none;">1</div>
-                    </button>
-                    <button class="tab-btn" id="evidence-tab">
-                        <i class="fas fa-search"></i>
-                        <span>证据</span>
-                    </button>
-                    <button class="tab-btn" id="notes-tab">
-                        <i class="fas fa-sticky-note"></i>
-                        <span>笔记</span>
-                    </button>
-                </div>
-                
-                <!-- 内容面板 -->
-                <div class="content-panels">
-                    <!-- 角色面板 -->
-                    <div class="content-panel active" id="characters-panel">
-                        <div class="panel-header">
-                            <h3>相关人员</h3>
-                            <div class="action-buttons">
-                                <button id="get-hint-btn" class="action-btn">
-                                    <i class="fas fa-lightbulb"></i>
-                                    提示
-                                </button>
-                                <button id="make-accusation-btn" class="action-btn primary">
-                                    <i class="fas fa-gavel"></i>
-                                    指控
-                                </button>
-                            </div>
-                        </div>
-                        <div class="characters-grid" id="characters-grid">
-                            <!-- 角色卡片将通过JavaScript动态生成 -->
-                        </div>
+                <!-- 左侧滑出菜单 -->
+                <div class="sidebar-menu" id="sidebar-menu">
+                    <div class="menu-header">
+                        <h3>游戏菜单</h3>
+                        <button class="close-menu-btn" id="close-menu-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
                     </div>
                     
-                    <!-- 对话面板 -->
-                    <div class="content-panel" id="chat-panel">
-                        <div class="panel-header">
-                            <h3 id="chat-character-name">选择角色开始对话</h3>
-                            <button id="clear-chat-btn" class="action-btn">
-                                <i class="fas fa-trash"></i>
-                                清空
-                            </button>
-                        </div>
-                        <div class="conversation-area" id="conversation-area">
-                            <div class="welcome-message">
-                                <i class="fas fa-comments"></i>
-                                <p>选择一个角色开始询问</p>
+                    <div class="menu-content">
+                        <!-- 案件详情按钮 -->
+                        <button class="menu-item" id="case-details-btn">
+                            <i class="fas fa-info-circle"></i>
+                            <span>案件详情</span>
+                        </button>
+                        
+                        <!-- 角色列表 -->
+                        <div class="menu-section">
+                            <h4>对话角色</h4>
+                            <div class="character-menu-list" id="character-menu-list">
+                                <!-- 角色按钮将通过JavaScript动态生成 -->
                             </div>
                         </div>
-                        <div class="question-input-area">
-                            <div class="suggested-questions" id="suggested-questions" style="display: none;">
-                                <div class="suggested-list" id="suggested-list">
-                                    <!-- 推荐问题将动态生成 -->
+                        
+                        <!-- 其他功能 -->
+                        <div class="menu-section">
+                            <h4>其他功能</h4>
+                            <button class="menu-item" id="evidence-menu-btn">
+                                <i class="fas fa-search"></i>
+                                <span>查看证据</span>
+                            </button>
+                            <button class="menu-item" id="notes-menu-btn">
+                                <i class="fas fa-sticky-note"></i>
+                                <span>调查笔记</span>
+                            </button>
+                            <button class="menu-item" id="get-hint-btn">
+                                <i class="fas fa-lightbulb"></i>
+                                <span>获取提示</span>
+                            </button>
+                            <button class="menu-item primary" id="make-accusation-btn">
+                                <i class="fas fa-gavel"></i>
+                                <span>进行指控</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 菜单遮罩 -->
+                <div class="menu-overlay" id="menu-overlay"></div>
+                
+                <!-- 主内容区域 -->
+                <div class="main-content">
+                    <!-- 顶部案件标题 -->
+                    <div class="case-title-header">
+                        <h2 id="game-case-title">豪宅谋杀案</h2>
+                    </div>
+                    
+                    <!-- 主要内容显示区域 -->
+                    <div class="content-container">
+                        <!-- 对话面板（主要显示区域） -->
+                        <div class="chat-content" id="chat-content">
+                            <div class="chat-header">
+                                <h3 id="chat-character-name">选择角色开始对话</h3>
+                                <button id="clear-chat-btn" class="clear-btn">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                            <div class="conversation-area" id="conversation-area">
+                                <div class="welcome-message">
+                                    <i class="fas fa-comments"></i>
+                                    <p>从左侧菜单选择角色开始询问</p>
                                 </div>
                             </div>
-                            <div class="input-area">
-                                <textarea id="question-input" placeholder="输入你想问的问题..." rows="2"></textarea>
-                                <button id="send-question-btn" class="send-btn">
-                                    <i class="fas fa-paper-plane"></i>
+                        </div>
+                        
+                        <!-- 模态内容区域（用于显示案件详情、证据等） -->
+                        <div class="modal-content-area" id="modal-content-area" style="display: none;">
+                            <div class="modal-header">
+                                <h3 id="modal-content-title">内容标题</h3>
+                                <button id="close-modal-content" class="close-btn">
+                                    <i class="fas fa-times"></i>
                                 </button>
                             </div>
-                        </div>
-                    </div>
-                    
-                    <!-- 证据面板 -->
-                    <div class="content-panel" id="evidence-panel">
-                        <div class="panel-header">
-                            <h3>发现的证据</h3>
-                        </div>
-                        <div class="evidence-list" id="evidence-list">
-                            <div class="no-evidence">
-                                <i class="fas fa-search"></i>
-                                <p>暂无发现的证据</p>
+                            <div class="modal-content-body" id="modal-content-body">
+                                <!-- 动态内容 -->
                             </div>
                         </div>
                     </div>
                     
-                    <!-- 笔记面板 -->
-                    <div class="content-panel" id="notes-panel">
-                        <div class="panel-header">
-                            <h3>调查笔记</h3>
-                            <button id="clear-notes-btn" class="action-btn">
-                                <i class="fas fa-trash"></i>
-                                清空
+                    <!-- 底部输入区域（仅对话时显示） -->
+                    <div class="bottom-input" id="bottom-input" style="display: none;">
+                        <div class="suggested-questions" id="suggested-questions" style="display: none;">
+                            <div class="suggested-list" id="suggested-list">
+                                <!-- 推荐问题将动态生成 -->
+                            </div>
+                        </div>
+                        <div class="input-area">
+                            <textarea id="question-input" placeholder="输入你想问的问题..." rows="2"></textarea>
+                            <button id="send-question-btn" class="send-btn">
+                                <i class="fas fa-paper-plane"></i>
                             </button>
                         </div>
-                        <div class="notes-area">
-                            <textarea id="notes-area" placeholder="记录你的推理和发现..."></textarea>
-                        </div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 指控界面 -->
+        <div class="mobile-screen" id="accusation-screen">
+            <div class="screen-header">
+                <button class="back-btn" id="back-from-accusation">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2>进行指控</h2>
+                <div class="header-spacer"></div>
+            </div>
+            <div class="accusation-container">
+                <div class="accusation-form">
+                    <div class="form-group">
+                        <label for="mobile-accused-select">选择被指控者：</label>
+                        <select id="mobile-accused-select" class="form-control">
+                            <option value="">请选择...</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mobile-accusation-reasoning">指控理由：</label>
+                        <textarea id="mobile-accusation-reasoning" class="form-control" rows="6" 
+                                placeholder="详细说明你的指控理由和证据...&#10;&#10;例如：&#10;• 时间线矛盾&#10;• 证词不一致&#10;• 动机充分&#10;• 物理证据支持"></textarea>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button id="mobile-submit-accusation-btn" class="btn-mobile btn-primary">
+                            <i class="fas fa-gavel"></i>
+                            <span>提交指控</span>
+                        </button>
+                        <button id="mobile-cancel-accusation-btn" class="btn-mobile btn-secondary">
+                            <i class="fas fa-times"></i>
+                            <span>取消</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 审判结果界面 -->
+        <div class="mobile-screen" id="trial-result-screen">
+            <div class="screen-header">
+                <h2><i class="fas fa-balance-scale"></i> 审判结果</h2>
+                <button class="header-action-btn" id="trial-menu-btn">
+                    <i class="fas fa-ellipsis-v"></i>
+                </button>
+            </div>
+            <div class="trial-container">
+                <div id="mobile-trial-result-content" class="trial-result-content">
+                    <!-- 审判结果将通过JavaScript动态生成 -->
                 </div>
             </div>
         </div>
@@ -344,4 +393,4 @@
         });
     </script>
 </body>
-</html> 
+</html>

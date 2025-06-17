@@ -133,11 +133,11 @@ class MobileDetectiveApp {
     
     async loadCases() {
         try {
-            const response = await fetch(`${this.apiBase}/game/cases`);
-            const data = await response.json();
+            const response = await fetch(`${this.apiBase}/cases`);
+            const cases = await response.json();
             
-            if (data.success) {
-                this.renderCases(data.cases);
+            if (response.ok && Array.isArray(cases)) {
+                this.renderCases(cases);
             } else {
                 this.showToast('加载案件失败', 'error');
             }
@@ -151,7 +151,7 @@ class MobileDetectiveApp {
         const casesList = document.getElementById('cases-list');
         casesList.innerHTML = '';
         
-        cases.forEach((caseData, index) => {
+        cases.forEach((caseData) => {
             const caseCard = document.createElement('div');
             caseCard.className = 'case-card';
             caseCard.innerHTML = `
@@ -163,7 +163,7 @@ class MobileDetectiveApp {
                 </div>
             `;
             
-            caseCard.addEventListener('click', () => this.startGame(index));
+            caseCard.addEventListener('click', () => this.startGame(caseData.index));
             casesList.appendChild(caseCard);
         });
     }
@@ -183,7 +183,7 @@ class MobileDetectiveApp {
             
             const data = await response.json();
             
-            if (data.success) {
+            if (response.ok && data.session_id) {
                 this.sessionId = data.session_id;
                 this.currentCase = data.case;
                 this.gameState = data.game_state;
@@ -665,17 +665,21 @@ class MobileDetectiveApp {
             'easy': '简单',
             'medium': '中等',
             'hard': '困难',
-            'expert': '专家'
+            'expert': '专家级'
         };
         return difficultyMap[difficulty] || difficulty;
     }
     
     getCategoryText(category) {
         const categoryMap = {
-            'murder': '谋杀案',
-            'theft': '盗窃案',
-            'fraud': '诈骗案',
-            'mystery': '悬疑案'
+            'classic_murder': '经典谋杀案',
+            'locked_room': '密室杀人案', 
+            'revenge': '复仇案件',
+            'family_drama': '家庭纠纷案',
+            'kids_friendly': '儿童友好案例',
+            'supernatural': '超自然元素案例',
+            'financial_crime': '经济犯罪案',
+            'missing_person': '失踪案件'
         };
         return categoryMap[category] || category;
     }
@@ -802,10 +806,14 @@ class MobileDetectiveApp {
             const element = this.createElement(item);
             introContent.appendChild(element);
             
-            // 滚动到当前元素
-            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const cursor = await this.typewriterEffect(element, item);
             
-            await this.typewriterEffect(element, item);
+            // 每行结束后光标闪烁1次
+            if (cursor) {
+                await this.blinkCursor(cursor, 1);
+                cursor.remove(); // 移除光标
+            }
+            
             await this.delay(item.delay);
         }
     }
@@ -828,16 +836,7 @@ class MobileDetectiveApp {
                 div.innerHTML = `<p class="intro-text"></p>`;
                 break;
             case 'character':
-                const char = item.character;
-                const typeText = this.getCharacterTypeText(char.character_type);
-                div.innerHTML = `
-                    <div class="character-intro">
-                        <h4 class="char-name"></h4>
-                        <p class="char-info"><strong>职业：</strong><span class="char-occupation"></span></p>
-                        <p class="char-type"><strong>身份：</strong><span class="char-type-text"></span></p>
-                        <p class="char-background"><strong>背景：</strong><span class="char-bg-text"></span></p>
-                    </div>
-                `;
+                div.innerHTML = `<p class="intro-text"></p>`;
                 break;
         }
         
@@ -845,32 +844,31 @@ class MobileDetectiveApp {
     }
     
     async typewriterEffect(element, item) {
-        if (this.skipTypewriter) return;
+        if (this.skipTypewriter) return null;
+        
+        let cursor = null;
         
         switch (item.type) {
             case 'title':
-                await this.typeText(element.querySelector('.intro-title'), item.text, 80);
+                cursor = await this.typeText(element.querySelector('.intro-title'), item.text, 80);
                 break;
             case 'subtitle':
-                await this.typeText(element.querySelector('.intro-subtitle'), item.text, 60);
+                cursor = await this.typeText(element.querySelector('.intro-subtitle'), item.text, 60);
                 break;
             case 'detail':
-                await this.typeText(element.querySelector('.detail-text'), item.text, 50);
+                cursor = await this.typeText(element.querySelector('.detail-text'), item.text, 50);
                 break;
             case 'text':
-                await this.typeText(element.querySelector('.intro-text'), item.text, 30);
+                cursor = await this.typeText(element.querySelector('.intro-text'), item.text, 30);
                 break;
             case 'character':
                 const char = item.character;
-                await this.typeText(element.querySelector('.char-name'), char.name, 60);
-                await this.delay(200);
-                await this.typeText(element.querySelector('.char-occupation'), char.occupation, 50);
-                await this.delay(200);
-                await this.typeText(element.querySelector('.char-type-text'), this.getCharacterTypeText(char.character_type), 50);
-                await this.delay(200);
-                await this.typeText(element.querySelector('.char-bg-text'), char.background, 40);
+                const characterText = `${char.name}，${char.age}岁，${char.occupation}，${this.getCharacterTypeText(char.character_type)}。${char.background}`;
+                cursor = await this.typeText(element.querySelector('.intro-text'), characterText, 40);
                 break;
         }
+        
+        return cursor;
     }
     
     async typeText(element, text, speed) {
@@ -884,7 +882,7 @@ class MobileDetectiveApp {
         // 添加光标
         const cursor = document.createElement('span');
         cursor.className = 'typewriter-cursor';
-        cursor.textContent = '|';
+        cursor.textContent = '█'; // 使用实心方块字符
         element.appendChild(cursor);
         
         // 逐字显示
@@ -898,15 +896,34 @@ class MobileDetectiveApp {
             
             const textNode = document.createTextNode(text[i]);
             element.insertBefore(textNode, cursor);
+            
+            // 只有在自动滚动启用时才跟随光标
+            if (this.autoScrollEnabled && !this.userScrolling) {
+                cursor.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            }
         }
         
-        // 移除光标
-        cursor.remove();
+        // 保留光标用于后续闪烁效果
+        return cursor;
     }
     
     async delay(ms) {
         if (this.skipTypewriter) return;
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    async blinkCursor(cursor, times) {
+        if (this.skipTypewriter || !cursor) return;
+        
+        // 确保光标初始状态可见
+        cursor.style.opacity = '1';
+        
+        for (let i = 0; i < times; i++) {
+            cursor.style.opacity = '0';
+            await this.delay(200);
+            cursor.style.opacity = '1';
+            await this.delay(200);
+        }
     }
     
     skipIntroduction() {
@@ -937,10 +954,8 @@ class MobileDetectiveApp {
                     break;
                 case 'character':
                     const char = item.character;
-                    element.querySelector('.char-name').textContent = char.name;
-                    element.querySelector('.char-occupation').textContent = char.occupation;
-                    element.querySelector('.char-type-text').textContent = this.getCharacterTypeText(char.character_type);
-                    element.querySelector('.char-bg-text').textContent = char.background;
+                    const characterText = `${char.name}，${char.age}岁，${char.occupation}，${this.getCharacterTypeText(char.character_type)}。${char.background}`;
+                    element.querySelector('.intro-text').textContent = characterText;
                     break;
             }
         });

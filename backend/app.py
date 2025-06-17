@@ -152,14 +152,150 @@ app.mount("/static", StaticFiles(directory="frontend/static"), name="static")
 
 # 页面路由
 @app.get("/")
-async def read_root():
+async def read_root(request: Request):
     """
     主页接口
     
-    返回游戏主页面，包含版本信息和JavaScript文件版本控制
+    根据设备类型返回不同的页面：
+    - 移动设备：返回mobile.html
+    - PC设备：返回index.html
     """
     try:
-        # 读取HTML文件
+        # 检测是否为移动设备
+        user_agent = request.headers.get("user-agent", "").lower()
+        is_mobile = _is_mobile_device(user_agent)
+        
+        # 根据设备类型选择HTML文件
+        if is_mobile:
+            html_file = "frontend/mobile.html"
+            page_title = "🕵️ AI侦探推理游戏 - 手机版"
+        else:
+            html_file = "frontend/index.html"
+            page_title = "侦探推理游戏"
+        
+        # 读取对应的HTML文件
+        with open(html_file, "r", encoding="utf-8") as f:
+            html_content = f.read()
+        
+        # 获取版本信息
+        js_version = get_js_version()
+        app_version = get_version()
+        
+        if is_mobile:
+            # 为移动端添加版本信息
+            version_meta = f'''
+    <meta name="app-version" content="{app_version}">
+    <meta name="js-version" content="{js_version}">'''
+            
+            html_content = html_content.replace(
+                '<title>🕵️ AI侦探推理游戏 - 手机版</title>',
+                f'<title>🕵️ AI侦探推理游戏 - 手机版 v{app_version}</title>{version_meta}'
+            )
+            
+            # 更新移动端页面中的版本显示
+            html_content = html_content.replace(
+                'AI Detective Game v1.0.0',
+                f'AI Detective Game v{app_version}'
+            )
+        else:
+            # 为PC端替换JavaScript文件版本号
+            html_content = re.sub(
+                r'<script src="/static/js/app\.js\?v=[\d\.]+"></script>',
+                f'<script src="/static/js/app.js?v={js_version}"></script>',
+                html_content
+            )
+            
+            # 在HTML中添加版本信息
+            version_meta = f'''
+    <meta name="app-version" content="{app_version}">
+    <meta name="js-version" content="{js_version}">'''
+            
+            html_content = html_content.replace(
+                '<title>侦探推理游戏</title>',
+                f'<title>侦探推理游戏 v{app_version}</title>{version_meta}'
+            )
+        
+        logger.info(f"设备检测 - User-Agent: {user_agent[:100]}... - 设备类型: {'移动端' if is_mobile else 'PC端'}")
+        
+        return HTMLResponse(content=html_content)
+        
+    except Exception as e:
+        logger.error(f"读取页面文件失败: {e}")
+        # 降级处理，根据设备类型返回对应文件
+        user_agent = request.headers.get("user-agent", "").lower()
+        if _is_mobile_device(user_agent):
+            return FileResponse("frontend/mobile.html")
+        else:
+            return FileResponse("frontend/index.html")
+
+def _is_mobile_device(user_agent: str) -> bool:
+    """
+    检测是否为移动设备
+    
+    Args:
+        user_agent: 用户代理字符串
+        
+    Returns:
+        bool: 是否为移动设备
+    """
+    mobile_keywords = [
+        'mobile', 'android', 'iphone', 'ipad', 'ipod', 
+        'blackberry', 'windows phone', 'webos', 'opera mini',
+        'iemobile', 'nokia', 'samsung', 'htc', 'lg', 'motorola',
+        'sony', 'xiaomi', 'huawei', 'oppo', 'vivo', 'oneplus'
+    ]
+    
+    return any(keyword in user_agent for keyword in mobile_keywords)
+
+@app.get("/mobile")
+async def mobile_page(request: Request):
+    """
+    移动端页面接口
+    
+    强制返回移动端页面，不进行设备检测
+    """
+    try:
+        # 读取移动端HTML文件
+        with open("frontend/mobile.html", "r", encoding="utf-8") as f:
+            html_content = f.read()
+        
+        # 获取版本信息
+        js_version = get_js_version()
+        app_version = get_version()
+        
+        # 添加版本信息
+        version_meta = f'''
+    <meta name="app-version" content="{app_version}">
+    <meta name="js-version" content="{js_version}">'''
+        
+        html_content = html_content.replace(
+            '<title>🕵️ AI侦探推理游戏 - 手机版</title>',
+            f'<title>🕵️ AI侦探推理游戏 - 手机版 v{app_version}</title>{version_meta}'
+        )
+        
+        # 更新版本显示
+        html_content = html_content.replace(
+            'AI Detective Game v1.0.0',
+            f'AI Detective Game v{app_version}'
+        )
+        
+        logger.info(f"强制返回移动端页面 - 客户端: {_get_client_ip(request)}")
+        
+        return HTMLResponse(content=html_content)
+        
+    except Exception as e:
+        logger.error(f"读取移动端页面失败: {e}")
+        return FileResponse("frontend/mobile.html")
+
+@app.get("/desktop")
+async def desktop_page(request: Request):
+    """
+    PC端页面接口
+    
+    强制返回PC端页面，不进行设备检测
+    """
+    try:
+        # 读取PC端HTML文件
         with open("frontend/index.html", "r", encoding="utf-8") as f:
             html_content = f.read()
         
@@ -167,14 +303,14 @@ async def read_root():
         js_version = get_js_version()
         app_version = get_version()
         
-        # 替换JavaScript文件的版本号
+        # 替换JavaScript文件版本号
         html_content = re.sub(
             r'<script src="/static/js/app\.js\?v=[\d\.]+"></script>',
             f'<script src="/static/js/app.js?v={js_version}"></script>',
             html_content
         )
         
-        # 在HTML中添加版本信息（在title标签后添加）
+        # 添加版本信息
         version_meta = f'''
     <meta name="app-version" content="{app_version}">
     <meta name="js-version" content="{js_version}">'''
@@ -184,10 +320,12 @@ async def read_root():
             f'<title>侦探推理游戏 v{app_version}</title>{version_meta}'
         )
         
+        logger.info(f"强制返回PC端页面 - 客户端: {_get_client_ip(request)}")
+        
         return HTMLResponse(content=html_content)
         
     except Exception as e:
-        logger.error(f"读取首页文件失败: {e}")
+        logger.error(f"读取PC端页面失败: {e}")
         return FileResponse("frontend/index.html")
 
 @app.get("/game_history.html")

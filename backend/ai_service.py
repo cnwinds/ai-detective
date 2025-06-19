@@ -76,4 +76,21 @@ class AIService:
             logger.error(f"AI快速回应服务错误 - 提示长度: {len(prompt)}, 错误: {str(e)}", exc_info=True)
             if GameConfig.DEBUG_MODE:
                 print(f"AI快速服务错误: {e}")
-            return "抱歉，我现在无法回应..." 
+            return "抱歉，我现在无法回应..."
+    
+    async def get_suggestion_response(self, prompt: str) -> str:
+        """获取建议问题生成回应（使用专门的建议模型）"""
+        try:
+            response = self.client.chat.completions.create(
+                model=GameConfig.SUGGESTION_MODEL,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.7,  # 建议问题使用较低的温度以保证质量
+                max_tokens=300
+            )
+            
+            return response.choices[0].message.content.strip()
+        except Exception as e:
+            logger.error(f"AI建议问题生成服务错误 - 提示长度: {len(prompt)}, 错误: {str(e)}", exc_info=True)
+            if GameConfig.DEBUG_MODE:
+                print(f"AI建议问题生成服务错误: {e}")
+            return "抱歉，我现在无法生成建议问题..."

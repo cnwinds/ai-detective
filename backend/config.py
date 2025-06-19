@@ -33,6 +33,9 @@ class GameConfig:
     BASE_URL = os.getenv("OPENAI_BASE_URL") or os.getenv("BASE_URL") or template_defaults.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
     MODEL = os.getenv("OPENAI_MODEL") or os.getenv("MODEL") or template_defaults.get("OPENAI_MODEL", "gpt-3.5-turbo")
     
+    # 建议问题生成模型配置（可选择更快的模型）
+    SUGGESTION_MODEL = os.getenv("SUGGESTION_MODEL") or template_defaults.get("SUGGESTION_MODEL", MODEL)
+    
     # 游戏设置
     GAME_LANGUAGE = os.getenv("LANGUAGE") or template_defaults.get("LANGUAGE", "chinese")
     DEBUG_MODE = (os.getenv("DEBUG_MODE") or template_defaults.get("DEBUG_MODE", "false")).lower() == "true"
@@ -75,6 +78,7 @@ class GameConfig:
             'api_key_set': bool(cls.API_KEY),
             'base_url': cls.BASE_URL,
             'model': cls.MODEL,
+            'suggestion_model': cls.SUGGESTION_MODEL,
             'language': cls.GAME_LANGUAGE,
             'debug_mode': cls.DEBUG_MODE,
             'narrator_temp': cls.NARRATOR_TEMPERATURE,
@@ -97,4 +101,4 @@ def get_api_config():
         'api_key': GameConfig.API_KEY,
         'base_url': GameConfig.BASE_URL,
         'model': GameConfig.MODEL
-    } 
+    }

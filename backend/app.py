@@ -343,6 +343,11 @@ async def replay():
     """游戏回放页面"""
     return FileResponse("frontend/replay.html")
 
+@app.get("/mobile_evaluation.html")
+async def mobile_evaluation():
+    """移动端游戏评价页面"""
+    return FileResponse("frontend/mobile_evaluation.html")
+
 @app.get("/test_stream.html")
 async def test_stream():
     """流式响应测试页面"""
@@ -371,4 +376,4 @@ if __name__ == "__main__":
         port=port,
         log_config=None,  # 禁用uvicorn的默认日志配置
         access_log=True   # 启用访问日志
-    ) 
+    )

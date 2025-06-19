@@ -404,23 +404,52 @@ class MobileDetectiveApp {
         const modalBody = document.getElementById('modal-content-body');
         
         modalTitle.textContent = '案件详情';
+        
+        // 获取受害者信息
+        const victim = this.currentCase.characters.find(char => 
+            char.character_type === 'victim' || char.name === this.currentCase.victim_name
+        );
+        
         modalBody.innerHTML = `
             <div class="case-details-content">
-                <h3>${this.currentCase.title}</h3>
-                <p><strong>案件描述：</strong>${this.currentCase.description}</p>
-                <p><strong>案件类型：</strong>${this.getCategoryText(this.currentCase.category)}</p>
-                <p><strong>难度等级：</strong>${this.getDifficultyText(this.currentCase.difficulty)}</p>
                 
-                <h4>相关人员</h4>
-                <div class="characters-list">
-                    ${this.currentCase.characters.map(char => `
-                        <div class="character-item">
-                            <strong>${char.name}</strong> - ${char.occupation}
-                            <span class="character-type ${char.character_type}">
-                                ${this.getCharacterTypeText(char.character_type)}
-                            </span>
-                        </div>
-                    `).join('')}
+                <div class="case-basic-info">
+                    <p><strong>受害者：</strong>${this.currentCase.victim_name || '未知'}</p>
+                    <p><strong>案发时间：</strong>${this.currentCase.time_of_crime || '时间不详'}</p>
+                    <p><strong>案发地点：</strong>${this.currentCase.crime_scene || '地点不详'}</p>
+                </div>
+                
+                <div class="case-description">
+                    <h4>案件描述</h4>
+                    <p>${this.currentCase.description}</p>
+                </div>
+                
+                <div class="characters-section">
+                    <h4>相关人员</h4>
+                    <div class="characters-list">
+                        ${this.currentCase.characters.map(char => `
+                            <div class="character-item ${char.character_type === 'victim' ? 'victim-item' : 'interactive-item'}" 
+                                 ${char.character_type !== 'victim' ? `onclick="mobileApp.selectCharacterFromDetails('${char.name}')"` : ''}>
+                                <div class="character-main-info">
+                                    <strong>${char.name}</strong>
+                                    <span class="character-occupation">${char.occupation}</span>
+                                </div>
+                                <span class="character-type-badge ${char.character_type}">
+                                    ${this.getCharacterTypeText(char.character_type)}
+                                </span>
+                                ${char.character_type !== 'victim' ? '<i class="fas fa-chevron-right"></i>' : ''}
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div class="case-objectives">
+                    <h4>调查目标</h4>
+                    <ul>
+                        <li>通过与相关人员对话收集线索</li>
+                        <li>分析证据找出矛盾之处</li>
+                        <li>确定真正的凶手并提出指控</li>
+                    </ul>
                 </div>
             </div>
         `;
@@ -1620,7 +1649,11 @@ class MobileDetectiveApp {
     }
     
     goToEvaluation() {
-        this.showToast('评价功能开发中...', 'info');
+        if (this.sessionId) {
+            window.location.href = `mobile_evaluation.html?session_id=${this.sessionId}`;
+        } else {
+            this.showToast('无法获取游戏会话ID，无法进行评价', 'error');
+        }
     }
     
     startNewGame() {
@@ -1833,7 +1866,7 @@ class MobileDetectiveApp {
             'hard': '困难',
             'expert': '专家级'
         };
-        return difficultyMap[difficulty] || difficulty;
+        return difficultyMap[difficulty] || '未知难度';
     }
     
     getCategoryText(category) {
@@ -1847,7 +1880,7 @@ class MobileDetectiveApp {
             'financial_crime': '经济犯罪案',
             'missing_person': '失踪案件'
         };
-        return categoryMap[category] || category;
+        return categoryMap[category] || '未知类型';
     }
     
     getCharacterTypeText(type) {
@@ -1857,7 +1890,16 @@ class MobileDetectiveApp {
             'victim': '受害者',
             'expert': '专家'
         };
-        return typeMap[type] || type;
+        return typeMap[type] || '未知角色';
+    }
+    
+    // 从案件详情中选择角色进行对话
+    selectCharacterFromDetails(characterName) {
+        const character = this.currentCase.characters.find(char => char.name === characterName);
+        if (character && character.character_type !== 'victim') {
+            this.selectCharacterForChat(character);
+            this.hideModal();
+        }
     }
     
     _getOrCreateClientId() {
@@ -1974,13 +2016,12 @@ class MobileDetectiveApp {
             
             const cursor = await this.typewriterEffect(element, item);
             
-            // 每行结束后光标闪烁2次
+            // 每行结束后光标显示半次闪烁时间
             if (cursor) {
-                await this.blinkCursor(cursor, 2);
+                cursor.style.opacity = '1';
+                await this.delay(350);
                 cursor.remove(); // 移除光标
             }
-            
-            await this.delay(item.delay);
         }
     }
     

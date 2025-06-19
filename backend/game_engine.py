@@ -208,7 +208,7 @@ class DetectiveGameEngine:
 请直接输出3个问题，每行一个，不要编号。如果发现矛盾，请在问题前加上"🔍矛盾："："""
 
         try:
-            response = await self.ai_service.get_fast_response(prompt)
+            response = await self.ai_service.get_suggestion_response(prompt)
             questions = [q.strip() for q in response.strip().split('\n') if q.strip()]
             return questions[:3] if len(questions) >= 3 else questions
         except Exception as e:

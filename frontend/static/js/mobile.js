@@ -1394,7 +1394,7 @@ class MobileDetectiveApp {
                 }
                 
                 verdictContainer.innerHTML = `
-                    <div class="verdict" style="color: #495057; background: #f8f9fa; border: 1px solid #dee2e6;">
+                    <div class="verdict" style="color: var(--theme-text-primary); background: var(--theme-secondary-bg); border: 1px solid var(--theme-border-color);">
                         <i class="fas fa-balance-scale"></i>
                         ${verdictText}
                     </div>

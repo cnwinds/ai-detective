@@ -45,6 +45,49 @@ box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 ```
 说明：使用更深的三色渐变背景，提升文字对比度和整体视觉效果。
 
+### 错误点：标签配色在某些主题下对比度不足
+错误示范：
+```css
+.badge-top.badge-medium {
+    background: var(--theme-accent-color);
+    color: white; /* 在浅色强调色主题下对比度不足 */
+}
+
+.badge-top.badge-category {
+    background: var(--theme-secondary-bg);
+    color: var(--theme-primary-color);
+    /* 缺少文字阴影，在某些主题下可读性差 */
+}
+```
+正确做法：
+```css
+.badge-top.badge-medium {
+    background: var(--theme-accent-color);
+    color: rgba(0, 0, 0, 0.8); /* 为浅色背景使用深色文字 */
+    text-shadow: none;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+}
+
+.badge-top.badge-category {
+    background: var(--theme-secondary-bg);
+    color: var(--theme-primary-color);
+    border: 1px solid var(--theme-border-color);
+    backdrop-filter: blur(10px);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* 添加文字阴影增强可读性 */
+}
+
+/* 为不同主题提供特定的配色优化 */
+body.theme-classic .badge-top.badge-medium {
+    color: rgba(0, 0, 0, 0.9);
+    font-weight: 700;
+}
+
+body.theme-midnight .badge-top.badge-category {
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+```
+说明：通过为不同主题提供特定的文字颜色和阴影配置，确保在所有主题下标签都有良好的对比度和可读性。
+
 ### 错误点：指控页面按钮颜色过于突兀
 错误示范：
 ```css
@@ -162,26 +205,3 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 ```
 说明：将突兀的红色按钮改为与整体设计风格一致的蓝紫色渐变，保持视觉和谐性。
-
-### 错误点：手机版评价页面缺失
-错误示范：
-```javascript
-goToEvaluation() {
-    this.showToast('评价功能开发中...', 'info');
-}
-```
-正确做法：
-```javascript
-goToEvaluation() {
-    if (this.sessionId) {
-        window.location.href = `mobile_evaluation.html?session_id=${this.sessionId}`;
-    } else {
-        this.showToast('无法获取游戏会话ID，无法进行评价', 'error');
-    }
-}
-```
-说明：参考PC版评价页面功能，为手机版创建了专门的评价页面，采用移动端友好的设计，包括：
-- 使用项目统一的深色渐变背景和毛玻璃效果
-- 大尺寸星级评分适配触摸操作
-- 响应式布局和触觉反馈
-- 防止页面缩放的移动端优化

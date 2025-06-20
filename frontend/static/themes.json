@@ -1,0 +1,136 @@
+{
+  "themes": {
+    "classic": {
+      "name": "经典侦探",
+      "description": "经典的侦探小说风格，深邃神秘",
+      "colors": {
+        "primaryBg": "linear-gradient(135deg, #2d3748 0%, #1a202c 50%, #0f0f1a 100%)",
+        "secondaryBg": "rgba(255, 255, 255, 0.1)",
+        "primaryColor": "#64b5f6",
+        "accentColor": "#FFD700",
+        "successColor": "#4CAF50",
+        "warningColor": "#f44336",
+        "textPrimary": "#ffffff",
+        "textSecondary": "rgba(255, 255, 255, 0.9)",
+        "textMuted": "rgba(255, 255, 255, 0.7)"
+      }
+    },
+    "midnight": {
+      "name": "午夜悬疑",
+      "description": "深夜悬疑氛围，紫色科技感",
+      "colors": {
+        "primaryBg": "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)",
+        "secondaryBg": "rgba(187, 134, 252, 0.1)",
+        "primaryColor": "#bb86fc",
+        "accentColor": "#03dac6",
+        "successColor": "#00c853",
+        "warningColor": "#ff5722",
+        "textPrimary": "#ffffff",
+        "textSecondary": "rgba(255, 255, 255, 0.9)",
+        "textMuted": "rgba(255, 255, 255, 0.7)"
+      }
+    },
+    "crime": {
+      "name": "犯罪现场",
+      "description": "紧张刺激的犯罪现场氛围",
+      "colors": {
+        "primaryBg": "linear-gradient(135deg, #521C0D 0%, #D5451B 30%, #2d1810 100%)",
+        "secondaryBg": "rgba(213, 69, 27, 0.1)",
+        "primaryColor": "#ff9b45",
+        "accentColor": "#f4e7e1",
+        "successColor": "#4caf50",
+        "warningColor": "#d32f2f",
+        "textPrimary": "#ffffff",
+        "textSecondary": "rgba(255, 255, 255, 0.9)",
+        "textMuted": "rgba(255, 255, 255, 0.7)"
+      }
+    },
+    "cold": {
+      "name": "冷案重启",
+      "description": "冷静理性的分析氛围",
+      "colors": {
+        "primaryBg": "linear-gradient(135deg, #0B1D51 0%, #725CAD 50%, #8CCDEB 100%)",
+        "secondaryBg": "rgba(140, 205, 235, 0.1)",
+        "primaryColor": "#8ccdeb",
+        "accentColor": "#ffe3a9",
+        "successColor": "#00c853",
+        "warningColor": "#ff5722",
+        "textPrimary": "#ffffff",
+        "textSecondary": "rgba(255, 255, 255, 0.9)",
+        "textMuted": "rgba(255, 255, 255, 0.7)"
+      }
+    },
+    "forest": {
+      "name": "森林迷案",
+      "description": "自然神秘的森林氛围",
+      "colors": {
+        "primaryBg": "linear-gradient(135deg, #2D4F2B 0%, #708A58 50%, #1a2e1a 100%)",
+        "secondaryBg": "rgba(112, 138, 88, 0.1)",
+        "primaryColor": "#98CD00",
+        "accentColor": "#FFFADC",
+        "successColor": "#4caf50",
+        "warningColor": "#ff5722",
+        "textPrimary": "#ffffff",
+        "textSecondary": "rgba(255, 255, 255, 0.9)",
+        "textMuted": "rgba(255, 255, 255, 0.7)"
+      }
+    },
+    "ocean": {
+      "name": "深海谜团",
+      "description": "深邃海洋的神秘感",
+      "colors": {
+        "primaryBg": "linear-gradient(135deg, #0ABAB5 0%, #56DFCF 50%, #0a4a47 100%)",
+        "secondaryBg": "rgba(86, 223, 207, 0.1)",
+        "primaryColor": "#56DFCF",
+        "accentColor": "#FFEDF3",
+        "successColor": "#4caf50",
+        "warningColor": "#ff5722",
+        "textPrimary": "#ffffff",
+        "textSecondary": "rgba(255, 255, 255, 0.9)",
+        "textMuted": "rgba(255, 255, 255, 0.7)"
+      }
+    }
+  },
+  "caseThemeMapping": {
+    "FAMILY_DRAMA": "classic",
+    "BUSINESS_CRIME": "midnight",
+    "MYSTERY": "cold",
+    "VIOLENT_CRIME": "crime",
+    "OUTDOOR_CRIME": "forest",
+    "MARITIME_CRIME": "ocean"
+  },
+  "characterThemeColors": {
+    "suspect": {
+      "classic": "#f44336",
+      "midnight": "#ff5722",
+      "crime": "#d32f2f",
+      "cold": "#ff5722",
+      "forest": "#d32f2f",
+      "ocean": "#ff5722"
+    },
+    "witness": {
+      "classic": "#2196F3",
+      "midnight": "#bb86fc",
+      "crime": "#ff9b45",
+      "cold": "#8ccdeb",
+      "forest": "#98CD00",
+      "ocean": "#56DFCF"
+    },
+    "victim": {
+      "classic": "#FFC107",
+      "midnight": "#03dac6",
+      "crime": "#f4e7e1",
+      "cold": "#ffe3a9",
+      "forest": "#FFFADC",
+      "ocean": "#FFEDF3"
+    },
+    "expert": {
+      "classic": "#4CAF50",
+      "midnight": "#00c853",
+      "crime": "#4caf50",
+      "cold": "#00c853",
+      "forest": "#4caf50",
+      "ocean": "#4caf50"
+    }
+  }
+}

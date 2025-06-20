@@ -314,7 +314,7 @@
     <div class="pwa-banner" id="pwaBanner">
         <span>🚀 安装到主屏幕，随时享受推理乐趣！</span>
         <button id="installBtn">安装</button>
-        <button id="dismissBtn" style="background: transparent; border: 1px solid #ccc;">稍后</button>
+        <button id="dismissBtn" style="background: transparent; border: 1px solid var(--theme-border-color);">稍后</button>
     </div>
 
     <!-- 加载遮罩 -->
@@ -343,10 +343,22 @@
 
     <!-- JavaScript -->
     <script src="static/js/mobile.js"></script>
+    <!-- 主题系统脚本 -->
+    <script src="static/js/theme-manager.js"></script>
+    <script src="static/js/theme-selector.js"></script>
+    
     <script>
-        // PWA安装功能
+        // 初始化主题选择器触发按钮
+        document.addEventListener('DOMContentLoaded', () => {
+            // 等待主题管理器加载完成后创建触发按钮
+            if (window.themeSelector) {
+                window.themeSelector.createTriggerButton();
+            }
+        });
+        
+        // PWA安装横幅逻辑
         let deferredPrompt;
-        const pwaBanner = document.getElementById('pwaBanner');
+        const pwaBanner = document.getElementById('pwa-banner');
         const installBtn = document.getElementById('installBtn');
         const dismissBtn = document.getElementById('dismissBtn');
 

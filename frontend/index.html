@@ -428,6 +428,9 @@
     <script src="/static/js/api.js"></script>
     <script src="/static/js/game.js"></script>
     <script src="/static/js/app.js"></script>
+    <!-- 主题系统脚本 -->
+    <script src="/static/js/theme-manager.js"></script>
+    <script src="/static/js/theme-selector.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const versionMeta = document.querySelector('meta[name="app-version"]');
@@ -436,6 +439,11 @@
                 if (versionSpan) {
                     versionSpan.textContent = 'v' + versionMeta.getAttribute('content');
                 }
+            }
+            
+            // 初始化主题选择器触发按钮
+            if (window.themeSelector) {
+                window.themeSelector.createTriggerButton();
             }
         });
     </script>

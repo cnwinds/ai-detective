@@ -1091,7 +1091,7 @@ class DetectiveGameApp {
         if (victimNameEl) {
             const victimName = this.currentCase.victim_name || '未知';
             victimNameEl.textContent = victimName;
-            victimNameEl.style.color = '#ffffff';
+            victimNameEl.style.color = 'var(--theme-text-primary)';
             victimNameEl.style.fontWeight = '600';
             this.log('✅ 设置被害人姓名:', victimName);
         } else {
@@ -1101,7 +1101,7 @@ class DetectiveGameApp {
         if (crimeSceneEl) {
             const crimeScene = this.currentCase.crime_scene || '未知';
             crimeSceneEl.textContent = crimeScene;
-            crimeSceneEl.style.color = '#ffffff';
+            crimeSceneEl.style.color = 'var(--theme-text-primary)';
             crimeSceneEl.style.fontWeight = '600';
             this.log('✅ 设置案发地点:', crimeScene);
         } else {
@@ -1111,7 +1111,7 @@ class DetectiveGameApp {
         if (crimeTimeEl) {
             const crimeTime = this.currentCase.time_of_crime || '未知';
             crimeTimeEl.textContent = crimeTime;
-            crimeTimeEl.style.color = '#ffffff';
+            crimeTimeEl.style.color = 'var(--theme-text-primary)';
             crimeTimeEl.style.fontWeight = '600';
             this.log('✅ 设置案发时间:', crimeTime);
         } else {
@@ -2253,7 +2253,7 @@ class DetectiveGameApp {
                 }
                 
                 verdictContainer.innerHTML = `
-                    <div class="verdict" style="color: #495057; background: #f8f9fa; border: 1px solid #dee2e6;">
+                    <div class="verdict" style="color: var(--theme-text-primary); background: var(--theme-secondary-bg); border: 1px solid var(--theme-border-color);">
                         <i class="fas fa-balance-scale"></i>
                         ${verdictText}
                     </div>
@@ -2629,7 +2629,7 @@ class DetectiveGameApp {
             <div class="loading-suggestions">
                 <i class="fas fa-spinner fa-spin"></i>
                 <span>正在生成参考问题...</span>
-                <p style="font-size: 12px; color: #666; margin-top: 5px;">您可以直接在上方输入框中提问，无需等待</p>
+                <p style="font-size: 12px; color: var(--theme-text-secondary); margin-top: 5px;">您可以直接在上方输入框中提问，无需等待</p>
             </div>
         `;
     }
@@ -2655,4 +2655,4 @@ class DetectiveGameApp {
 let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new DetectiveGameApp();
-}); 
+});

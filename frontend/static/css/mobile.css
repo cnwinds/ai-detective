@@ -37,7 +37,9 @@ html, body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
     background: var(--theme-primary-bg);
     color: var(--theme-text-primary);
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
@@ -49,7 +51,9 @@ html, body {
     width: 100%;
     height: 100vh;
     position: relative;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* 屏幕管理 */
@@ -63,6 +67,9 @@ html, body {
     flex-direction: column;
     background: var(--theme-primary-bg);
     transition: background 0.3s ease;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .mobile-screen.active {
@@ -381,6 +388,8 @@ html, body {
 /* 案件选择界面 */
 #case-selection {
     background: var(--theme-primary-bg);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* 案情介绍页面 */
@@ -1036,6 +1045,8 @@ body.theme-forest .badge-category {
     display: flex;
     flex-direction: column;
     background: rgba(0, 0, 0, 0.2);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* 模态内容区域 */

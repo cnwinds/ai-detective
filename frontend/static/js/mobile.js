@@ -169,13 +169,20 @@ class MobileDetectiveApp {
             this.startGameFromIntro();
         });
         
-        // 禁止页面滚动和缩放（但允许按钮点击）
+        // 禁止页面滚动和缩放（但允许按钮点击和可滚动区域）
         document.addEventListener('touchmove', (e) => {
             // 允许按钮和可滚动区域的触摸事件
             if (e.target.closest('button') || 
                 e.target.closest('.intro-content') || 
                 e.target.closest('.conversation-area') ||
-                e.target.closest('textarea')) {
+                e.target.closest('textarea') ||
+                e.target.closest('.cases-container') ||
+                e.target.closest('.chat-content') ||
+                e.target.closest('#case-selection') ||
+                e.target.closest('.mobile-screen') ||
+                e.target.closest('.modal-content-body') ||
+                e.target.closest('.accusation-container') ||
+                e.target.closest('.trial-container')) {
                 return;
             }
             e.preventDefault();

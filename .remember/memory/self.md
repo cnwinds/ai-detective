@@ -45,6 +45,100 @@ box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 ```
 说明：使用更深的三色渐变背景，提升文字对比度和整体视觉效果。
 
+### 错误点：移动端页面无法滚动的层级问题
+错误示范：
+```css
+html, body {
+    height: 100%;
+    overflow: hidden; /* 阻止了整个页面滚动 */
+}
+
+#mobile-app {
+    height: 100vh;
+    overflow: hidden; /* 阻止了应用容器滚动 */
+}
+
+.mobile-screen {
+    height: 100%;
+    /* 缺少overflow设置，无法滚动 */
+}
+
+.chat-content {
+    /* 即使设置了overflow-y: auto，但父容器阻止了滚动 */
+}
+```
+正确做法：
+```css
+html, body {
+    height: 100%;
+    overflow-x: hidden; /* 只隐藏水平滚动 */
+    overflow-y: auto; /* 允许垂直滚动 */
+    -webkit-overflow-scrolling: touch; /* 移动端滚动优化 */
+}
+
+#mobile-app {
+    height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.mobile-screen {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* 各个具体容器也需要设置滚动 */
+#case-selection {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.chat-content {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+```
+说明：移动端滚动问题需要从最外层到内层逐级设置overflow属性，确保滚动链条完整。
+
+### 错误点：JavaScript事件监听器阻止移动端滚动
+错误示范：
+```javascript
+// 过于严格的touchmove事件阻止，只允许少数元素滚动
+document.addEventListener('touchmove', (e) => {
+    if (e.target.closest('button') || 
+        e.target.closest('.intro-content') || 
+        e.target.closest('.conversation-area') ||
+        e.target.closest('textarea')) {
+        return;
+    }
+    e.preventDefault(); // 阻止了大部分区域的滚动
+}, { passive: false });
+```
+正确做法：
+```javascript
+// 添加所有需要滚动的容器选择器
+document.addEventListener('touchmove', (e) => {
+    if (e.target.closest('button') || 
+        e.target.closest('.intro-content') || 
+        e.target.closest('.conversation-area') ||
+        e.target.closest('textarea') ||
+        e.target.closest('.cases-container') ||
+        e.target.closest('.chat-content') ||
+        e.target.closest('#case-selection') ||
+        e.target.closest('.mobile-screen') ||
+        e.target.closest('.modal-content-body') ||
+        e.target.closest('.accusation-container') ||
+        e.target.closest('.trial-container')) {
+        return; // 允许这些元素及其子元素滚动
+    }
+    e.preventDefault();
+}, { passive: false });
+```
+说明：移动端滚动问题可能同时由CSS和JavaScript引起，需要检查touchmove事件监听器是否阻止了滚动。
+
 ### 错误点：重复定义主题渐变变量
 错误示范：
 ```css

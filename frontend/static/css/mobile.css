@@ -102,7 +102,7 @@ html, body {
 .loading-progress-bar {
     width: 250px;
     height: 4px;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--theme-hover-bg);
     border-radius: 2px;
     margin: 20px auto;
     overflow: hidden;
@@ -209,14 +209,14 @@ html, body {
 }
 
 .btn-primary {
-    background: linear-gradient(45deg, var(--theme-success-color), var(--theme-primary-color));
-    color: var(--theme-text-primary);
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    background: var(--theme-accent-color);
+    color: #000;
+    box-shadow: 0 4px 15px var(--theme-shadow-color);
 }
 
 .btn-primary:active {
     transform: translateY(2px);
-    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 2px 8px var(--theme-shadow-color);
 }
 
 .btn-secondary {
@@ -228,7 +228,7 @@ html, body {
 }
 
 .btn-secondary:active {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--theme-hover-bg);
     transform: translateY(1px);
 }
 
@@ -314,17 +314,17 @@ html, body {
 
 .game-logo i {
     font-size: 3rem;
-    color: #64b5f6;
+    color: var(--theme-primary-color);
 }
 
 .game-logo h1 {
     font-size: 2.2rem;
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-weight: 700;
 }
 
 .game-subtitle {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--theme-text-secondary);
     font-size: 1rem;
 }
 
@@ -352,24 +352,24 @@ html, body {
 }
 
 .menu-btn.primary-btn {
-    background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
-    color: #ffffff;
-    box-shadow: 0 4px 15px rgba(100, 181, 246, 0.4);
+    background: var(--theme-accent-color);
+    color: #000;
+    box-shadow: 0 4px 15px var(--theme-shadow-color);
 }
 
 .menu-btn.primary-btn:active {
     transform: translateY(2px);
-    box-shadow: 0 2px 8px rgba(100, 181, 246, 0.3);
+    box-shadow: 0 2px 8px var(--theme-shadow-color);
 }
 
 .menu-btn.secondary-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
+    border: 1px solid var(--theme-border-color);
 }
 
 .menu-btn.secondary-btn:active {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--theme-hover-bg);
     transform: translateY(1px);
 }
 
@@ -451,7 +451,7 @@ html, body {
 
 .intro-section li::before {
     content: "•";
-    color: #64b5f6;
+    color: var(--theme-primary-color);
     font-weight: bold;
     position: absolute;
     left: 0;
@@ -477,26 +477,26 @@ html, body {
 
 .character-type-badge.suspect {
     background: rgba(244, 67, 54, 0.2);
-    color: #f44336;
+    color: var(--theme-warning-color);
     border: 1px solid rgba(244, 67, 54, 0.3);
 }
 
 .character-type-badge.witness {
     background: rgba(76, 175, 80, 0.2);
-    color: #4caf50;
+    color: var(--theme-success-color);
     border: 1px solid rgba(76, 175, 80, 0.3);
 }
 
 .character-type-badge.victim {
     background: rgba(158, 158, 158, 0.2);
-    color: #9e9e9e;
+    color: var(--theme-text-muted);
     border: 1px solid rgba(158, 158, 158, 0.3);
 }
 
 /* 案件介绍内容样式 */
 .intro-title {
     font-size: 2.2rem;
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-weight: bold;
     margin-bottom: 20px;
     text-align: center;
@@ -505,16 +505,16 @@ html, body {
 
 .intro-subtitle {
     font-size: 1.6rem;
-    color: #ffffff;
+    color: var(--theme-text-secondary);
     font-weight: 600;
     margin: 25px 0 15px 0;
     padding-left: 10px;
-    border-left: 3px solid #ffffff;
+    border-left: 3px solid var(--theme-text-primary);
 }
 
 .intro-text {
     font-size: 1rem;
-    color: #f0f0f0;
+    color: var(--theme-text-secondary);
     line-height: 1.6;
     margin-bottom: 15px;
     text-align: justify;
@@ -528,7 +528,7 @@ html, body {
 }
 
 .intro-detail strong {
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-weight: 600;
 }
 
@@ -541,7 +541,7 @@ html, body {
 /* 打字机效果 */
 .typewriter-cursor {
     display: inline-block;
-    color: #64b5f6;
+    color: var(--theme-text-primary);
     margin-left: 2px;
     font-size: 1em;
     line-height: 1;
@@ -580,32 +580,33 @@ html, body {
 }
 
 .intro-btn.skip-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
+    border: 1px solid var(--theme-border-color);
 }
 
 .intro-btn.skip-btn:active {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--theme-hover-bg);
     transform: translateY(1px);
 }
 
 .intro-btn.start-btn {
-    background: linear-gradient(135deg, #64b5f6 0%, #42a5f5 100%);
-    color: #ffffff;
-    box-shadow: 0 4px 15px rgba(100, 181, 246, 0.4);
+    background: var(--theme-accent-color);
+    color: #000;
+    box-shadow: 0 4px 15px var(--theme-shadow-color);
 }
 
 .intro-btn.start-btn:disabled {
-    background: rgba(100, 181, 246, 0.3);
-    color: rgba(255, 255, 255, 0.5);
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-muted);
     box-shadow: none;
     cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .intro-btn.start-btn:not(:disabled):active {
     transform: translateY(2px);
-    box-shadow: 0 2px 8px rgba(100, 181, 246, 0.3);
+    box-shadow: 0 2px 8px var(--theme-shadow-color);
 }
 
 .screen-header {
@@ -620,7 +621,7 @@ html, body {
 
 .screen-header h2 {
     font-size: 1.3rem;
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-weight: 600;
 }
 
@@ -629,8 +630,8 @@ html, body {
     height: 40px;
     border: none;
     border-radius: 10px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -639,7 +640,7 @@ html, body {
 }
 
 .back-btn:active {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--theme-hover-bg);
     transform: scale(0.95);
 }
 
@@ -660,14 +661,12 @@ html, body {
 }
 
 .case-card {
-    background: linear-gradient(145deg, 
-        rgba(255, 255, 255, 0.15) 0%, 
-        rgba(255, 255, 255, 0.05) 100%);
+    background: var(--theme-card-bg);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
     border-radius: 15px;
     padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--theme-border-color);
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
@@ -676,25 +675,23 @@ html, body {
 .case-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-    border-color: rgba(255, 255, 255, 0.3);
+    border-color: var(--theme-border-hover);
 }
 
 .case-card:active {
     transform: scale(0.98);
-    background: linear-gradient(145deg, 
-        rgba(255, 255, 255, 0.2) 0%, 
-        rgba(255, 255, 255, 0.1) 100%);
+    background: var(--theme-card-active-bg);
 }
 
 .case-card h3 {
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-size: 1.2rem;
     margin-bottom: 8px;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
 }
 
 .case-card p {
-    color: #e2e8f0; /* 更高对比度的浅灰 */
+    color: var(--theme-text-secondary); /* 更高对比度的浅灰 */
     font-size: 0.9rem;
     line-height: 1.4;
     margin-bottom: 12px;
@@ -714,7 +711,7 @@ html, body {
 }
 
 .badge-difficulty {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--theme-secondary-bg);
     color: var(--theme-accent-color);
     border: 1px solid var(--theme-border-color);
     backdrop-filter: blur(10px);
@@ -765,7 +762,7 @@ body.theme-forest .badge-category {
 
 /* 游戏主界面 */
 #game-screen {
-    background: linear-gradient(135deg, #4a5568 0%, #2d3748 50%, #1a202c 100%);
+    background: var(--theme-background);
 }
 
 .game-layout {
@@ -783,10 +780,10 @@ body.theme-forest .badge-category {
     height: 56px;
     border: none;
     border-radius: 50%;
-    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+    background: var(--theme-primary-gradient);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    color: #ffffff;
+    color: var(--theme-text-primary);
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
@@ -794,21 +791,21 @@ body.theme-forest .badge-category {
     justify-content: center;
     z-index: 1000;
     font-size: 20px;
-    box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3), 
+    box-shadow: 0 8px 32px var(--theme-shadow-color), 
                 0 4px 16px rgba(0, 0, 0, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--theme-border-color);
     animation: floatPulse 3s ease-in-out infinite;
 }
 
 .sidebar-menu-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(102, 126, 234, 0.4), 
+    box-shadow: 0 12px 40px var(--theme-shadow-color), 
                 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .sidebar-menu-btn:active {
     transform: translateY(0) scale(0.95);
-    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.2), 
+    box-shadow: 0 4px 16px var(--theme-shadow-color), 
                 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
@@ -819,10 +816,10 @@ body.theme-forest .badge-category {
     left: -300px;
     width: 280px;
     height: 100%;
-    background: rgba(15, 15, 35, 0.98);
+    background: var(--theme-sidebar-bg);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid var(--theme-border-color);
     transition: left 0.3s ease;
     z-index: 1001;
     display: flex;
@@ -853,14 +850,14 @@ body.theme-forest .badge-category {
 
 .menu-header {
     padding: 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--theme-border-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
 
 .menu-header h3 {
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-size: 1.2rem;
     margin: 0;
     font-weight: 600;
@@ -871,8 +868,8 @@ body.theme-forest .badge-category {
     height: 32px;
     border: none;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -896,8 +893,8 @@ body.theme-forest .badge-category {
     padding: 15px;
     border: none;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
-    color: #ffffff;
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -914,7 +911,7 @@ body.theme-forest .badge-category {
 
 .menu-item i {
     font-size: 18px;
-    color: #64b5f6;
+    color: var(--theme-primary-color);
 }
 
 .menu-section {
@@ -922,7 +919,7 @@ body.theme-forest .badge-category {
 }
 
 .menu-section h4 {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--theme-text-secondary);
     font-size: 14px;
     margin: 0 0 10px 0;
     font-weight: 500;
@@ -941,8 +938,8 @@ body.theme-forest .badge-category {
     padding: 12px 15px;
     border: none;
     border-radius: 10px;
-    background: rgba(100, 181, 246, 0.1);
-    color: #ffffff;
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -952,7 +949,7 @@ body.theme-forest .badge-category {
 }
 
 .character-menu-item:active {
-    background: rgba(100, 181, 246, 0.2);
+    background: var(--theme-hover-bg);
     transform: scale(0.98);
 }
 
@@ -960,12 +957,12 @@ body.theme-forest .badge-category {
     width: 32px;
     height: 32px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #64b5f6, #42a5f5);
+    background: var(--theme-primary-gradient);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
-    color: #ffffff;
+    color: var(--theme-text-primary);
 }
 
 .character-menu-item .character-info {
@@ -979,7 +976,7 @@ body.theme-forest .badge-category {
 
 .character-menu-item .character-role {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--theme-text-secondary);
 }
 
 /* 主内容区域 */
@@ -1722,9 +1719,10 @@ body.theme-forest .badge-category {
 }
 
 .send-btn:disabled {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.4);
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-muted);
     cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .send-btn:not(:disabled):active {
@@ -2206,9 +2204,10 @@ body.theme-forest .badge-category {
 }
 
 .bottom-input .send-btn:disabled {
-    background: rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.4);
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-muted);
     cursor: not-allowed;
+    opacity: 0.5;
 }
 
 .bottom-input .send-btn:not(:disabled):active {
@@ -2229,18 +2228,18 @@ body.theme-forest .badge-category {
 }
 
 .bottom-input .suggestion-btn {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--theme-secondary-bg);
+    border: 1px solid var(--theme-border-color);
     border-radius: 20px;
     padding: 8px 12px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--theme-text-primary);
     font-size: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .bottom-input .suggestion-btn:active {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--theme-hover-bg);
     transform: scale(0.95);
 }
 
@@ -2261,17 +2260,17 @@ body.theme-forest .badge-category {
 
 /* 清除按钮样式 */
 .clear-btn {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--theme-secondary-bg);
     border: none;
     border-radius: 8px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--theme-text-primary);
     padding: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
 }
 
 .clear-btn:active {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--theme-hover-bg);
     transform: scale(0.95);
 }
 
@@ -2727,16 +2726,16 @@ body.theme-forest .badge-category {
 }
 
 .trial-actions .btn-mobile.evaluation-btn {
-    background: linear-gradient(45deg, var(--theme-success-color), var(--theme-success-color));
-    color: var(--theme-text-primary);
-    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
+    background: var(--theme-accent-color);
+    color: #000;
+    box-shadow: 0 4px 15px var(--theme-shadow-color);
     font-weight: 600;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    text-shadow: none;
 }
 
 .trial-actions .btn-mobile.evaluation-btn:active {
     transform: translateY(2px);
-    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3);
+    box-shadow: 0 2px 8px var(--theme-shadow-color);
 }
 
 .trial-actions .btn-mobile.menu-btn-mobile {
@@ -2750,21 +2749,21 @@ body.theme-forest .badge-category {
 }
 
 .trial-actions .btn-mobile.menu-btn-mobile:active {
-    background: rgba(52, 73, 94, 0.9);
+    background: var(--theme-hover-bg);
     transform: translateY(1px);
 }
 
 .trial-actions .btn-mobile.restart-btn {
-    background: linear-gradient(45deg, var(--theme-primary-color), var(--theme-primary-color));
-    color: var(--theme-text-primary);
-    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+    background: var(--theme-accent-color);
+    color: #000;
+    box-shadow: 0 4px 15px var(--theme-shadow-color);
     font-weight: 600;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+    text-shadow: none;
 }
 
 .trial-actions .btn-mobile.restart-btn:active {
     transform: translateY(2px);
-    box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
+    box-shadow: 0 2px 8px var(--theme-shadow-color);
 }
 
 .trial-error {

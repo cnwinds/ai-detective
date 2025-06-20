@@ -282,7 +282,7 @@ body {
     display: inline-block;
     width: 2px;
     height: 1.2em;
-    background: var(--theme-primary-color);
+    background: var(--theme-text-primary);
     animation: blink 1s infinite;
     margin-left: 2px;
 }
@@ -460,10 +460,10 @@ body {
     display: inline-block;
     width: 2px;
     height: 1.2em;
-    background: linear-gradient(45deg, #667eea, #764ba2);
+    background: var(--theme-text-primary);
     animation: blink 1s infinite;
     margin-left: 2px;
-    box-shadow: 0 0 5px rgba(102, 126, 234, 0.5);
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
 }
 
 /* 角色卡片动画 */

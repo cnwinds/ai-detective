@@ -423,14 +423,15 @@
         </div>
     </div>
 
+    <!-- 主题系统脚本 - 必须在应用程序脚本之前加载 -->
+    <script src="/static/js/theme-manager.js"></script>
+    <script src="/static/js/theme-selector.js"></script>
+    
     <script src="/static/js/utils.js"></script>
     <script src="/static/js/ui.js"></script>
     <script src="/static/js/api.js"></script>
     <script src="/static/js/game.js"></script>
     <script src="/static/js/app.js"></script>
-    <!-- 主题系统脚本 -->
-    <script src="/static/js/theme-manager.js"></script>
-    <script src="/static/js/theme-selector.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const versionMeta = document.querySelector('meta[name="app-version"]');

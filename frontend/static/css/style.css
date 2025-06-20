@@ -16,7 +16,7 @@
     --theme-border-color: rgba(255, 255, 255, 0.2);
     --theme-shadow-color: rgba(0, 0, 0, 0.1);
     --theme-shadow-light: rgba(0, 0, 0, 0.06);
-    --theme-primary-gradient: linear-gradient(135deg, #64b5f6 0%, #4299e1 50%, #3182ce 100%);
+    /* --theme-primary-gradient 已被 --theme-primary-bg 替代，由主题管理器动态设置 */
     
     /* 标签专用颜色变量 */
     --badge-text-light: rgba(0, 0, 0, 0.8);
@@ -1895,7 +1895,7 @@ body.theme-forest .badge-top.badge-category {
 .close-btn {
     background: none;
     border: none;
-    font-size: 1.5rem;
+    font-size: 20px;
     cursor: pointer;
     color: var(--theme-text-secondary);
     padding: 0;

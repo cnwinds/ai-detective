@@ -36,6 +36,9 @@ class MobileDetectiveApp {
             this.bindEvents();
             await this.loadVersionInfo();
             
+            // 确保使用经典主题配色
+            this.ensureClassicTheme();
+            
             // 模拟加载时间，但只在仍在加载屏幕时才跳转
             setTimeout(() => {
                 // 只有当前屏幕是加载屏幕时才自动跳转到主菜单
@@ -52,6 +55,29 @@ class MobileDetectiveApp {
             if (loadingScreen && loadingScreen.classList.contains('active')) {
                 this.hideLoadingScreen();
             }
+        }
+    }
+    
+    /**
+     * 确保使用经典主题配色
+     */
+    ensureClassicTheme() {
+        // 等待主题管理器加载完成后应用经典主题
+        if (window.themeManager) {
+            if (window.themeManager.isReady()) {
+                window.themeManager.applyTheme('classic');
+                console.log('已强制应用经典主题配色');
+            } else {
+                window.themeManager.waitForReady().then(() => {
+                    window.themeManager.applyTheme('classic');
+                    console.log('主题管理器加载完成，已应用经典主题配色');
+                });
+            }
+        } else {
+            // 如果主题管理器还未加载，等待一段时间后重试
+            setTimeout(() => {
+                this.ensureClassicTheme();
+            }, 100);
         }
     }
     
@@ -120,7 +146,6 @@ class MobileDetectiveApp {
         safeBindEvent('mobile-cancel-accusation-btn', 'click', () => this.showScreen('game-screen'));
         
         // 对话
-        safeBindEvent('clear-chat-btn', 'click', () => this.clearConversation());
         safeBindEvent('send-question-btn', 'click', () => this.askQuestion());
         safeBindEvent('question-input', 'input', (e) => this.handleQuestionInput(e));
         safeBindEvent('question-input', 'keydown', (e) => {
@@ -129,9 +154,6 @@ class MobileDetectiveApp {
                 this.askQuestion();
             }
         });
-        
-        // 笔记
-        safeBindEvent('clear-notes-btn', 'click', () => this.clearNotes());
         
         // 模态框
         safeBindEvent('close-modal', 'click', () => this.hideModal());
@@ -237,6 +259,9 @@ class MobileDetectiveApp {
                 this.currentCase = data.case;
                 this.gameState = data.game_state;
                 
+                // 自动应用案件对应的主题
+                this.applyThemeForCase();
+                
                 // 显示案情介绍而不是直接进入游戏
                 this.showCaseIntroduction();
             } else {
@@ -280,33 +305,6 @@ class MobileDetectiveApp {
         } catch (error) {
             console.error('加载游戏状态失败:', error);
         }
-    }
-    
-    renderCharacters() {
-        const charactersGrid = document.getElementById('characters-grid');
-        // 如果元素不存在，直接返回（新的菜单系统不需要这个方法）
-        if (!charactersGrid) {
-            console.log('characters-grid element not found, using new menu system');
-            return;
-        }
-        
-        charactersGrid.innerHTML = '';
-        
-        this.currentCase.characters.forEach(character => {
-            const characterCard = document.createElement('div');
-            characterCard.className = 'character-card';
-            characterCard.innerHTML = `
-                <div class="character-avatar">
-                    <i class="fas fa-user"></i>
-                </div>
-                <div class="character-name">${character.name}</div>
-                <div class="character-occupation">${character.occupation}</div>
-                <div class="character-type ${character.character_type}">${this.getCharacterTypeText(character.character_type)}</div>
-            `;
-            
-            characterCard.addEventListener('click', () => this.selectCharacter(character));
-            charactersGrid.appendChild(characterCard);
-        });
     }
     
     selectCharacter(character) {
@@ -402,42 +400,67 @@ class MobileDetectiveApp {
         const modalArea = document.getElementById('modal-content-area');
         const modalTitle = document.getElementById('modal-content-title');
         const modalBody = document.getElementById('modal-content-body');
+        const modalHeader = modalArea.querySelector('.modal-header');
         
         modalTitle.textContent = '案件详情';
+        // 隐藏整个标题行
+        if (modalHeader) {
+            modalHeader.style.display = 'none';
+        }
         
-        // 获取受害者信息
-        const victim = this.currentCase.characters.find(char => 
+        // 分离受害者和其他角色
+        const victimCharacter = this.currentCase.characters.find(char => 
             char.character_type === 'victim' || char.name === this.currentCase.victim_name
+        );
+        const otherCharacters = this.currentCase.characters.filter(char => 
+            char.character_type !== 'victim' && char.name !== this.currentCase.victim_name
         );
         
         modalBody.innerHTML = `
-            <div class="case-details-content">
-                
-                <div class="case-basic-info">
-                    <p><strong>受害者：</strong>${this.currentCase.victim_name || '未知'}</p>
-                    <p><strong>案发时间：</strong>${this.currentCase.time_of_crime || '时间不详'}</p>
-                    <p><strong>案发地点：</strong>${this.currentCase.crime_scene || '地点不详'}</p>
-                </div>
+            <div class="case-details-content" style="background: transparent;">
                 
                 <div class="case-description">
-                    <h4>案件描述</h4>
                     <p>${this.currentCase.description}</p>
                 </div>
                 
                 <div class="characters-section">
-                    <h4>相关人员</h4>
                     <div class="characters-list">
-                        ${this.currentCase.characters.map(char => `
-                            <div class="character-item ${char.character_type === 'victim' ? 'victim-item' : 'interactive-item'}" 
-                                 ${char.character_type !== 'victim' ? `onclick="mobileApp.selectCharacterFromDetails('${char.name}')"` : ''}>
+                        ${victimCharacter ? `
+                            <div class="character-item victim-item">
+                                <div class="victim-first-row">
+                                    <div class="character-main-info">
+                                        <strong>${victimCharacter.name}</strong>
+                                        <span class="character-occupation">${victimCharacter.occupation}</span>
+                                    </div>
+                                    <span class="character-type-badge victim">
+                                        ${this.getCharacterTypeText('victim')}
+                                    </span>
+                                </div>
+                                <div class="victim-case-info">
+                                    <div class="case-info-item">
+                                        <div class="info-label">案发时间：</div>
+                                        <div class="info-value">${this.currentCase.time_of_crime}</div>
+                                    </div>
+                                    <div class="case-info-item">
+                                        <div class="info-label">案发地点：</div>
+                                        <div class="info-value">${this.currentCase.crime_scene}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        ` : ''}
+                        ${otherCharacters.map(char => `
+                            <div class="character-item interactive-item" 
+                                 onclick="mobileApp.selectCharacterFromDetails('${char.name}')">
                                 <div class="character-main-info">
                                     <strong>${char.name}</strong>
                                     <span class="character-occupation">${char.occupation}</span>
                                 </div>
-                                <span class="character-type-badge ${char.character_type}">
-                                    ${this.getCharacterTypeText(char.character_type)}
-                                </span>
-                                ${char.character_type !== 'victim' ? '<i class="fas fa-chevron-right"></i>' : ''}
+                                <div class="character-right-section">
+                                    <span class="character-type-badge ${char.character_type}">
+                                        ${this.getCharacterTypeText(char.character_type)}
+                                    </span>
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
                             </div>
                         `).join('')}
                     </div>
@@ -450,6 +473,13 @@ class MobileDetectiveApp {
                         <li>分析证据找出矛盾之处</li>
                         <li>确定真正的凶手并提出指控</li>
                     </ul>
+                </div>
+                
+                <div class="case-action-section">
+                    <button class="case-accusation-btn" onclick="mobileApp.showAccusationDirectly()">
+                        <i class="fas fa-gavel"></i>
+                        <span>进行指控</span>
+                    </button>
                 </div>
             </div>
         `;
@@ -1066,6 +1096,10 @@ class MobileDetectiveApp {
         this.populateAccusationSelect();
     }
     
+    showAccusationDirectly() {
+        this.showAccusationScreen();
+    }
+    
     populateAccusationSelect() {
         const accusedSelect = document.getElementById('mobile-accused-select');
         if (!accusedSelect) return;
@@ -1202,12 +1236,7 @@ class MobileDetectiveApp {
         
         switch (data.type) {
             case 'start':
-                trialSteps.innerHTML = `
-                    <div class="trial-intro">
-                        <h3>🏛️ 审判开始</h3>
-                        <p>现在开始审理对 <strong>${data.accused_name}</strong> 的指控</p>
-                    </div>
-                `;
+                trialSteps.innerHTML = ``;
                 // 审判开始，内容变化会自动触发滚动
                 break;
                 
@@ -1713,13 +1742,6 @@ class MobileDetectiveApp {
         this.conversationHistory = [];
     }
     
-    clearNotes() {
-        const notesArea = document.getElementById('notes-area');
-        if (notesArea) {
-            notesArea.value = '';
-        }
-    }
-    
     showUnreadBadge() {
         const unreadBadge = document.getElementById('unread-badge');
         if (unreadBadge) {
@@ -1850,10 +1872,6 @@ class MobileDetectiveApp {
         this.showModal('案件信息', caseInfo);
     }
     
-    showGameMenu() {
-        this.showToast('游戏菜单功能开发中...', 'info');
-    }
-    
     // 工具方法
     truncateText(text, maxLength) {
         return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
@@ -1916,6 +1934,45 @@ class MobileDetectiveApp {
         this.showScreen('case-intro-screen');
         this.skipTypewriter = false;
         this.startTypewriterSequence();
+    }
+    
+    // 根据案件类型自动应用主题
+    applyThemeForCase() {
+        if (!this.currentCase || !this.currentCase.category) {
+            console.log('无法应用主题：案件数据或类型缺失');
+            return;
+        }
+        
+        // 检查主题管理器是否存在
+        if (!window.themeManager) {
+            console.log('警告：主题管理器未加载');
+            return;
+        }
+        
+        // 等待主题管理器加载完成
+        if (window.themeManager.isReady()) {
+            const recommendedTheme = window.themeManager.getRecommendedTheme(this.currentCase.category);
+            if (recommendedTheme) {
+                window.themeManager.applyTheme(recommendedTheme);
+                console.log(`已为案件类型 ${this.currentCase.category} 自动应用主题: ${recommendedTheme}`);
+            } else {
+                console.log(`未找到案件类型 ${this.currentCase.category} 对应的主题`);
+            }
+        } else {
+            // 如果主题管理器还未加载完成，等待加载
+            console.log('主题管理器正在加载中，等待完成...');
+            window.themeManager.waitForReady().then(() => {
+                const recommendedTheme = window.themeManager.getRecommendedTheme(this.currentCase.category);
+                if (recommendedTheme) {
+                    window.themeManager.applyTheme(recommendedTheme);
+                    console.log(`已为案件类型 ${this.currentCase.category} 自动应用主题: ${recommendedTheme}`);
+                } else {
+                    console.log(`未找到案件类型 ${this.currentCase.category} 对应的主题`);
+                }
+            }).catch(error => {
+                console.log('主题管理器加载失败:', error);
+            });
+        }
     }
     
     async startTypewriterSequence() {

@@ -8,6 +8,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="/static/js/theme-manager.js"></script>
     <style>
         * {
             margin: 0;
@@ -19,8 +20,8 @@
         html, body {
             height: 100%;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #4a5568 0%, #2d3748 50%, #1a202c 100%);
-            color: #ffffff;
+            background: var(--theme-primary-bg, linear-gradient(135deg, #4a5568 0%, #2d3748 50%, #1a202c 100%));
+            color: var(--theme-text-primary, #ffffff);
             overflow-x: hidden;
             user-select: none;
             -webkit-user-select: none;
@@ -43,13 +44,13 @@
         }
 
         .back-button {
-            background: linear-gradient(145deg, 
+            background: var(--theme-secondary-bg, linear-gradient(145deg, 
                 rgba(255, 255, 255, 0.15) 0%, 
-                rgba(255, 255, 255, 0.05) 100%);
+                rgba(255, 255, 255, 0.05) 100%));
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 12px;
             padding: 12px;
-            color: #e2e8f0;
+            color: var(--theme-text-secondary, #e2e8f0);
             font-size: 1.2rem;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -73,22 +74,22 @@
         .header-title h1 {
             font-size: 1.5rem;
             font-weight: 600;
-            color: #e2e8f0;
+            color: var(--theme-text-secondary, #e2e8f0);
             text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
         }
 
         .header-title p {
             font-size: 0.9rem;
-            color: #a0aec0;
+            color: var(--theme-text-muted, #a0aec0);
             margin-top: 5px;
         }
 
         /* 主要内容区域 */
         .evaluation-content {
             flex: 1;
-            background: linear-gradient(145deg, 
+            background: var(--theme-secondary-bg, linear-gradient(145deg, 
                 rgba(255, 255, 255, 0.15) 0%, 
-                rgba(255, 255, 255, 0.05) 100%);
+                rgba(255, 255, 255, 0.05) 100%));
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.2);
@@ -112,7 +113,7 @@
                 rgba(72, 187, 120, 0.2) 0%, 
                 rgba(56, 178, 172, 0.1) 100%);
             border: 1px solid rgba(72, 187, 120, 0.3);
-            color: #68d391;
+            color: var(--theme-success-color, #68d391);
         }
 
         .message.error {
@@ -120,7 +121,7 @@
                 rgba(245, 101, 101, 0.2) 0%, 
                 rgba(229, 62, 62, 0.1) 100%);
             border: 1px solid rgba(245, 101, 101, 0.3);
-            color: #fc8181;
+            color: var(--theme-warning-color, #fc8181);
         }
 
         /* 表单组 */
@@ -132,12 +133,12 @@
             display: block;
             margin-bottom: 12px;
             font-weight: 600;
-            color: #e2e8f0;
+            color: var(--theme-text-secondary, #e2e8f0);
             font-size: 1rem;
         }
 
         .required {
-            color: #fc8181;
+            color: var(--theme-warning-color, #fc8181);
         }
 
         /* 评分区域 */
@@ -163,13 +164,13 @@
 
         .star.active,
         .star:hover {
-            color: #ffd700;
+            color: var(--theme-accent-color, #ffd700);
             text-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
         }
 
         .rating-text {
             text-align: center;
-            color: #a0aec0;
+            color: var(--theme-text-muted, #a0aec0);
             font-size: 1rem;
             margin-top: 10px;
             min-height: 24px;
@@ -181,12 +182,12 @@
         .form-select {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(145deg, 
+            background: var(--theme-secondary-bg, linear-gradient(145deg, 
                 rgba(255, 255, 255, 0.1) 0%, 
-                rgba(255, 255, 255, 0.05) 100%);
+                rgba(255, 255, 255, 0.05) 100%));
             border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 12px;
-            color: #e2e8f0;
+            color: var(--theme-text-secondary, #e2e8f0);
             font-size: 1rem;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
@@ -209,8 +210,8 @@
         .form-textarea:focus,
         .form-select:focus {
             outline: none;
-            border-color: rgba(102, 126, 234, 0.6);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+            border-color: var(--theme-primary-color, rgba(102, 126, 234, 0.6));
+            box-shadow: 0 0 0 3px var(--theme-primary-color, rgba(102, 126, 234, 0.2));
         }
 
         .form-textarea {
@@ -221,7 +222,7 @@
 
         .form-input::placeholder,
         .form-textarea::placeholder {
-            color: #a0aec0;
+            color: var(--theme-text-muted, #a0aec0);
         }
 
         /* 复选框样式 */
@@ -231,9 +232,9 @@
             gap: 12px;
             justify-content: center;
             padding: 15px;
-            background: linear-gradient(145deg, 
+            background: var(--theme-secondary-bg, linear-gradient(145deg, 
                 rgba(255, 255, 255, 0.1) 0%, 
-                rgba(255, 255, 255, 0.05) 100%);
+                rgba(255, 255, 255, 0.05) 100%));
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -241,11 +242,11 @@
         .checkbox-group input[type="checkbox"] {
             width: 20px;
             height: 20px;
-            accent-color: #4299e1;
+            accent-color: var(--theme-primary-color, #4299e1);
         }
 
         .checkbox-group label {
-            color: #e2e8f0;
+            color: var(--theme-text-secondary, #e2e8f0);
             font-size: 1rem;
             cursor: pointer;
         }
@@ -279,16 +280,16 @@
         }
 
         .btn-secondary {
-            background: linear-gradient(145deg, 
+            background: var(--theme-secondary-bg, linear-gradient(145deg, 
                 rgba(255, 255, 255, 0.15) 0%, 
-                rgba(255, 255, 255, 0.05) 100%);
+                rgba(255, 255, 255, 0.05) 100%));
             border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #e2e8f0;
+            color: var(--theme-text-secondary, #e2e8f0);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-            color: white;
+            background: var(--theme-primary-color, linear-gradient(135deg, #4299e1 0%, #3182ce 100%));
+            color: var(--theme-text-primary, white);
             box-shadow: 0 4px 15px rgba(66, 153, 225, 0.4);
         }
 
@@ -609,6 +610,21 @@
                 window.location.href = '/';
             }
         }
+        
+        // 初始化主题管理器
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.themeManager) {
+                // 主题管理器已加载，应用当前主题
+                const currentTheme = window.themeManager.getCurrentTheme();
+                window.themeManager.applyTheme(currentTheme);
+            } else {
+                // 等待主题管理器加载
+                window.addEventListener('themeManagerReady', function() {
+                    const currentTheme = window.themeManager.getCurrentTheme();
+                    window.themeManager.applyTheme(currentTheme);
+                });
+            }
+        });
         
         // 页面加载时检查会话ID
         if (!sessionId) {

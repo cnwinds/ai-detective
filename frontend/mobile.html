@@ -165,14 +165,6 @@
                             <span>案件详情</span>
                         </button>
                         
-                        <!-- 角色列表 -->
-                        <div class="menu-section">
-                            <h4>对话角色</h4>
-                            <div class="character-menu-list" id="character-menu-list">
-                                <!-- 角色按钮将通过JavaScript动态生成 -->
-                            </div>
-                        </div>
-                        
                         <!-- 其他功能 -->
                         <div class="menu-section">
                             <h4>其他功能</h4>
@@ -193,6 +185,15 @@
                                 <span>进行指控</span>
                             </button>
                         </div>
+                        
+                        <!-- 角色列表 -->
+                        <div class="menu-section">
+                            <h4>对话角色</h4>
+                            <div class="character-menu-list" id="character-menu-list">
+                                <!-- 角色按钮将通过JavaScript动态生成 -->
+                            </div>
+                        </div>
+                        
                     </div>
                 </div>
                 
@@ -212,9 +213,6 @@
                         <div class="chat-content" id="chat-content">
                             <div class="chat-header">
                                 <h3 id="chat-character-name">选择角色开始对话</h3>
-                                <button id="clear-chat-btn" class="clear-btn">
-                                    <i class="fas fa-trash"></i>
-                                </button>
                             </div>
                             <div class="conversation-area" id="conversation-area">
                                 <div class="welcome-message">
@@ -341,11 +339,12 @@
         <span id="toast-message">消息内容</span>
     </div>
 
-    <!-- JavaScript -->
-    <script src="static/js/mobile.js"></script>
-    <!-- 主题系统脚本 -->
+    <!-- 主题系统脚本 - 必须在应用程序脚本之前加载 -->
     <script src="static/js/theme-manager.js"></script>
     <script src="static/js/theme-selector.js"></script>
+    
+    <!-- JavaScript -->
+    <script src="static/js/mobile.js"></script>
     
     <script>
         // 初始化主题选择器触发按钮

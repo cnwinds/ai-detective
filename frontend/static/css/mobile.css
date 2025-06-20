@@ -15,7 +15,7 @@
     --theme-text-accent: #E0E7FF;
     --theme-border-color: rgba(255, 255, 255, 0.2);
     --theme-shadow-color: rgba(0, 0, 0, 0.1);
-    --theme-primary-gradient: linear-gradient(135deg, #64b5f6 0%, #4299e1 50%, #3182ce 100%);
+    /* --theme-primary-gradient 已被 --theme-primary-bg 替代，由主题管理器动态设置 */
     
     /* 角色类型颜色 */
     --suspect-color: #FF5722;
@@ -412,7 +412,7 @@ html, body {
 
 .intro-section h2 {
     font-size: 1.8rem;
-    color: var(--theme-primary-color);
+    color: var(--theme-text-primary);
     margin-bottom: 15px;
     display: flex;
     align-items: center;
@@ -780,10 +780,10 @@ body.theme-forest .badge-category {
     height: 56px;
     border: none;
     border-radius: 50%;
-    background: var(--theme-primary-gradient);
+    background: var(--theme-accent-color);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    color: var(--theme-text-primary);
+    color: #000;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     display: flex;
@@ -910,8 +910,10 @@ body.theme-forest .badge-category {
 }
 
 .menu-item i {
-    font-size: 18px;
+    font-size: 20px;
     color: var(--theme-primary-color);
+    width: 20px;
+    text-align: center;
 }
 
 .menu-section {
@@ -954,15 +956,16 @@ body.theme-forest .badge-category {
 }
 
 .character-menu-item .character-avatar {
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
-    background: var(--theme-primary-gradient);
+    background: var(--theme-primary-color);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 16px;
     color: var(--theme-text-primary);
+    flex-shrink: 0;
 }
 
 .character-menu-item .character-info {
@@ -1042,7 +1045,7 @@ body.theme-forest .badge-category {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(15, 15, 35, 0.98);
+    background: rgba(15, 15, 35, 0.6);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     z-index: 100;
@@ -1069,7 +1072,7 @@ body.theme-forest .badge-category {
 
 .case-details-content h4 {
     color: var(--theme-text-primary);
-    margin: 20px 0 10px 0;
+    margin: 0px 0 10px 0;
     font-size: 1.1em;
     display: flex;
     align-items: center;
@@ -1084,7 +1087,7 @@ body.theme-forest .badge-category {
 
 /* 基本信息区域 */
 .case-basic-info {
-    background: var(--theme-primary-gradient);
+    background: var(--theme-primary-bg);
     border-radius: 12px;
     padding: 15px;
     margin-bottom: 20px;
@@ -1161,6 +1164,43 @@ body.theme-forest .badge-category {
 .character-item.victim-item {
     background: rgba(255, 193, 7, 0.2);
     border-color: #FFC107;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+.victim-first-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.victim-case-info {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.case-info-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.info-label {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+.info-value {
+    color: #ffffff;
+    font-size: 0.95em;
+    font-weight: 600;
 }
 
 .character-main-info {
@@ -1170,13 +1210,13 @@ body.theme-forest .badge-category {
 }
 
 .character-main-info strong {
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-size: 1.1em;
 }
 
 .character-occupation {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9em;
+    color: var(--theme-text-secondary);
+    font-size: 0.6em;
 }
 
 .character-type-badge {
@@ -1328,23 +1368,25 @@ body.theme-forest .badge-category {
     height: 40px;
     border: none;
     border-radius: 8px;
-    background: rgba(0, 0, 0, 0.6);
-    color: #ffffff;
+    background: var(--theme-primary-bg);
+    color: var(--theme-text-primary);
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10;
+    box-shadow: 0 4px 12px var(--theme-shadow-color);
 }
 
 .menu-btn:active {
-    background: rgba(0, 0, 0, 0.8);
+    background: var(--theme-primary-bg);
     transform: scale(0.95);
+    box-shadow: 0 2px 8px var(--theme-shadow-color);
 }
 
 .tab-btn i {
-    font-size: 1.2rem;
+    font-size: 20px;
 }
 
 .tab-btn span {
@@ -1430,18 +1472,6 @@ body.theme-forest .badge-category {
     box-shadow: 0 0 20px rgba(100, 181, 246, 0.3);
 }
 
-.character-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #64b5f6, #42a5f5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 10px;
-    font-size: 1.5rem;
-    color: #ffffff;
-}
 
 .character-name {
     color: var(--theme-text-primary);
@@ -1450,11 +1480,8 @@ body.theme-forest .badge-category {
     margin-bottom: 4px;
 }
 
-.character-occupation {
-    color: var(--theme-primary-color);
-    font-size: 0.8rem;
-    margin-bottom: 8px;
-}
+/* .character-occupation 重复样式已合并到第1217行的定义中 */
+/* 移动端角色职业显示统一使用 .character-occupation 样式 */
 
 .character-type {
     padding: 3px 8px;
@@ -1541,7 +1568,7 @@ body.theme-forest .badge-category {
     width: 40px;
     height: 40px;
     margin: 0;
-    font-size: 1.2rem;
+    font-size: 18px;
 }
 
 .character-details h4 {
@@ -1568,6 +1595,7 @@ body.theme-forest .badge-category {
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 16px;
 }
 
 .clear-btn:active {
@@ -1704,30 +1732,7 @@ body.theme-forest .badge-category {
     box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
 }
 
-.send-btn {
-    width: 44px;
-    height: 44px;
-    border: none;
-    border-radius: 12px;
-    background: linear-gradient(135deg, #64b5f6, #42a5f5);
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.send-btn:disabled {
-    background: var(--theme-secondary-bg);
-    color: var(--theme-text-muted);
-    cursor: not-allowed;
-    opacity: 0.5;
-}
-
-.send-btn:not(:disabled):active {
-    transform: scale(0.95);
-}
+/* 通用发送按钮样式已合并到 .bottom-input .send-btn */
 
 .input-stats {
     display: flex;
@@ -1878,6 +1883,7 @@ body.theme-forest .badge-category {
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
+    font-size: 20px;
 }
 
 .close-btn:active {
@@ -2165,7 +2171,7 @@ body.theme-forest .badge-category {
     color: #ffffff;
     font-size: 14px;
     resize: none;
-    min-height: 40px;
+    min-height: 48px; /* 与发送按钮等高 */
     max-height: 100px;
 }
 
@@ -2181,11 +2187,11 @@ body.theme-forest .badge-category {
 
 .bottom-input .send-btn {
     min-width: 44px;
-    height: 44px;
+    height: 48px; /* 与聊天输入框等高 */
     border: none;
     border-radius: 12px;
-    background: #64b5f6;
-    color: white;
+    background: var(--theme-accent-color);
+    color: #000;
     cursor: pointer;
     transition: all 0.3s ease;
     display: flex;
@@ -2193,8 +2199,9 @@ body.theme-forest .badge-category {
     justify-content: center;
     flex-shrink: 0;
     flex-direction: column;
-    gap: 1px;
     padding: 4px 8px;
+    font-size: 18px;
+    box-shadow: 0 4px 12px var(--theme-shadow-color);
 }
 
 .bottom-input .send-btn .question-counter {
@@ -2211,8 +2218,9 @@ body.theme-forest .badge-category {
 }
 
 .bottom-input .send-btn:not(:disabled):active {
-    background: #42a5f5;
+    background: var(--theme-primary-bg);
     transform: scale(0.95);
+    box-shadow: 0 2px 8px var(--theme-shadow-color);
 }
 
 /* 推荐问题区域 */
@@ -2252,6 +2260,42 @@ body.theme-forest .badge-category {
     padding: 12px;
     color: rgba(255, 255, 255, 0.7);
     font-size: 14px;
+}
+
+/* 案件指控按钮区域 */
+.case-action-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--theme-border-color);
+    display: flex;
+    justify-content: center;
+}
+
+.case-accusation-btn {
+    background: var(--theme-accent-color);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 16px var(--theme-shadow-color);
+    min-width: 160px;
+    justify-content: center;
+}
+
+.case-accusation-btn:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px var(--theme-shadow-color);
+}
+
+.case-accusation-btn i {
+    font-size: 18px;
 }
 
 .suggestions-loading i {
@@ -2319,7 +2363,7 @@ body.theme-forest .badge-category {
     -webkit-backdrop-filter: blur(15px);
     border-radius: 15px;
     padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--theme-border-color);
     transition: all 0.3s ease;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
@@ -2332,7 +2376,7 @@ body.theme-forest .badge-category {
     display: block;
     margin-bottom: 8px;
     font-weight: 600;
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-size: 0.95rem;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
@@ -2340,31 +2384,31 @@ body.theme-forest .badge-category {
 .form-control {
     width: 100%;
     padding: 12px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--theme-border-color);
     border-radius: 12px;
     font-size: 1rem;
     transition: all 0.3s ease;
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--theme-secondary-bg);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    color: #ffffff;
+    color: var(--theme-text-primary);
 }
 
 .form-control:focus {
     outline: none;
-    border-color: #64b5f6;
+    border-color: var(--theme-primary-color);
     box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
     background: rgba(255, 255, 255, 0.15);
 }
 
 .form-control::placeholder {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--theme-text-muted);
 }
 
 .form-control option {
     padding: 8px;
     background: #2d3748;
-    color: #ffffff;
+    color: var(--theme-text-primary);
 }
 
 .form-actions {
@@ -2391,8 +2435,8 @@ body.theme-forest .badge-category {
 }
 
 .form-actions .btn-mobile.btn-primary {
-    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-    color: #ffffff;
+    background: var(--theme-accent-color);
+    color: #000;
     box-shadow: 0 4px 15px rgba(66, 153, 225, 0.4);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
@@ -2403,9 +2447,9 @@ body.theme-forest .badge-category {
 }
 
 .form-actions .btn-mobile.btn-secondary {
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
+    border: 1px solid var(--theme-border-color);
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
@@ -2439,11 +2483,11 @@ body.theme-forest .badge-category {
 }
 
 .trial-header {
-    background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
-    color: white;
+    background: var(--theme-primary-bg);
+    color: var(--theme-text-primary);
     padding: 20px;
     text-align: center;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--theme-border-color);
 }
 
 .trial-header h2 {
@@ -2472,16 +2516,16 @@ body.theme-forest .badge-category {
 }
 
 .step-header {
-    background: rgba(100, 181, 246, 0.1);
+    background: var(--theme-secondary-bg);
     padding: 16px 20px;
-    border-left: 4px solid #64b5f6;
+    border-left: 4px solid var(--theme-primary-color);
 }
 
 .step-header h3 {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
-    color: #ffffff;
+    color: var(--theme-text-primary);
     display: flex;
     align-items: center;
     gap: 8px;
@@ -2491,7 +2535,7 @@ body.theme-forest .badge-category {
 .step-content {
     padding: 20px;
     line-height: 1.6;
-    color: #e2e8f0;
+    color: var(--theme-text-secondary);
 }
 
 .streaming-text {
@@ -2501,7 +2545,7 @@ body.theme-forest .badge-category {
 .streaming-text::after {
     content: '|';
     animation: blink 1s infinite;
-    color: #64b5f6;
+    color: var(--theme-primary-color);
     font-weight: bold;
 }
 
@@ -2512,23 +2556,23 @@ body.theme-forest .badge-category {
         rgba(255, 255, 255, 0.15) 0%, 
         rgba(255, 255, 255, 0.05) 100%);
     border-radius: 12px;
-    border-left: 4px solid #64b5f6;
+    border-left: 4px solid var(--theme-primary-color);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--theme-border-color);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .witness-testimony h4 {
     margin: 0 0 12px 0;
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-size: 1rem;
     font-weight: 600;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .testimony-content {
-    color: #e2e8f0;
+    color: var(--theme-text-secondary);
     line-height: 1.5;
 }
 
@@ -2539,16 +2583,16 @@ body.theme-forest .badge-category {
         rgba(255, 255, 255, 0.15) 0%, 
         rgba(255, 255, 255, 0.05) 100%);
     border-radius: 12px;
-    border-left: 4px solid #ed8936;
+    border-left: 4px solid var(--theme-warning-color);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--theme-border-color);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .vote-item h4 {
     margin: 0 0 12px 0;
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-size: 1rem;
     font-weight: 600;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
@@ -2558,7 +2602,7 @@ body.theme-forest .badge-category {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: #7f8c8d;
+    color: var(--theme-text-muted);
     font-style: italic;
 }
 
@@ -2604,7 +2648,7 @@ body.theme-forest .badge-category {
 }
 
 .vote-reason {
-    color: #e2e8f0;
+    color: var(--theme-text-secondary);
     line-height: 1.5;
     font-size: 0.95rem;
 }
@@ -2619,13 +2663,13 @@ body.theme-forest .badge-category {
     text-align: center;
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--theme-border-color);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
 .vote-summary h4 {
     margin: 0 0 16px 0;
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-size: 1.1rem;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
@@ -2660,7 +2704,7 @@ body.theme-forest .badge-category {
 
 .vote-stat span:last-child {
     font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--theme-text-muted);
     font-weight: 500;
 }
 
@@ -2676,8 +2720,9 @@ body.theme-forest .badge-category {
         rgba(255, 255, 255, 0.05) 100%);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--theme-border-color);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    color: var(--theme-text-primary);
 }
 
 .correctness-indicator {
@@ -2689,7 +2734,7 @@ body.theme-forest .badge-category {
         rgba(255, 255, 255, 0.05) 100%);
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--theme-border-color);
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
@@ -2698,6 +2743,7 @@ body.theme-forest .badge-category {
     margin: 0;
     font-size: 1.3rem;
     font-weight: 600;
+    color: var(--theme-text-primary);
 }
 
 .trial-actions {
@@ -2705,7 +2751,7 @@ body.theme-forest .badge-category {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    background: rgba(248, 249, 250, 0.8);
+    background: var(--theme-secondary-bg);
     backdrop-filter: blur(5px);
     -webkit-backdrop-filter: blur(5px);
 }
@@ -2741,7 +2787,7 @@ body.theme-forest .badge-category {
 .trial-actions .btn-mobile.menu-btn-mobile {
     background: var(--theme-secondary-bg);
     color: var(--theme-text-primary);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--theme-border-color);
     backdrop-filter: blur(10px);
     font-weight: 600;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
@@ -2768,7 +2814,7 @@ body.theme-forest .badge-category {
 
 .trial-error {
     background: rgba(231, 76, 60, 0.1);
-    border: 1px solid rgba(231, 76, 60, 0.3);
+    border: 1px solid var(--theme-warning-color);
     border-radius: 12px;
     padding: 20px;
     margin: 16px 0;
@@ -2777,13 +2823,13 @@ body.theme-forest .badge-category {
 
 .trial-error h3 {
     margin: 0 0 8px 0;
-    color: #e74c3c;
+    color: var(--theme-warning-color);
     font-size: 1.1rem;
 }
 
 .trial-error p {
     margin: 0;
-    color: #c0392b;
+    color: var(--theme-text-secondary);
 }
 
 .trial-intro {
@@ -2796,7 +2842,7 @@ body.theme-forest .badge-category {
     margin-bottom: 20px;
     backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(15px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--theme-border-color);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 

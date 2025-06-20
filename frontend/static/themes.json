@@ -92,12 +92,14 @@
     }
   },
   "caseThemeMapping": {
-    "FAMILY_DRAMA": "classic",
-    "BUSINESS_CRIME": "midnight",
-    "MYSTERY": "cold",
-    "VIOLENT_CRIME": "crime",
-    "OUTDOOR_CRIME": "forest",
-    "MARITIME_CRIME": "ocean"
+    "classic_murder": "classic",
+    "locked_room": "midnight",
+    "revenge": "crime",
+    "family_drama": "classic",
+    "kids_friendly": "forest",
+    "supernatural": "midnight",
+    "financial_crime": "cold",
+    "missing_person": "ocean"
   },
   "characterThemeColors": {
     "suspect": {

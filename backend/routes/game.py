@@ -280,6 +280,8 @@ async def start_game(request: StartGameRequest, req: Request, db: Session = Depe
                 "victim_name": game_engine.current_case.victim_name,
                 "crime_scene": game_engine.current_case.crime_scene,
                 "time_of_crime": game_engine.current_case.time_of_crime,
+                "category": game_engine.current_case.category.value,
+                "difficulty": game_engine.current_case.difficulty.value,
                 "characters": [
                     {
                         "name": char.name,
@@ -738,4 +740,4 @@ def get_game_sessions():
 # 获取连接管理器的函数，供其他模块使用
 def get_connection_manager():
     """获取连接管理器"""
-    return manager 
+    return manager

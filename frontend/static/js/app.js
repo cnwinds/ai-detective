@@ -508,6 +508,9 @@ class DetectiveGameApp {
             
             this.log(`游戏开始 - 会话ID: ${this.sessionId}, 客户端ID: ${this.clientId}`);
             
+            // 自动应用案件对应的主题
+            this.applyThemeForCase();
+            
             // 显示案情介绍而不是直接进入游戏
             this.showCaseIntroduction();
         } catch (error) {
@@ -525,6 +528,45 @@ class DetectiveGameApp {
         
         // 开始完整的打字机效果序列
         this.startFullTypewriterSequence();
+    }
+    
+    // 根据案件类型自动应用主题
+    applyThemeForCase() {
+        if (!this.currentCase || !this.currentCase.category) {
+            this.log('无法应用主题：案件数据或类型缺失');
+            return;
+        }
+
+        // 检查主题管理器是否存在
+        if (!window.themeManager) {
+            this.log('警告：主题管理器未加载');
+            return;
+        }
+
+        // 等待主题管理器加载完成
+        if (window.themeManager.isReady()) {
+            const recommendedTheme = window.themeManager.getRecommendedTheme(this.currentCase.category);
+            if (recommendedTheme) {
+                window.themeManager.applyTheme(recommendedTheme);
+                this.log(`已为案件类型 ${this.currentCase.category} 自动应用主题: ${recommendedTheme}`);
+            } else {
+                this.log(`未找到案件类型 ${this.currentCase.category} 对应的主题`);
+            }
+        } else {
+            // 如果主题管理器还未加载完成，等待加载
+            this.log('主题管理器正在加载中，等待完成...');
+            window.themeManager.waitForReady().then(() => {
+                const recommendedTheme = window.themeManager.getRecommendedTheme(this.currentCase.category);
+                if (recommendedTheme) {
+                    window.themeManager.applyTheme(recommendedTheme);
+                    this.log(`已为案件类型 ${this.currentCase.category} 自动应用主题: ${recommendedTheme}`);
+                } else {
+                    this.log(`未找到案件类型 ${this.currentCase.category} 对应的主题`);
+                }
+            }).catch(error => {
+                this.log('主题管理器加载失败:', error);
+            });
+        }
     }
     
     // 渲染介绍页面的角色信息

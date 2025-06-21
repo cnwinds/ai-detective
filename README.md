@@ -147,17 +147,20 @@ python update_version.py 1.7.0
 git clone <repository-url>
 cd ai-detective
 
-# 2. 安装依赖
+# 2. 启动MySQL数据库容器
+docker run --name mysql-container -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:5.7
+
+# 3. 安装依赖
 pip install -r requirements.txt
 
-# 3. 设置API密钥
+# 4. 设置API密钥
 cp env.template .env
-# 编辑 .env 文件，填入你的 OpenAI API 密钥
+# 编辑 .env 文件，填入你的 OpenAI API 密钥和数据库配置
 
-# 4. 启动游戏
+# 5. 启动游戏
 python start_game.py
 
-# 5. 打开浏览器访问 http://localhost:8000
+# 6. 打开浏览器访问 http://localhost:8000
 ```
 
 ### 方式二：Docker运行
@@ -328,4 +331,4 @@ cp env.template .env
 
 ---
 
-**享受推理的乐趣！🕵️‍♂️** 
+**享受推理的乐趣！🕵️‍♂️**

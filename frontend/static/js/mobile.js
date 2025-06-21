@@ -9,6 +9,8 @@ class MobileDetectiveApp {
         this.evidenceList = [];
         this.conversationHistory = [];
         this.hintsHistory = [];
+        this.hintsUsed = 0;
+        this.maxHints = 3;
         this.activeTab = 'characters';
         this.websocket = null;
         this.clientId = this._getOrCreateClientId();
@@ -137,7 +139,7 @@ class MobileDetectiveApp {
         safeBindEvent('close-modal-content', 'click', () => this.closeModalContent());
         
         // 操作按钮
-        safeBindEvent('get-hint-btn', 'click', () => this.getHint());
+        safeBindEvent('get-hint-btn', 'click', () => this.showHints());
         safeBindEvent('make-accusation-btn', 'click', () => this.makeAccusation());
         
         // 指控界面事件
@@ -305,12 +307,32 @@ class MobileDetectiveApp {
                 const gameState = await response.json();
                 this.questionCount = gameState.current_round || 0;
                 this.maxQuestions = gameState.max_rounds || 30;
-                console.log(`游戏状态加载成功 - 当前轮次: ${this.questionCount}/${this.maxQuestions}`);
+                this.hintsUsed = gameState.hints_used || 0;
+                this.maxHints = gameState.max_hints || 3;
+                this.updateHintDisplay();
+                console.log(`游戏状态加载成功 - 当前轮次: ${this.questionCount}/${this.maxQuestions}, 提示: ${this.hintsUsed}/${this.maxHints}`);
             } else {
                 console.warn('获取游戏状态失败，使用默认值');
             }
         } catch (error) {
             console.error('加载游戏状态失败:', error);
+        }
+    }
+    
+    updateHintDisplay() {
+        const hintCountEl = document.getElementById('hint-count');
+        if (hintCountEl) {
+            hintCountEl.textContent = `(${this.hintsUsed || 0}/${this.maxHints || 3})`;
+        }
+        
+        // 更新按钮状态
+        const hintBtn = document.getElementById('get-hint-btn');
+        if (hintBtn && this.hintsUsed >= this.maxHints) {
+            hintBtn.disabled = true;
+            hintBtn.style.opacity = '0.6';
+        } else if (hintBtn) {
+            hintBtn.disabled = false;
+            hintBtn.style.opacity = '1';
         }
     }
     
@@ -356,6 +378,11 @@ class MobileDetectiveApp {
             availableCharacters.forEach(character => {
                 const characterBtn = document.createElement('button');
                 characterBtn.className = 'character-menu-item';
+                
+                // 计算与该角色的聊天次数
+                const chatCount = this.chatHistory[character.name] ? 
+                    this.chatHistory[character.name].filter(item => item.type === 'question').length : 0;
+                
                 characterBtn.innerHTML = `
                     <div class="character-avatar">
                         ${character.name.charAt(0)}
@@ -364,6 +391,7 @@ class MobileDetectiveApp {
                         <div class="character-name">${character.name}</div>
                         <div class="character-role">${character.occupation}</div>
                     </div>
+                    <div class="chat-count">(${chatCount})</div>
                 `;
                 
                 characterBtn.addEventListener('click', () => {
@@ -455,12 +483,20 @@ class MobileDetectiveApp {
                                 </div>
                             </div>
                         ` : ''}
-                        ${otherCharacters.map(char => `
+                        ${otherCharacters.map(char => {
+                            // 计算与该角色的聊天次数
+                            const chatCount = this.chatHistory[char.name] ?
+                                this.chatHistory[char.name].filter(item => item.type === 'question').length : 0;
+                            
+                            return `
                             <div class="character-item interactive-item" 
                                  onclick="mobileApp.selectCharacterFromDetails('${char.name}')">
                                 <div class="character-main-info">
                                     <strong>${char.name}</strong>
                                     <span class="character-occupation">${char.occupation}</span>
+                                </div>
+                                <div class="character-center-info">
+                                    <div class="chat-count">(${chatCount})</div>
                                 </div>
                                 <div class="character-right-section">
                                     <span class="character-type-badge ${char.character_type}">
@@ -469,7 +505,8 @@ class MobileDetectiveApp {
                                     <i class="fas fa-chevron-right"></i>
                                 </div>
                             </div>
-                        `).join('')}
+                            `;
+                        }).join('')}
                     </div>
                 </div>
                 
@@ -529,6 +566,73 @@ class MobileDetectiveApp {
                 </div>
             `;
         }
+        
+        // 隐藏底部输入区域
+        const bottomInput = document.getElementById('bottom-input');
+        if (bottomInput) {
+            bottomInput.style.display = 'none';
+        }
+        
+        modalArea.style.display = 'flex';
+        this.closeSidebarMenu();
+    }
+    
+    showHints() {
+        const modalArea = document.getElementById('modal-content-area');
+        const modalTitle = document.getElementById('modal-content-title');
+        const modalBody = document.getElementById('modal-content-body');
+        
+        modalTitle.textContent = '获得的提示';
+        
+        const canGetMoreHints = (this.hintsUsed || 0) < (this.maxHints || 3);
+        
+        if (this.hintsHistory.length === 0) {
+            modalBody.innerHTML = `
+                <div class="no-hints">
+                    <i class="fas fa-lightbulb"></i>
+                    <p>暂无获得的提示</p>
+                    <small>点击下方按钮来获得智能提示</small>
+                </div>
+                <div class="hints-actions">
+                    <button id="get-new-hint-btn" class="btn-mobile btn-primary" ${!canGetMoreHints ? 'disabled' : ''}>
+                        <i class="fas fa-lightbulb"></i>
+                        <span>获取新提示 (${this.hintsUsed || 0}/${this.maxHints || 3})</span>
+                    </button>
+                </div>
+            `;
+        } else {
+            modalBody.innerHTML = `
+                <div class="hints-list">
+                    ${this.hintsHistory.map((hint, index) => `
+                        <div class="hint-item">
+                            <div class="hint-header">
+                                <div class="hint-number">提示 ${index + 1}</div>
+                                <div class="hint-time">${new Date().toLocaleString()}</div>
+                            </div>
+                            <div class="hint-content">${hint}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="hints-actions">
+                    <button id="get-new-hint-btn" class="btn-mobile btn-primary" ${!canGetMoreHints ? 'disabled' : ''}>
+                        <i class="fas fa-lightbulb"></i>
+                        <span>获取新提示 (${this.hintsUsed || 0}/${this.maxHints || 3})</span>
+                    </button>
+                </div>
+            `;
+        }
+        
+        // 绑定获取新提示按钮的点击事件
+        setTimeout(() => {
+            const getNewHintBtn = document.getElementById('get-new-hint-btn');
+            if (getNewHintBtn && !getNewHintBtn.disabled) {
+                getNewHintBtn.addEventListener('click', async () => {
+                    await this.getHint();
+                    // 获取提示后刷新页面显示
+                    this.showHints();
+                });
+            }
+        }, 100);
         
         // 隐藏底部输入区域
         const bottomInput = document.getElementById('bottom-input');
@@ -789,6 +893,12 @@ class MobileDetectiveApp {
         questionInput.value = '';
         this.handleQuestionInput({ target: { value: '' } });
         
+        // 在等待回答期间隐藏建议问题区域
+        const suggestedQuestionsArea = document.getElementById('suggested-questions');
+        if (suggestedQuestionsArea) {
+            suggestedQuestionsArea.style.display = 'none';
+        }
+        
         this.addQuestionToConversation(question, true);
         
         // 保存问题到聊天历史
@@ -859,6 +969,20 @@ class MobileDetectiveApp {
                                     content: fullResponse,
                                     evidence: evidenceRevealed
                                 });
+                                
+                                // 更新角色菜单中的聊天次数
+                                this.generateCharacterMenu();
+                                
+                                // 如果当前显示的是案件详情页面，也要刷新以更新聊天次数
+                                const modalArea = document.getElementById('modal-content-area');
+                                const modalTitle = document.getElementById('modal-content-title');
+                                if (modalArea && modalArea.style.display === 'flex' && 
+                                    modalTitle && modalTitle.textContent === '案件详情') {
+                                    // 延迟刷新案件详情页面，确保聊天历史已更新
+                                    setTimeout(() => {
+                                        this.showCaseDetails();
+                                    }, 100);
+                                }
                                 
                                 // 重新获取建议问题
                                 this.showSuggestedQuestionsLoading();
@@ -981,6 +1105,12 @@ class MobileDetectiveApp {
     }
     
     updateEvidenceDisplay() {
+        // 更新菜单中的证据数量显示
+        const evidenceCountElement = document.getElementById('evidence-count');
+        if (evidenceCountElement) {
+            evidenceCountElement.textContent = `(${this.evidenceList.length})`;
+        }
+        
         const evidenceList = document.getElementById('evidence-list');
         
         // 如果元素不存在，直接返回（新的菜单系统通过模态框显示证据）
@@ -1079,6 +1209,8 @@ class MobileDetectiveApp {
             
             if (response.ok && data.hint) {
                 this.hintsHistory.push(data.hint);
+                this.hintsUsed = data.hints_used || (this.hintsUsed + 1);
+                this.updateHintDisplay();
                 this.updateGameStats();
                 this.showModal('提示', data.hint);
             } else {
@@ -1704,6 +1836,8 @@ class MobileDetectiveApp {
         this.selectedCharacter = null;
         this.evidenceList = [];
         this.hintsHistory = [];
+        this.hintsUsed = 0;
+        this.maxHints = 3;
         this.sessionId = null;
         this.chatHistory = {};
         this.questionCount = 0;

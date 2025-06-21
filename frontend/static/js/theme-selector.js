@@ -472,20 +472,12 @@ class ThemeSelector {
     }
 
     /**
-     * 创建主题选择器触发按钮
+     * 创建主题选择器触发按钮（已废弃，现在使用菜单按钮）
      */
     createTriggerButton() {
-        const button = document.createElement('button');
-        button.className = 'theme-selector-trigger';
-        button.innerHTML = '<i class="fas fa-palette"></i>';
-        button.setAttribute('aria-label', '选择主题');
-        
-        button.addEventListener('click', () => {
-            this.toggle();
-        });
-        
-        document.body.appendChild(button);
-        return button;
+        // 不再创建浮动按钮，主题选择功能已移至侧边菜单
+        console.log('主题选择器已集成到侧边菜单中');
+        return null;
     }
 
     /**

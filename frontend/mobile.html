@@ -165,12 +165,12 @@
                             <span>案件详情</span>
                         </button>
                         
-                        <!-- 其他功能 -->
                         <div class="menu-section">
-                            <h4>其他功能</h4>
+                            <h4>案件功能</h4>
                             <button class="menu-item" id="evidence-menu-btn">
                                 <i class="fas fa-search"></i>
                                 <span>查看证据</span>
+                                <span class="evidence-count" id="evidence-count">(0)</span>
                             </button>
                             <button class="menu-item" id="notes-menu-btn">
                                 <i class="fas fa-sticky-note"></i>
@@ -179,6 +179,7 @@
                             <button class="menu-item" id="get-hint-btn">
                                 <i class="fas fa-lightbulb"></i>
                                 <span>获取提示</span>
+                                <span id="hint-count">(0/0)</span>
                             </button>
                             <button class="menu-item primary" id="make-accusation-btn">
                                 <i class="fas fa-gavel"></i>
@@ -193,7 +194,13 @@
                                 <!-- 角色按钮将通过JavaScript动态生成 -->
                             </div>
                         </div>
-                        
+                        <div class="menu-section">
+                            <h4>其他功能</h4>
+                            <button class="menu-item" id="theme-selector-menu-btn">
+                                <i class="fas fa-palette"></i>
+                                <span>选择主题</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
@@ -296,9 +303,7 @@
         <div class="mobile-screen" id="trial-result-screen">
             <div class="screen-header">
                 <h2><i class="fas fa-balance-scale"></i> 审判结果</h2>
-                <button class="header-action-btn" id="trial-menu-btn">
-                    <i class="fas fa-ellipsis-v"></i>
-                </button>
+                <div class="header-spacer"></div>
             </div>
             <div class="trial-container">
                 <div id="mobile-trial-result-content" class="trial-result-content">
@@ -347,11 +352,18 @@
     <script src="static/js/mobile.js"></script>
     
     <script>
-        // 初始化主题选择器触发按钮
+        // 初始化主题选择器菜单按钮
         document.addEventListener('DOMContentLoaded', () => {
-            // 等待主题管理器加载完成后创建触发按钮
-            if (window.themeSelector) {
-                window.themeSelector.createTriggerButton();
+            // 绑定主题选择器菜单按钮事件
+            const themeMenuBtn = document.getElementById('theme-selector-menu-btn');
+            if (themeMenuBtn && window.themeSelector) {
+                themeMenuBtn.addEventListener('click', () => {
+                    window.themeSelector.toggle();
+                    // 关闭侧边菜单
+                    if (window.mobileApp) {
+                        window.mobileApp.closeSidebarMenu();
+                    }
+                });
             }
         });
         

@@ -302,88 +302,7 @@ html, body {
     opacity: 0.9;
 }
 
-.main-menu-container {
-    width: 100%;
-    max-width: 350px;
-}
 
-.menu-header {
-    margin-bottom: 60px;
-}
-
-.game-logo {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 15px;
-    margin-bottom: 15px;
-}
-
-.game-logo i {
-    font-size: 3rem;
-    color: var(--theme-primary-color);
-}
-
-.game-logo h1 {
-    font-size: 2.2rem;
-    color: var(--theme-text-primary);
-    font-weight: 700;
-}
-
-.game-subtitle {
-    color: var(--theme-text-secondary);
-    font-size: 1rem;
-}
-
-.menu-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 40px;
-}
-
-.menu-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    padding: 16px 24px;
-    border: none;
-    border-radius: 12px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-}
-
-.menu-btn.primary-btn {
-    background: var(--theme-accent-color);
-    color: #000;
-    box-shadow: 0 4px 15px var(--theme-shadow-color);
-}
-
-.menu-btn.primary-btn:active {
-    transform: translateY(2px);
-    box-shadow: 0 2px 8px var(--theme-shadow-color);
-}
-
-.menu-btn.secondary-btn {
-    background: var(--theme-secondary-bg);
-    color: var(--theme-text-primary);
-    border: 1px solid var(--theme-border-color);
-}
-
-.menu-btn.secondary-btn:active {
-    background: var(--theme-hover-bg);
-    transform: translateY(1px);
-}
-
-.version-tag {
-    color: rgba(255, 255, 255, 0.6);
-    font-size: 0.9rem;
-}
 
 /* 案件选择界面 */
 #case-selection {
@@ -991,6 +910,29 @@ body.theme-forest .badge-category {
     color: var(--theme-text-secondary);
 }
 
+.character-menu-item .chat-count {
+    font-size: 12px;
+    color: var(--theme-accent-color);
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+/* 证据数量显示 */
+.evidence-count {
+    font-size: 12px;
+    color: var(--theme-accent-color);
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+/* 提示数量显示 */
+#hint-count {
+    font-size: 12px;
+    color: var(--theme-accent-color);
+    font-weight: 600;
+    margin-left: 5px;
+}
+
 /* 主内容区域 */
 .main-content {
     flex: 1;
@@ -1006,7 +948,7 @@ body.theme-forest .badge-category {
     -webkit-backdrop-filter: blur(15px);
     padding: 20px 20px 15px 96px; /* 左边距增加以避开悬浮菜单按钮 */
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    text-align: center;
+    text-align: right;
 }
 
 #game-case-title {
@@ -1225,6 +1167,20 @@ body.theme-forest .badge-category {
     font-size: 1.1em;
 }
 
+.character-center-info {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    margin: 0 15px;
+}
+
+.character-center-info .chat-count {
+    font-size: 12px;
+    color: var(--theme-accent-color);
+    font-weight: 600;
+}
+
 .character-occupation {
     color: var(--theme-text-secondary);
     font-size: 0.6em;
@@ -1370,40 +1326,9 @@ body.theme-forest .badge-category {
     font-weight: 600;
 }
 
-/* 菜单按钮 */
-.menu-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    width: 40px;
-    height: 40px;
-    border: none;
-    border-radius: 8px;
-    background: var(--theme-primary-bg);
-    color: var(--theme-text-primary);
-    cursor: pointer;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    box-shadow: 0 4px 12px var(--theme-shadow-color);
-}
 
-.menu-btn:active {
-    background: var(--theme-primary-bg);
-    transform: scale(0.95);
-    box-shadow: 0 2px 8px var(--theme-shadow-color);
-}
 
-.tab-btn i {
-    font-size: 20px;
-}
 
-.tab-btn span {
-    font-size: 0.75rem;
-    font-weight: 500;
-}
 
 .unread-badge {
     position: absolute;
@@ -1565,8 +1490,10 @@ body.theme-forest .badge-category {
     align-items: center;
     justify-content: space-between;
     padding: 15px 20px;
-    background: rgba(0, 0, 0, 0.3);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--theme-secondary-bg);
+    border-bottom: 1px solid var(--theme-border-color);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .character-info {
@@ -1583,14 +1510,14 @@ body.theme-forest .badge-category {
 }
 
 .character-details h4 {
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 2px;
 }
 
 .character-role {
-    color: #90cdf4;
+    color: var(--theme-primary-color);
     font-size: 0.8rem;
 }
 
@@ -1599,8 +1526,8 @@ body.theme-forest .badge-category {
     height: 36px;
     border: none;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.7);
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-secondary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1610,7 +1537,7 @@ body.theme-forest .badge-category {
 }
 
 .clear-btn:active {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--theme-hover-bg);
     transform: scale(0.95);
 }
 
@@ -1618,19 +1545,19 @@ body.theme-forest .badge-category {
     flex: 1;
     padding: 20px;
     overflow-y: auto;
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--theme-primary-bg);
 }
 
 .welcome-message {
     text-align: center;
-    color: #e0e0e0;
+    color: var(--theme-text-secondary);
     padding: 40px 20px;
 }
 
 .welcome-message i {
     font-size: 3rem;
     margin-bottom: 15px;
-    color: #cccccc;
+    color: var(--theme-text-muted);
 }
 
 .conversation-item {
@@ -1638,25 +1565,30 @@ body.theme-forest .badge-category {
 }
 
 .question {
-    background: linear-gradient(135deg, #64b5f6, #42a5f5);
-    color: #ffffff;
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
     padding: 12px 16px;
     border-radius: 18px 18px 4px 18px;
     margin-left: 40px;
     font-size: 0.9rem;
     line-height: 1.4;
+    border: 1px solid var(--theme-border-color);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .response {
-    background: rgba(255, 255, 255, 0.15);
-    color: #ffffff;
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
     padding: 12px 16px;
     border-radius: 18px 18px 18px 4px;
     margin-right: 40px;
     margin-top: 8px;
     font-size: 0.9rem;
     line-height: 1.4;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid var(--theme-border-color);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .response.streaming {
@@ -1667,17 +1599,12 @@ body.theme-forest .badge-category {
     animation: blink 1s infinite;
 }
 
-.question-input-area {
-    background: rgba(0, 0, 0, 0.4);
-    padding: 15px 20px 20px;
-}
-
 .suggested-questions {
     margin-bottom: 15px;
 }
 
 .suggestions-header h4 {
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-size: 0.9rem;
     font-weight: 600;
     margin-bottom: 10px;
@@ -1692,9 +1619,9 @@ body.theme-forest .badge-category {
 }
 
 .suggestion-btn {
-    background: rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
+    border: 1px solid var(--theme-border-color);
     border-radius: 10px;
     padding: 10px 12px;
     text-align: left;
@@ -1705,7 +1632,7 @@ body.theme-forest .badge-category {
 }
 
 .suggestion-btn:active {
-    background: rgba(255, 255, 255, 0.2);
+    background: var(--theme-hover-bg);
     transform: scale(0.98);
 }
 
@@ -1721,26 +1648,26 @@ body.theme-forest .badge-category {
 
 #question-input {
     flex: 1;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--theme-secondary-bg);
+    border: 1px solid var(--theme-border-color);
     border-radius: 12px;
     padding: 12px;
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-size: 0.9rem;
     line-height: 1.4;
     resize: none;
-    min-height: 44px;
+    min-height: 48px; /* 与发送按钮等高 */
     max-height: 100px;
 }
 
 #question-input::placeholder {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--theme-text-muted);
 }
 
 #question-input:focus {
     outline: none;
-    border-color: #64b5f6;
-    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+    border-color: var(--theme-primary-color);
+    box-shadow: 0 0 0 2px var(--theme-shadow-color);
 }
 
 /* 通用发送按钮样式已合并到 .bottom-input .send-btn */
@@ -1750,7 +1677,7 @@ body.theme-forest .badge-category {
     justify-content: space-between;
     margin-top: 8px;
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--theme-text-muted);
 }
 
 /* 证据面板 */
@@ -1762,50 +1689,131 @@ body.theme-forest .badge-category {
 
 .no-evidence {
     text-align: center;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--theme-text-muted);
     padding: 40px 20px;
 }
 
 .no-evidence i {
     font-size: 3rem;
     margin-bottom: 15px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--theme-text-muted);
 }
 
 .no-evidence small {
     display: block;
     margin-top: 8px;
-    color: rgba(255, 255, 255, 0.4);
+    color: var(--theme-text-muted);
 }
 
 .evidence-item {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--theme-secondary-bg);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     border-radius: 12px;
     padding: 15px;
     margin-bottom: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--theme-border-color);
 }
 
 .evidence-name {
-    color: #64b5f6;
+    color: var(--theme-primary-color);
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 8px;
 }
 
 .evidence-description {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--theme-text-primary);
     font-size: 0.9rem;
     line-height: 1.4;
     margin-bottom: 8px;
 }
 
 .evidence-significance {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--theme-text-secondary);
     font-size: 0.8rem;
-    font-style: italic;
+}
+
+/* 提示列表样式 */
+.hints-list {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.no-hints {
+    text-align: center;
+    color: var(--theme-text-muted);
+    padding: 40px 20px;
+}
+
+.no-hints i {
+    font-size: 3rem;
+    margin-bottom: 15px;
+    color: var(--theme-text-muted);
+}
+
+.no-hints small {
+    display: block;
+    margin-top: 8px;
+    color: var(--theme-text-muted);
+}
+
+.hint-item {
+    background: var(--theme-secondary-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid var(--theme-border-color);
+}
+
+.hint-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.hint-number {
+    color: var(--theme-primary-color);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.hint-time {
+    color: var(--theme-text-secondary);
+    font-size: 0.8rem;
+}
+
+.hint-content {
+    color: var(--theme-text-primary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+.hints-actions {
+    padding: 20px;
+    border-top: 1px solid var(--theme-border-color);
+    background: var(--theme-bg-primary);
+}
+
+.hints-actions .btn-mobile {
+    width: 100%;
+    justify-content: center;
+}
+
+.hints-actions .btn-mobile:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.hints-actions .btn-mobile:disabled:hover {
+    background: var(--theme-primary-color);
+    transform: none;
+    box-shadow: none;
 }
 
 /* 笔记面板 */
@@ -1938,6 +1946,17 @@ body.theme-forest .badge-category {
     from {
         opacity: 0;
         transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
     }
     to {
         opacity: 1;
@@ -2182,7 +2201,7 @@ body.theme-forest .badge-category {
     color: #ffffff;
     font-size: 14px;
     resize: none;
-    min-height: 48px; /* 与发送按钮等高 */
+    min-height: 48px;
     max-height: 100px;
 }
 
@@ -2197,8 +2216,9 @@ body.theme-forest .badge-category {
 }
 
 .bottom-input .send-btn {
-    min-width: 44px;
-    height: 48px; /* 与聊天输入框等高 */
+    min-width: 48px;
+    min-height: 48px; /* 跟随输入框的最小高度 */
+    max-height: 100px; /* 跟随输入框的最大高度 */
     border: none;
     border-radius: 12px;
     background: var(--theme-accent-color);
@@ -2210,15 +2230,18 @@ body.theme-forest .badge-category {
     justify-content: center;
     flex-shrink: 0;
     flex-direction: column;
-    padding: 4px 8px;
-    font-size: 18px;
+    padding: 2px 4px;
+    font-size: 16px;
     box-shadow: 0 4px 12px var(--theme-shadow-color);
+    gap: 6px;
+    align-self: stretch; /* 让按钮在flex容器中拉伸以匹配输入框高度 */
 }
 
 .bottom-input .send-btn .question-counter {
-    font-size: 0.6rem;
+    font-size: 0.55rem;
     opacity: 0.9;
     line-height: 1;
+    font-weight: 500;
 }
 
 .bottom-input .send-btn:disabled {
@@ -2269,7 +2292,7 @@ body.theme-forest .badge-category {
     justify-content: center;
     gap: 8px;
     padding: 12px;
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--theme-text-secondary);
     font-size: 14px;
 }
 

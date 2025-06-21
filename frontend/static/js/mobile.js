@@ -41,14 +41,11 @@ class MobileDetectiveApp {
             // 确保使用经典主题配色
             this.ensureClassicTheme();
             
-            // 模拟加载时间，但只在仍在加载屏幕时才跳转
-            setTimeout(() => {
-                // 只有当前屏幕是加载屏幕时才自动跳转到主菜单
-                const loadingScreen = document.querySelector('#loading-screen');
-                if (loadingScreen && loadingScreen.classList.contains('active')) {
-                    this.hideLoadingScreen();
-                }
-            }, 2000);
+            // 初始化完成后立即隐藏加载屏幕
+            const loadingScreen = document.querySelector('#loading-screen');
+            if (loadingScreen && loadingScreen.classList.contains('active')) {
+                this.hideLoadingScreen();
+            }
             
         } catch (error) {
             console.error('初始化失败:', error);
@@ -123,7 +120,11 @@ class MobileDetectiveApp {
         safeBindEvent('about-btn', 'click', () => this.showAbout());
         
         // 案件选择
-        safeBindEvent('back-to-menu', 'click', () => this.showScreen('main-menu'));
+        safeBindEvent('back-to-menu', 'click', () => {
+            this.showScreen('main-menu');
+            // 重新设置为默认主题
+            this.ensureClassicTheme();
+        });
         
         // 游戏界面 - 新的侧边栏菜单系统
         safeBindEvent('sidebar-menu-btn', 'click', () => this.toggleSidebarMenu());
@@ -204,6 +205,8 @@ class MobileDetectiveApp {
     
     hideLoadingScreen() {
         this.showScreen('main-menu');
+        // 重新设置为默认主题
+        this.ensureClassicTheme();
     }
     
     async showCaseSelection() {
@@ -1826,6 +1829,8 @@ class MobileDetectiveApp {
         this.resetGameState();
         // 返回主菜单
         this.showScreen('main-menu');
+        // 重新设置为默认主题
+        this.ensureClassicTheme();
     }
 
     initializeEvaluationForm() {
@@ -1981,9 +1986,11 @@ class MobileDetectiveApp {
                 if (navigator.vibrate) {
                     navigator.vibrate([100, 50, 100]);
                 }
-                // 3秒后返回审判结果界面
+                // 3秒后返回主界面
                 setTimeout(() => {
-                    this.showScreen('trial-result-screen');
+                    this.showScreen('main-menu');
+                    // 重新设置为默认主题
+                    this.ensureClassicTheme();
                 }, 3000);
             } else {
                 const error = await response.json();

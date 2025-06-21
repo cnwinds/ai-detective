@@ -116,7 +116,11 @@ class DetectiveGameApp {
         document.getElementById('about-btn').addEventListener('click', () => this.showModal('about-modal'));
         
         // 案例选择
-        document.getElementById('back-to-menu').addEventListener('click', () => this.showScreen('main-menu'));
+        document.getElementById('back-to-menu').addEventListener('click', () => {
+            this.showScreen('main-menu');
+            // 重新设置为默认主题
+            this.resetToDefaultTheme();
+        });
         
         // 案情介绍
         document.getElementById('start-investigation-btn').addEventListener('click', () => this.startInvestigation());
@@ -2689,6 +2693,29 @@ class DetectiveGameApp {
             return `
                 <div class="question">${question}</div>
             `;
+        }
+    }
+    
+    /**
+     * 重置为默认主题
+     */
+    resetToDefaultTheme() {
+        // 等待主题管理器加载完成后应用经典主题
+        if (window.themeManager) {
+            if (window.themeManager.isReady()) {
+                window.themeManager.applyTheme('classic');
+                console.log('已重置为默认主题配色');
+            } else {
+                window.themeManager.waitForReady().then(() => {
+                    window.themeManager.applyTheme('classic');
+                    console.log('主题管理器加载完成，已重置为默认主题配色');
+                });
+            }
+        } else {
+            // 如果主题管理器还未加载，等待一段时间后重试
+            setTimeout(() => {
+                this.resetToDefaultTheme();
+            }, 100);
         }
     }
 }

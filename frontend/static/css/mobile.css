@@ -2950,13 +2950,13 @@ body.theme-forest .badge-category {
 .message.success {
     background: rgba(72, 187, 120, 0.2);
     border: 1px solid rgba(72, 187, 120, 0.4);
-    color: #68d391;
+    color: var(--theme-text-primary);
 }
 
 .message.error {
     background: rgba(245, 101, 101, 0.2);
     border: 1px solid rgba(245, 101, 101, 0.4);
-    color: #fc8181;
+    color: var(--theme-text-primary);
 }
 
 /* 表单样式 */

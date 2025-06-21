@@ -579,3 +579,45 @@ document.addEventListener('DOMContentLoaded', () => {
 }
 ```
 说明：将突兀的红色按钮改为与整体设计风格一致的蓝紫色渐变，保持视觉和谐性。
+
+## 性能优化经验
+
+### 错误点：移动端加载屏幕设置不必要的固定延时
+错误示范：
+```javascript
+// 模拟加载时间，但只在仍在加载屏幕时才跳转
+setTimeout(() => {
+    const loadingScreen = document.querySelector('#loading-screen');
+    if (loadingScreen && loadingScreen.classList.contains('active')) {
+        this.hideLoadingScreen();
+    }
+}, 2000); // 固定2秒延时
+```
+正确做法：
+```javascript
+// 初始化完成后立即隐藏加载屏幕
+const loadingScreen = document.querySelector('#loading-screen');
+if (loadingScreen && loadingScreen.classList.contains('active')) {
+    this.hideLoadingScreen();
+}
+```
+说明：移除不必要的固定延时，让应用在初始化完成后立即响应，提升用户体验和应用启动速度。
+
+### 错误点：游戏结束后返回主界面时未重置主题
+错误示范：
+```javascript
+// 游戏结束后直接返回主界面，未重置主题
+setTimeout(() => {
+    this.showScreen('main-menu');
+}, 3000);
+```
+正确做法：
+```javascript
+// 游戏结束后返回主界面时重置为默认主题
+setTimeout(() => {
+    this.showScreen('main-menu');
+    // 重新设置为默认主题
+    this.ensureClassicTheme();
+}, 3000);
+```
+说明：确保游戏结束后返回主界面时重置为默认主题，避免主题状态残留影响用户体验。

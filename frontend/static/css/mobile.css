@@ -2670,15 +2670,21 @@ body.theme-forest .badge-category {
 }
 
 .vote-decision.support {
-    background: rgba(46, 204, 113, 0.1);
-    color: #27ae60;
-    border: 1px solid rgba(46, 204, 113, 0.3);
+    background: rgba(46, 204, 113, 0.25);
+    color: #ffffff;
+    border: 1px solid rgba(46, 204, 113, 0.5);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .vote-decision.oppose {
-    background: rgba(231, 76, 60, 0.1);
-    color: #e74c3c;
-    border: 1px solid rgba(231, 76, 60, 0.3);
+    background: rgba(231, 76, 60, 0.25);
+    color: #ffffff;
+    border: 1px solid rgba(231, 76, 60, 0.5);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .vote-reason {
@@ -2919,5 +2925,190 @@ body.theme-forest .badge-category {
     }
     51%, 100% {
         opacity: 0;
+    }
+}
+
+/* 游戏评价界面样式 */
+.evaluation-container {
+    height: calc(100% - 60px);
+    overflow-y: auto;
+    padding: 20px;
+    max-width: 100%;
+}
+
+/* 消息提示样式 */
+.message {
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+.message.success {
+    background: rgba(72, 187, 120, 0.2);
+    border: 1px solid rgba(72, 187, 120, 0.4);
+    color: #68d391;
+}
+
+.message.error {
+    background: rgba(245, 101, 101, 0.2);
+    border: 1px solid rgba(245, 101, 101, 0.4);
+    color: #fc8181;
+}
+
+/* 表单样式 */
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--theme-text-primary);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.required {
+    color: #fc8181;
+}
+
+/* 评分容器 */
+.rating-container {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 10px;
+    justify-content: center;
+    padding: 15px;
+    background: var(--theme-secondary-bg);
+    border-radius: 12px;
+    border: 1px solid var(--theme-border-color);
+}
+
+.star {
+    font-size: 2rem;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.star:hover,
+.star.active {
+    color: #ffd700;
+    transform: scale(1.1);
+}
+
+.rating-text {
+    text-align: center;
+    color: var(--theme-text-secondary);
+    font-size: 0.9rem;
+    margin-top: 5px;
+}
+
+/* 输入框样式 */
+.form-textarea,
+.form-select {
+    width: 100%;
+    padding: 15px;
+    border: 1px solid var(--theme-border-color);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--theme-text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.form-select option {
+    background: rgba(45, 55, 72, 0.95);
+    color: var(--theme-text-primary);
+    padding: 10px;
+}
+
+.form-textarea {
+    min-height: 100px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.form-textarea:focus,
+.form-select:focus {
+    outline: none;
+    border-color: var(--theme-primary-color);
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
+.form-textarea::placeholder {
+    color: var(--theme-text-muted);
+}
+
+/* 复选框样式 */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-content: center;
+    padding: 15px;
+    background: var(--theme-secondary-bg);
+    border-radius: 12px;
+    border: 1px solid var(--theme-border-color);
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: var(--theme-primary-color);
+}
+
+.checkbox-group label {
+    color: var(--theme-text-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+/* 按钮组样式 */
+.button-group {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.button-group .btn-mobile {
+    flex: 1;
+}
+
+/* 评价界面响应式设计 */
+@media (max-width: 480px) {
+    .evaluation-container {
+        padding: 15px;
+    }
+    
+    .rating-container {
+        padding: 12px;
+    }
+    
+    .star {
+        font-size: 1.8rem;
+    }
+    
+    .form-textarea,
+    .form-select {
+        padding: 12px;
+        font-size: 0.9rem;
+    }
+    
+    .button-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .button-group .btn-mobile {
+        flex: none;
     }
 }

@@ -311,6 +311,98 @@
                 </div>
             </div>
         </div>
+
+        <!-- 游戏评价界面 -->
+        <div class="mobile-screen" id="evaluation-screen">
+            <div class="screen-header">
+                <button class="back-btn" onclick="mobileApp.showScreen('trial-result-screen')">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <h2><i class="fas fa-star"></i> 游戏评价</h2>
+                <div class="header-spacer"></div>
+            </div>
+            <div class="evaluation-container">
+                <!-- 成功消息 -->
+                <div class="message success" id="evaluationSuccessMessage" style="display: none;">
+                    <i class="fas fa-check-circle"></i>
+                    感谢您的评价！您的反馈对我们非常重要。
+                </div>
+                
+                <!-- 错误消息 -->
+                <div class="message error" id="evaluationErrorMessage" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span id="evaluationErrorText">提交失败，请重试。</span>
+                </div>
+                
+                <!-- 评价表单 -->
+                <form id="mobileEvaluationForm">
+                    <!-- 整体评分 -->
+                    <div class="form-group">
+                        <label class="form-label">整体评分 <span class="required">*</span></label>
+                        <div class="rating-container">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                        <div class="rating-text" id="mobileRatingText">请选择评分</div>
+                    </div>
+                    
+                    <!-- 评价原因 -->
+                    <div class="form-group">
+                        <label class="form-label" for="mobileReason">评价原因 <span class="required">*</span></label>
+                        <textarea class="form-textarea" id="mobileReason" name="reason" 
+                                  placeholder="请详细说明您的评分原因，如游戏的优点、不足或建议..."></textarea>
+                    </div>
+                    
+                    <!-- 难度反馈 -->
+                    <div class="form-group">
+                        <label class="form-label" for="mobileDifficulty">难度反馈</label>
+                        <select class="form-select" id="mobileDifficulty" name="difficulty">
+                            <option value="">请选择</option>
+                            <option value="too_easy">太简单了</option>
+                            <option value="just_right">难度刚好</option>
+                            <option value="too_hard">太难了</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 最喜欢的方面 -->
+                    <div class="form-group">
+                        <label class="form-label" for="mobileMostLiked">最喜欢的方面</label>
+                        <textarea class="form-textarea" id="mobileMostLiked" name="mostLiked" 
+                                  placeholder="您最喜欢游戏的哪个方面？（可选）"></textarea>
+                    </div>
+                    
+                    <!-- 改进建议 -->
+                    <div class="form-group">
+                        <label class="form-label" for="mobileSuggestions">改进建议</label>
+                        <textarea class="form-textarea" id="mobileSuggestions" name="suggestions" 
+                                  placeholder="您对游戏有什么改进建议？（可选）"></textarea>
+                    </div>
+                    
+                    <!-- 推荐选项 -->
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="mobileRecommend" name="recommend">
+                            <label for="mobileRecommend">我会向朋友推荐这个游戏</label>
+                        </div>
+                    </div>
+                    
+                    <!-- 按钮组 -->
+                    <div class="button-group">
+                        <button type="submit" class="btn-mobile btn-primary" id="mobileSubmitBtn">
+                            <i class="fas fa-paper-plane"></i>
+                            <span>提交评价</span>
+                        </button>
+                        <button type="button" class="btn-mobile btn-secondary" onclick="mobileApp.showScreen('main-menu')">
+                            <i class="fas fa-home"></i>
+                            <span>返回主菜单</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <!-- PWA安装提示横幅 -->

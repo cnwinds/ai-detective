@@ -1617,10 +1617,6 @@ class MobileDetectiveApp {
                             <i class="fas fa-home"></i>
                             <span>返回主菜单</span>
                         </button>
-                        <button class="btn-mobile restart-btn" onclick="mobileApp.startNewGame()">
-                            <i class="fas fa-redo"></i>
-                            <span>重新开始</span>
-                        </button>
                     </div>
                 `;
                 // 审判完成，强制滚动到操作按钮
@@ -1818,7 +1814,8 @@ class MobileDetectiveApp {
     
     goToEvaluation() {
         if (this.sessionId) {
-            window.location.href = `mobile_evaluation.html?session_id=${this.sessionId}`;
+            this.showScreen('evaluation-screen');
+            this.initializeEvaluationForm();
         } else {
             this.showToast('无法获取游戏会话ID，无法进行评价', 'error');
         }
@@ -1829,6 +1826,191 @@ class MobileDetectiveApp {
         this.resetGameState();
         // 返回主菜单
         this.showScreen('main-menu');
+    }
+
+    initializeEvaluationForm() {
+        // 重置表单状态
+        this.selectedRating = 0;
+        document.getElementById('mobileEvaluationForm').reset();
+        document.getElementById('mobileRatingText').textContent = '请选择评分';
+        document.getElementById('evaluationSuccessMessage').style.display = 'none';
+        document.getElementById('evaluationErrorMessage').style.display = 'none';
+        
+        // 清除所有星级选择
+        const stars = document.querySelectorAll('#evaluation-screen .star');
+        stars.forEach(star => star.classList.remove('active'));
+        
+        // 绑定评分交互事件
+        this.bindEvaluationEvents();
+    }
+
+    bindEvaluationEvents() {
+        const stars = document.querySelectorAll('#evaluation-screen .star');
+        const ratingText = document.getElementById('mobileRatingText');
+        const ratingTexts = ['', '很不满意', '不满意', '一般', '满意', '非常满意'];
+        
+        // 移除之前的事件监听器
+        stars.forEach(star => {
+            star.replaceWith(star.cloneNode(true));
+        });
+        
+        // 重新获取星级元素并绑定事件
+        const newStars = document.querySelectorAll('#evaluation-screen .star');
+        newStars.forEach(star => {
+            star.addEventListener('click', () => {
+                this.selectedRating = parseInt(star.dataset.rating);
+                this.updateStars();
+                ratingText.textContent = ratingTexts[this.selectedRating];
+                
+                // 添加触觉反馈（如果支持）
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            });
+            
+            // 触摸开始时高亮显示
+            star.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const rating = parseInt(star.dataset.rating);
+                this.highlightStars(rating);
+            });
+            
+            // 触摸结束时确认选择
+            star.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                this.selectedRating = parseInt(star.dataset.rating);
+                this.updateStars();
+                ratingText.textContent = ratingTexts[this.selectedRating];
+                
+                // 添加触觉反馈（如果支持）
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+            });
+            
+            // 鼠标悬停效果（适用于支持鼠标的设备）
+            star.addEventListener('mouseover', () => {
+                const rating = parseInt(star.dataset.rating);
+                this.highlightStars(rating);
+            });
+        });
+        
+        // 鼠标离开评分区域时恢复到已选择的评分
+        const ratingContainer = document.querySelector('#evaluation-screen .rating-container');
+        if (ratingContainer) {
+            ratingContainer.addEventListener('mouseleave', () => {
+                this.updateStars();
+            });
+            
+            // 触摸取消时恢复到已选择的评分
+            ratingContainer.addEventListener('touchcancel', () => {
+                this.updateStars();
+            });
+        }
+        
+        // 绑定表单提交事件
+        const form = document.getElementById('mobileEvaluationForm');
+        if (form) {
+            form.removeEventListener('submit', this.handleEvaluationSubmit);
+            form.addEventListener('submit', (e) => this.handleEvaluationSubmit(e));
+        }
+    }
+
+    highlightStars(rating) {
+        const stars = document.querySelectorAll('#evaluation-screen .star');
+        stars.forEach((star, index) => {
+            if (index < rating) {
+                star.classList.add('active');
+            } else {
+                star.classList.remove('active');
+            }
+        });
+    }
+
+    updateStars() {
+        this.highlightStars(this.selectedRating);
+    }
+
+    async handleEvaluationSubmit(e) {
+        e.preventDefault();
+        
+        if (!this.sessionId) {
+            this.showEvaluationError('缺少会话ID，无法提交评价');
+            return;
+        }
+        
+        if (this.selectedRating === 0) {
+            this.showEvaluationError('请选择评分');
+            return;
+        }
+        
+        const reason = document.getElementById('mobileReason').value.trim();
+        if (!reason) {
+            this.showEvaluationError('请填写评价原因');
+            return;
+        }
+        
+        const submitBtn = document.getElementById('mobileSubmitBtn');
+        const submitBtnText = submitBtn.querySelector('span');
+        const submitBtnIcon = submitBtn.querySelector('i');
+        
+        submitBtn.disabled = true;
+        submitBtnText.textContent = '提交中...';
+        submitBtnIcon.className = 'fas fa-spinner fa-spin';
+        
+        try {
+            const response = await fetch(`${this.apiBase}/game/evaluation`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    session_id: this.sessionId,
+                    rating: this.selectedRating,
+                    reason: reason,
+                    difficulty_feedback: document.getElementById('mobileDifficulty').value || null,
+                    most_liked: document.getElementById('mobileMostLiked').value.trim() || null,
+                    suggestions: document.getElementById('mobileSuggestions').value.trim() || null,
+                    would_recommend: document.getElementById('mobileRecommend').checked
+                })
+            });
+            
+            if (response.ok) {
+                this.showEvaluationSuccess();
+                // 添加触觉反馈
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+                // 3秒后返回审判结果界面
+                setTimeout(() => {
+                    this.showScreen('trial-result-screen');
+                }, 3000);
+            } else {
+                const error = await response.json();
+                this.showEvaluationError(error.detail || '提交失败');
+            }
+        } catch (error) {
+            console.error('提交评价失败:', error);
+            this.showEvaluationError('网络错误，请重试');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtnText.textContent = '提交评价';
+            submitBtnIcon.className = 'fas fa-paper-plane';
+        }
+    }
+
+    showEvaluationSuccess() {
+        document.getElementById('evaluationSuccessMessage').style.display = 'block';
+        document.getElementById('evaluationErrorMessage').style.display = 'none';
+        document.getElementById('mobileEvaluationForm').style.display = 'none';
+    }
+
+    showEvaluationError(message) {
+        const errorElement = document.getElementById('evaluationErrorMessage');
+        const errorText = document.getElementById('evaluationErrorText');
+        errorText.textContent = message;
+        errorElement.style.display = 'block';
+        document.getElementById('evaluationSuccessMessage').style.display = 'none';
     }
     
     resetGameState() {

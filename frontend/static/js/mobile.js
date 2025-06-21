@@ -86,13 +86,13 @@ class MobileDetectiveApp {
             const versionInfo = await response.json();
             
             // 更新移动端页面底部的版本显示
-            const mobileVersionElement = document.getElementById('mobile-version-info');
+            const mobileVersionElement = this.$('#mobile-version-info');
             if (mobileVersionElement) {
                 mobileVersionElement.textContent = `AI Detective Game v${versionInfo.version}`;
             }
             
             // 兼容原有的app-version元素（如果存在）
-            const versionElement = document.getElementById('app-version');
+            const versionElement = this.$('#app-version');
             if (versionElement) {
                 versionElement.textContent = `v${versionInfo.version}`;
             }
@@ -104,9 +104,17 @@ class MobileDetectiveApp {
     }
     
     bindEvents() {
-        // 安全绑定事件的辅助函数
+        // DOM查询和事件绑定的辅助函数
+        const $ = (selector) => {
+            return selector.startsWith('#') ? 
+                document.getElementById(selector.slice(1)) : 
+                document.querySelector(selector);
+        };
+        
+        const $$ = (selector) => document.querySelectorAll(selector);
+        
         const safeBindEvent = (id, event, handler) => {
-            const element = document.getElementById(id);
+            const element = $(id.startsWith('#') ? id : `#${id}`);
             if (element) {
                 element.addEventListener(event, handler);
             } else {
@@ -114,62 +122,66 @@ class MobileDetectiveApp {
             }
         };
 
-        // 主菜单
-        safeBindEvent('start-game-main-btn', 'click', () => this.showCaseSelection());
-        safeBindEvent('rules-btn', 'click', () => this.showRules());
-        safeBindEvent('about-btn', 'click', () => this.showAbout());
+        // 事件绑定配置 - 使用配置对象减少重复代码
+        const eventBindings = [
+            // 主菜单
+            ['start-game-main-btn', 'click', () => this.showCaseSelection()],
+            ['rules-btn', 'click', () => this.showRules()],
+            ['about-btn', 'click', () => this.showAbout()],
+            
+            // 案件选择
+            ['back-to-menu', 'click', () => {
+                this.showScreen('main-menu');
+                this.ensureClassicTheme();
+            }],
+            
+            // 游戏界面 - 侧边栏菜单系统
+            ['sidebar-menu-btn', 'click', () => this.toggleSidebarMenu()],
+            ['close-menu-btn', 'click', () => this.closeSidebarMenu()],
+            ['menu-overlay', 'click', () => this.closeSidebarMenu()],
+            
+            // 菜单项
+            ['case-details-btn', 'click', () => this.showCaseDetails()],
+            ['evidence-menu-btn', 'click', () => this.showEvidence()],
+            ['notes-menu-btn', 'click', () => this.showNotes()],
+            
+            // 模态内容
+            ['close-modal-content', 'click', () => this.closeModalContent()],
+            ['close-modal', 'click', () => this.hideModal()],
+            
+            // 操作按钮
+            ['get-hint-btn', 'click', () => this.showHints()],
+            ['make-accusation-btn', 'click', () => this.makeAccusation()],
+            
+            // 指控界面
+            ['back-from-accusation', 'click', () => this.showScreen('game-screen')],
+            ['mobile-submit-accusation-btn', 'click', () => this.submitAccusation()],
+            ['mobile-cancel-accusation-btn', 'click', () => this.showScreen('game-screen')],
+            
+            // 对话
+            ['send-question-btn', 'click', () => this.askQuestion()],
+            ['question-input', 'input', (e) => this.handleQuestionInput(e)],
+            ['question-input', 'keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    this.askQuestion();
+                }
+            }],
+            
+            // 案情介绍页面
+            ['skip-intro-btn', 'click', () => {
+                console.log('跳过介绍按钮被点击');
+                this.skipIntroduction();
+            }],
+            ['start-game-btn', 'click', () => {
+                console.log('开始游戏按钮被点击');
+                this.startGameFromIntro();
+            }]
+        ];
         
-        // 案件选择
-        safeBindEvent('back-to-menu', 'click', () => {
-            this.showScreen('main-menu');
-            // 重新设置为默认主题
-            this.ensureClassicTheme();
-        });
-        
-        // 游戏界面 - 新的侧边栏菜单系统
-        safeBindEvent('sidebar-menu-btn', 'click', () => this.toggleSidebarMenu());
-        safeBindEvent('close-menu-btn', 'click', () => this.closeSidebarMenu());
-        safeBindEvent('menu-overlay', 'click', () => this.closeSidebarMenu());
-        
-        // 菜单项
-        safeBindEvent('case-details-btn', 'click', () => this.showCaseDetails());
-        safeBindEvent('evidence-menu-btn', 'click', () => this.showEvidence());
-        safeBindEvent('notes-menu-btn', 'click', () => this.showNotes());
-        
-        // 模态内容关闭
-        safeBindEvent('close-modal-content', 'click', () => this.closeModalContent());
-        
-        // 操作按钮
-        safeBindEvent('get-hint-btn', 'click', () => this.showHints());
-        safeBindEvent('make-accusation-btn', 'click', () => this.makeAccusation());
-        
-        // 指控界面事件
-        safeBindEvent('back-from-accusation', 'click', () => this.showScreen('game-screen'));
-        safeBindEvent('mobile-submit-accusation-btn', 'click', () => this.submitAccusation());
-        safeBindEvent('mobile-cancel-accusation-btn', 'click', () => this.showScreen('game-screen'));
-        
-        // 对话
-        safeBindEvent('send-question-btn', 'click', () => this.askQuestion());
-        safeBindEvent('question-input', 'input', (e) => this.handleQuestionInput(e));
-        safeBindEvent('question-input', 'keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                this.askQuestion();
-            }
-        });
-        
-        // 模态框
-        safeBindEvent('close-modal', 'click', () => this.hideModal());
-        
-        // 案情介绍页面
-        safeBindEvent('skip-intro-btn', 'click', () => {
-            console.log('跳过介绍按钮被点击');
-            this.skipIntroduction();
-        });
-        
-        safeBindEvent('start-game-btn', 'click', () => {
-            console.log('开始游戏按钮被点击');
-            this.startGameFromIntro();
+        // 批量绑定事件
+        eventBindings.forEach(([id, event, handler]) => {
+            safeBindEvent(id, event, handler);
         });
         
         // 禁止页面滚动和缩放（但允许按钮点击和可滚动区域）
@@ -196,11 +208,22 @@ class MobileDetectiveApp {
         });
     }
     
+    // DOM元素获取辅助方法
+    $(selector) {
+        return selector.startsWith('#') ? 
+            document.getElementById(selector.slice(1)) : 
+            document.querySelector(selector);
+    }
+    
+    $$(selector) {
+        return document.querySelectorAll(selector);
+    }
+    
     showScreen(screenId) {
-        document.querySelectorAll('.mobile-screen').forEach(screen => {
+        this.$$('.mobile-screen').forEach(screen => {
             screen.classList.remove('active');
         });
-        document.getElementById(screenId).classList.add('active');
+        this.$(`#${screenId}`).classList.add('active');
     }
     
     hideLoadingScreen() {
@@ -231,7 +254,7 @@ class MobileDetectiveApp {
     }
     
     renderCases(cases) {
-        const casesList = document.getElementById('cases-list');
+        const casesList = this.$('#cases-list');
         casesList.innerHTML = '';
         
         cases.forEach((caseData) => {
@@ -286,7 +309,7 @@ class MobileDetectiveApp {
     }
     
     async initializeGame() {
-        document.getElementById('game-case-title').textContent = this.currentCase.title;
+        this.$('#game-case-title').textContent = this.currentCase.title;
         this.generateCharacterMenu();
         this.updateGameStats();
         this.connectWebSocket();
@@ -323,13 +346,13 @@ class MobileDetectiveApp {
     }
     
     updateHintDisplay() {
-        const hintCountEl = document.getElementById('hint-count');
+        const hintCountEl = this.$('#hint-count');
         if (hintCountEl) {
             hintCountEl.textContent = `(${this.hintsUsed || 0}/${this.maxHints || 3})`;
         }
         
         // 更新按钮状态
-        const hintBtn = document.getElementById('get-hint-btn');
+        const hintBtn = this.$('#get-hint-btn');
         if (hintBtn && this.hintsUsed >= this.maxHints) {
             hintBtn.disabled = true;
             hintBtn.style.opacity = '0.6';
@@ -353,8 +376,8 @@ class MobileDetectiveApp {
     
     // 新的菜单系统方法
     toggleSidebarMenu() {
-        const menu = document.getElementById('sidebar-menu');
-        const overlay = document.getElementById('menu-overlay');
+        const menu = this.$('#sidebar-menu');
+        const overlay = this.$('#menu-overlay');
         
         menu.classList.toggle('show');
         overlay.classList.toggle('show');
@@ -369,7 +392,7 @@ class MobileDetectiveApp {
     }
     
     generateCharacterMenu() {
-        const characterMenuList = document.getElementById('character-menu-list');
+        const characterMenuList = this.$('#character-menu-list');
         characterMenuList.innerHTML = '';
         
         if (this.currentCase && this.currentCase.characters) {
@@ -420,7 +443,7 @@ class MobileDetectiveApp {
         this.loadCharacterChatHistory(character);
         
         // 显示底部输入区域
-        const bottomInput = document.getElementById('bottom-input');
+        const bottomInput = this.$('#bottom-input');
         if (bottomInput) {
             bottomInput.style.display = 'block';
         }
@@ -435,9 +458,9 @@ class MobileDetectiveApp {
     }
     
     showCaseDetails() {
-        const modalArea = document.getElementById('modal-content-area');
-        const modalTitle = document.getElementById('modal-content-title');
-        const modalBody = document.getElementById('modal-content-body');
+        const modalArea = this.$('#modal-content-area');
+        const modalTitle = this.$('#modal-content-title');
+        const modalBody = this.$('#modal-content-body');
         const modalHeader = modalArea.querySelector('.modal-header');
         
         modalTitle.textContent = '案件详情';
@@ -532,7 +555,7 @@ class MobileDetectiveApp {
         `;
         
         // 隐藏底部输入区域
-        const bottomInput = document.getElementById('bottom-input');
+        const bottomInput = this.$('#bottom-input');
         if (bottomInput) {
             bottomInput.style.display = 'none';
         }
@@ -542,8 +565,8 @@ class MobileDetectiveApp {
     }
     
     showEvidence() {
-        const modalArea = document.getElementById('modal-content-area');
-        const modalTitle = document.getElementById('modal-content-title');
+        const modalArea = this.$('#modal-content-area');
+        const modalTitle = this.$('#modal-content-title');
         const modalBody = document.getElementById('modal-content-body');
         
         modalTitle.textContent = '发现的证据';
@@ -705,7 +728,7 @@ class MobileDetectiveApp {
     }
     
     loadCharacterChatHistory(character) {
-        const conversationArea = document.getElementById('conversation-area');
+        const conversationArea = this.$('#conversation-area');
         const characterKey = character.name;
         
         // 获取该角色的聊天历史
@@ -742,8 +765,8 @@ class MobileDetectiveApp {
     }
     
     updateChatHeader(character) {
-        const chatCharacterName = document.getElementById('chat-character-name');
-        const chatCharacterRole = document.getElementById('chat-character-role');
+        const chatCharacterName = this.$('#chat-character-name');
+        const chatCharacterRole = this.$('#chat-character-role');
         
         if (chatCharacterName) {
             chatCharacterName.textContent = `与 ${character.name} 对话`;
@@ -755,7 +778,7 @@ class MobileDetectiveApp {
     }
     
     initializeChatPanel() {
-        const conversationArea = document.getElementById('conversation-area');
+        const conversationArea = this.$('#conversation-area');
         conversationArea.innerHTML = `
             <div class="welcome-message">
                 <i class="fas fa-comments"></i>
@@ -771,8 +794,8 @@ class MobileDetectiveApp {
     }
     
     showSuggestedQuestionsLoading() {
-        const suggestedQuestionsArea = document.getElementById('suggested-questions');
-        const suggestionsList = document.getElementById('suggested-list');
+        const suggestedQuestionsArea = this.$('#suggested-questions');
+        const suggestionsList = this.$('#suggested-list');
         
         if (suggestedQuestionsArea && suggestionsList) {
             suggestionsList.innerHTML = `
@@ -836,7 +859,7 @@ class MobileDetectiveApp {
                 suggestionBtn.className = 'suggestion-btn';
                 suggestionBtn.textContent = question;
                 suggestionBtn.addEventListener('click', () => {
-                    const questionInput = document.getElementById('question-input');
+                    const questionInput = this.$('#question-input');
                     if (questionInput) {
                         questionInput.value = question;
                         this.handleQuestionInput({ target: { value: question } });
@@ -859,7 +882,7 @@ class MobileDetectiveApp {
     
     handleQuestionInput(e) {
         const input = e.target;
-        const sendBtn = document.getElementById('send-question-btn');
+        const sendBtn = this.$('#send-question-btn');
         
         if (sendBtn) {
             sendBtn.disabled = input.value.trim().length === 0;
@@ -1109,12 +1132,12 @@ class MobileDetectiveApp {
     
     updateEvidenceDisplay() {
         // 更新菜单中的证据数量显示
-        const evidenceCountElement = document.getElementById('evidence-count');
+        const evidenceCountElement = this.$('#evidence-count');
         if (evidenceCountElement) {
-            evidenceCountElement.textContent = `(${this.evidenceList.length})`;
+            evidenceCountElement.textContent = this.evidenceList.length;
         }
         
-        const evidenceList = document.getElementById('evidence-list');
+        const evidenceList = this.$('#evidence-list');
         
         // 如果元素不存在，直接返回（新的菜单系统通过模态框显示证据）
         if (!evidenceList) {
@@ -1155,7 +1178,7 @@ class MobileDetectiveApp {
         if (!this.currentCase) return;
         
         // 更新案件详情（新的菜单系统中这些元素不存在，添加安全检查）
-        const caseDetails = document.getElementById('case-details');
+        const caseDetails = this.$('#case-details');
         if (caseDetails) {
             caseDetails.innerHTML = `
                 <p><strong>案件类型：</strong>${this.getCategoryText(this.currentCase.category)}</p>
@@ -1166,7 +1189,7 @@ class MobileDetectiveApp {
         }
         
         // 更新调查进度（新的菜单系统中这些元素不存在，添加安全检查）
-        const progressStats = document.getElementById('progress-stats');
+        const progressStats = this.$('#progress-stats');
         if (progressStats) {
             const evidenceCount = this.evidenceList ? this.evidenceList.length : 0;
             const characterCount = this.currentCase.characters ? this.currentCase.characters.length : 0;
@@ -1243,7 +1266,7 @@ class MobileDetectiveApp {
     }
     
     populateAccusationSelect() {
-        const accusedSelect = document.getElementById('mobile-accused-select');
+        const accusedSelect = this.$('#mobile-accused-select');
         if (!accusedSelect) return;
         
         accusedSelect.innerHTML = '<option value="">请选择...</option>';
@@ -1262,8 +1285,8 @@ class MobileDetectiveApp {
     }
     
     async submitAccusation() {
-        const accusedName = document.getElementById('mobile-accused-select').value;
-        const reasoning = document.getElementById('mobile-accusation-reasoning').value.trim();
+        const accusedName = this.$('#mobile-accused-select').value;
+        const reasoning = this.$('#mobile-accusation-reasoning').value.trim();
         
         if (!accusedName) {
             this.showToast('请选择被指控者', 'error');
@@ -1275,7 +1298,7 @@ class MobileDetectiveApp {
             return;
         }
         
-        const submitBtn = document.getElementById('mobile-submit-accusation-btn');
+        const submitBtn = this.$('#mobile-submit-accusation-btn');
         if (!submitBtn) return;
         
         submitBtn.disabled = true;
@@ -1296,7 +1319,7 @@ class MobileDetectiveApp {
         // 切换到审判结果界面
         this.showScreen('trial-result-screen');
         
-        const resultContent = document.getElementById('mobile-trial-result-content');
+        const resultContent = this.$('#mobile-trial-result-content');
         if (!resultContent) return;
         
         resultContent.innerHTML = `
@@ -1312,7 +1335,7 @@ class MobileDetectiveApp {
         // 初始化内容观察器
         this._initContentObserver();
         
-        const trialSteps = document.getElementById('mobile-trial-steps');
+        const trialSteps = this.$('#mobile-trial-steps');
         if (!trialSteps) return;
         
         let trialData = {};
@@ -1836,10 +1859,10 @@ class MobileDetectiveApp {
     initializeEvaluationForm() {
         // 重置表单状态
         this.selectedRating = 0;
-        document.getElementById('mobileEvaluationForm').reset();
-        document.getElementById('mobileRatingText').textContent = '请选择评分';
-        document.getElementById('evaluationSuccessMessage').style.display = 'none';
-        document.getElementById('evaluationErrorMessage').style.display = 'none';
+        this.$('#mobileEvaluationForm').reset();
+        this.$('#mobileRatingText').textContent = '请选择评分';
+        this.$('#evaluationSuccessMessage').style.display = 'none';
+        this.$('#evaluationErrorMessage').style.display = 'none';
         
         // 清除所有星级选择
         const stars = document.querySelectorAll('#evaluation-screen .star');
@@ -1949,13 +1972,13 @@ class MobileDetectiveApp {
             return;
         }
         
-        const reason = document.getElementById('mobileReason').value.trim();
+        const reason = this.$('#mobileReason').value.trim();
         if (!reason) {
             this.showEvaluationError('请填写评价原因');
             return;
         }
         
-        const submitBtn = document.getElementById('mobileSubmitBtn');
+        const submitBtn = this.$('#mobileSubmitBtn');
         const submitBtnText = submitBtn.querySelector('span');
         const submitBtnIcon = submitBtn.querySelector('i');
         
@@ -1973,10 +1996,10 @@ class MobileDetectiveApp {
                     session_id: this.sessionId,
                     rating: this.selectedRating,
                     reason: reason,
-                    difficulty_feedback: document.getElementById('mobileDifficulty').value || null,
-                    most_liked: document.getElementById('mobileMostLiked').value.trim() || null,
-                    suggestions: document.getElementById('mobileSuggestions').value.trim() || null,
-                    would_recommend: document.getElementById('mobileRecommend').checked
+                    difficulty_feedback: this.$('#mobileDifficulty').value || null,
+                    most_liked: this.$('#mobileMostLiked').value.trim() || null,
+                    suggestions: this.$('#mobileSuggestions').value.trim() || null,
+                    would_recommend: this.$('#mobileRecommend').checked
                 })
             });
             
@@ -2007,17 +2030,17 @@ class MobileDetectiveApp {
     }
 
     showEvaluationSuccess() {
-        document.getElementById('evaluationSuccessMessage').style.display = 'block';
-        document.getElementById('evaluationErrorMessage').style.display = 'none';
-        document.getElementById('mobileEvaluationForm').style.display = 'none';
+        this.$('#evaluationSuccessMessage').style.display = 'block';
+        this.$('#evaluationErrorMessage').style.display = 'none';
+        this.$('#mobileEvaluationForm').style.display = 'none';
     }
 
     showEvaluationError(message) {
-        const errorElement = document.getElementById('evaluationErrorMessage');
-        const errorText = document.getElementById('evaluationErrorText');
+        const errorElement = this.$('#evaluationErrorMessage');
+        const errorText = this.$('#evaluationErrorText');
         errorText.textContent = message;
         errorElement.style.display = 'block';
-        document.getElementById('evaluationSuccessMessage').style.display = 'none';
+        this.$('#evaluationSuccessMessage').style.display = 'none';
     }
     
     resetGameState() {
@@ -2031,6 +2054,9 @@ class MobileDetectiveApp {
         this.chatHistory = {};
         this.questionCount = 0;
         this.maxQuestions = 30;
+        
+        // 重置打字机效果状态
+        this.skipTypewriter = false;
         
         // 重置滚动状态
         if (this.scrollTimer) {
@@ -2051,10 +2077,183 @@ class MobileDetectiveApp {
         this.clearConversation();
         
         // 重置界面状态
-        const bottomInput = document.getElementById('bottom-input');
+        const bottomInput = this.$('#bottom-input');
         if (bottomInput) {
             bottomInput.style.display = 'none';
         }
+        
+        // 重置案情介绍页面状态
+        const startGameBtn = this.$('#start-game-btn');
+        if (startGameBtn) {
+            startGameBtn.disabled = true;
+        }
+        
+        const introContent = this.$('#intro-content');
+        if (introContent) {
+            introContent.innerHTML = '';
+        }
+        
+        // 重置WebSocket连接
+        if (this.websocket) {
+            this.websocket.close();
+            this.websocket = null;
+        }
+        
+        // 重置游戏状态
+        this.gameState = null;
+        this.activeTab = 'characters';
+        
+        // 重置对话历史
+        this.conversationHistory = [];
+        
+        // 重置UI显示元素
+        this.resetUIElements();
+    }
+    
+    resetUIElements() {
+        // 重置证据显示
+        const evidenceCountElement = this.$('#evidence-count');
+        if (evidenceCountElement) {
+            evidenceCountElement.textContent = '0';
+        }
+        
+        const evidenceList = this.$('#evidence-list');
+        if (evidenceList) {
+            evidenceList.innerHTML = `
+                <div class="no-evidence">
+                    <i class="fas fa-search"></i>
+                    <p>还没有收集到证据</p>
+                    <small>通过询问角色来发现线索</small>
+                </div>
+            `;
+        }
+        
+        // 重置角色菜单
+        const characterMenuList = this.$('#character-menu-list');
+        if (characterMenuList) {
+            characterMenuList.innerHTML = '';
+        }
+        
+        // 重置发送按钮计数器
+        const sendBtn = this.$('#send-question-btn');
+        if (sendBtn) {
+            sendBtn.innerHTML = `
+                <i class="fas fa-paper-plane"></i>
+                <span class="question-counter">0/30</span>
+            `;
+        }
+        
+        // 重置提示显示
+        const hintCountEl = this.$('#hint-count');
+        if (hintCountEl) {
+            hintCountEl.textContent = `0/3`;
+        }
+        
+        // 重置聊天头部
+        const chatCharacterName = this.$('#chat-character-name');
+        const chatCharacterRole = this.$('#chat-character-role');
+        if (chatCharacterName) {
+            chatCharacterName.textContent = '';
+        }
+        if (chatCharacterRole) {
+            chatCharacterRole.textContent = '';
+        }
+        
+        // 重置问题输入框
+        const questionInput = this.$('#question-input');
+        if (questionInput) {
+            questionInput.value = '';
+            questionInput.placeholder = '选择角色后开始询问...';
+        }
+        
+        // 重置建议问题区域
+        const suggestedQuestions = this.$('#suggested-questions');
+        if (suggestedQuestions) {
+            suggestedQuestions.style.display = 'none';
+        }
+        
+        const suggestedList = this.$('#suggested-list');
+        if (suggestedList) {
+            suggestedList.innerHTML = '';
+        }
+        
+        // 重置模态框
+        const modal = this.$('#modal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+        
+        // 重置侧边栏菜单
+        const sidebarMenu = this.$('#sidebar-menu');
+        const menuOverlay = this.$('#menu-overlay');
+        if (sidebarMenu) {
+            sidebarMenu.classList.remove('show');
+        }
+        if (menuOverlay) {
+            menuOverlay.classList.remove('show');
+        }
+        
+        // 重置未读消息徽章
+        const unreadBadge = this.$('#unread-badge');
+        if (unreadBadge) {
+            unreadBadge.style.display = 'none';
+        }
+        
+        // 重置指控相关元素
+        const mobileAccusedSelect = this.$('#mobile-accused-select');
+        if (mobileAccusedSelect) {
+            mobileAccusedSelect.selectedIndex = 0;
+        }
+        
+        const mobileAccusationReasoning = this.$('#mobile-accusation-reasoning');
+        if (mobileAccusationReasoning) {
+            mobileAccusationReasoning.value = '';
+        }
+        
+        const mobileSubmitAccusationBtn = this.$('#mobile-submit-accusation-btn');
+        if (mobileSubmitAccusationBtn) {
+            mobileSubmitAccusationBtn.disabled = false;
+            mobileSubmitAccusationBtn.textContent = '提交指控';
+        }
+        
+        // 重置审判结果相关元素
+        const mobileTrialResultContent = this.$('#mobile-trial-result-content');
+        if (mobileTrialResultContent) {
+            mobileTrialResultContent.innerHTML = '';
+        }
+        
+        const mobileTrialSteps = this.$('#mobile-trial-steps');
+        if (mobileTrialSteps) {
+            mobileTrialSteps.innerHTML = '';
+        }
+        
+        // 重置评价表单
+        const mobileEvaluationForm = this.$('#mobileEvaluationForm');
+        if (mobileEvaluationForm) {
+            mobileEvaluationForm.reset();
+        }
+        
+        const mobileRatingText = this.$('#mobileRatingText');
+        if (mobileRatingText) {
+            mobileRatingText.textContent = '请选择评分';
+        }
+        
+        // 重置评分星级
+        const stars = document.querySelectorAll('#evaluation-screen .star');
+        stars.forEach(star => star.classList.remove('active'));
+        
+        // 重置评价消息显示
+        const evaluationSuccessMessage = this.$('#evaluationSuccessMessage');
+        const evaluationErrorMessage = this.$('#evaluationErrorMessage');
+        if (evaluationSuccessMessage) {
+            evaluationSuccessMessage.style.display = 'none';
+        }
+        if (evaluationErrorMessage) {
+            evaluationErrorMessage.style.display = 'none';
+        }
+        
+        // 重置选中评分
+        this.selectedRating = 0;
     }
     
     clearConversation() {
@@ -2073,14 +2272,14 @@ class MobileDetectiveApp {
     }
     
     showUnreadBadge() {
-        const unreadBadge = document.getElementById('unread-badge');
+        const unreadBadge = this.$('#unread-badge');
         if (unreadBadge) {
             unreadBadge.style.display = 'block';
         }
     }
     
     clearUnreadBadge() {
-        const unreadBadge = document.getElementById('unread-badge');
+        const unreadBadge = this.$('#unread-badge');
         if (unreadBadge) {
             unreadBadge.style.display = 'none';
         }
@@ -2136,19 +2335,19 @@ class MobileDetectiveApp {
     }
     
     showModal(title, content) {
-        document.getElementById('modal-title').textContent = title;
-        document.getElementById('modal-body').innerHTML = content;
-        document.getElementById('modal').classList.add('active');
+        this.$('#modal-title').textContent = title;
+        this.$('#modal-body').innerHTML = content;
+        this.$('#modal').classList.add('active');
     }
     
     hideModal() {
-        document.getElementById('modal').classList.remove('active');
+        this.$('#modal').classList.remove('active');
     }
     
     showToast(message, type = 'info') {
-        const toast = document.getElementById('toast');
-        const icon = document.getElementById('toast-icon');
-        const messageSpan = document.getElementById('toast-message');
+        const toast = this.$('#toast');
+        const icon = this.$('#toast-icon');
+        const messageSpan = this.$('#toast-message');
         
         const iconClass = {
             'success': 'fas fa-check-circle',
@@ -2306,7 +2505,7 @@ class MobileDetectiveApp {
     }
     
     async startTypewriterSequence() {
-        const introContent = document.getElementById('intro-content');
+        const introContent = this.$('#intro-content');
         introContent.innerHTML = '';
         
         // 创建内容结构
@@ -2316,7 +2515,7 @@ class MobileDetectiveApp {
         await this.typewriterSequence(content);
         
         // 启用开始游戏按钮
-        document.getElementById('start-game-btn').disabled = false;
+        this.$('#start-game-btn').disabled = false;
     }
     
     generateIntroContent() {
@@ -2564,7 +2763,7 @@ class MobileDetectiveApp {
         });
         
         // 启用开始游戏按钮
-        const startBtn = document.getElementById('start-game-btn');
+        const startBtn = this.$('#start-game-btn');
         if (startBtn) {
             startBtn.disabled = false;
             console.log('开始游戏按钮已启用');

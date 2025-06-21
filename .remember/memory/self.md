@@ -48,6 +48,59 @@ box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 ### 错误点：移动端页面无法滚动的层级问题
 错误示范：
 ```css
+
+### 错误点：移动端游戏重新开始时变量和UI状态未完全重置
+错误示范：
+```javascript
+resetGameState() {
+    this.currentCase = null;
+    this.selectedCharacter = null;
+    this.evidenceList = [];
+    // 只重置了部分变量，缺少UI元素和其他状态的重置
+}
+```
+正确做法：
+```javascript
+resetGameState() {
+    // 重置所有游戏相关变量
+    this.currentCase = null;
+    this.selectedCharacter = null;
+    this.evidenceList = [];
+    this.hintsHistory = [];
+    this.hintsUsed = 0;
+    this.maxHints = 3;
+    this.sessionId = null;
+    this.chatHistory = {};
+    this.questionCount = 0;
+    this.maxQuestions = 30;
+    this.skipTypewriter = false;
+    this.gameState = null;
+    this.activeTab = 'characters';
+    this.conversationHistory = [];
+    
+    // 重置所有相关的UI状态
+    this.resetUIElements();
+    
+    // 断开WebSocket连接
+    if (this.websocket) {
+        this.websocket.close();
+        this.websocket = null;
+    }
+}
+
+// 单独的UI重置方法，确保所有界面元素都被正确重置
+resetUIElements() {
+    // 重置案情介绍页面状态（开始游戏按钮禁用）
+    // 重置证据显示、角色菜单、聊天界面
+    // 重置指控和审判相关元素
+    // 重置评价表单和所有模态框
+}
+```
+说明：游戏重新开始时必须重置所有相关变量和UI元素，特别是案情介绍页面的开始游戏按钮状态，避免用户在未完成案情介绍时就能点击开始游戏。
+
+### 错误点：移动端页面无法滚动的层级问题
+错误示范：
+```css
 html, body {
     height: 100%;
     overflow: hidden; /* 阻止了整个页面滚动 */

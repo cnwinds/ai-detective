@@ -1416,31 +1416,6 @@ body.theme-forest .badge-category {
     margin-bottom: 4px;
 }
 
-/* .character-occupation 重复样式已合并到第1217行的定义中 */
-/* 移动端角色职业显示统一使用 .character-occupation 样式 */
-
-.character-type {
-    padding: 3px 8px;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    font-weight: 500;
-}
-
-.character-type.suspect {
-    background: rgba(255, 87, 34, 0.2);
-    color: var(--suspect-color);
-}
-
-.character-type.witness {
-    background: rgba(33, 150, 243, 0.2);
-    color: var(--witness-color);
-}
-
-.character-type.victim {
-    background: rgba(158, 158, 158, 0.2);
-    color: #9e9e9e;
-}
-
 .action-buttons {
     padding: 20px;
     display: flex;
@@ -2957,11 +2932,6 @@ body.theme-forest .badge-category {
     background: rgba(245, 101, 101, 0.2);
     border: 1px solid rgba(245, 101, 101, 0.4);
     color: var(--theme-text-primary);
-}
-
-/* 表单样式 */
-.form-group {
-    margin-bottom: 25px;
 }
 
 .form-label {

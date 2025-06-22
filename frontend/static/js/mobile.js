@@ -2271,19 +2271,7 @@ class MobileDetectiveApp {
         this.conversationHistory = [];
     }
     
-    showUnreadBadge() {
-        const unreadBadge = this.$('#unread-badge');
-        if (unreadBadge) {
-            unreadBadge.style.display = 'block';
-        }
-    }
-    
-    clearUnreadBadge() {
-        const unreadBadge = this.$('#unread-badge');
-        if (unreadBadge) {
-            unreadBadge.style.display = 'none';
-        }
-    }
+
     
     connectWebSocket() {
         if (this.websocket) {

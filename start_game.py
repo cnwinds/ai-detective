@@ -98,7 +98,7 @@ def check_environment():
         logger.error("❌ 未找到前端文件目录")
         return False
     
-    index_file = frontend_dir / 'index.html'
+    index_file = frontend_dir / 'desktop.html'
     if not index_file.exists():
         logger.error("❌ 未找到前端主页文件")
         return False
@@ -192,4 +192,4 @@ def main():
         logger.info("感谢使用！")
 
 if __name__ == "__main__":
-    main() 
+    main()

@@ -4,11 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>🕵️ AI侦探推理游戏 - 手机版</title>
-    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#667eea">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="AI侦探">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="static/css/mobile.css" rel="stylesheet">
 </head>
@@ -405,12 +401,7 @@
         </div>
     </div>
 
-    <!-- PWA安装提示横幅 -->
-    <div class="pwa-banner" id="pwaBanner">
-        <span>🚀 安装到主屏幕，随时享受推理乐趣！</span>
-        <button id="installBtn">安装</button>
-        <button id="dismissBtn" style="background: transparent; border: 1px solid var(--theme-border-color);">稍后</button>
-    </div>
+
 
     <!-- 加载遮罩 -->
     <div class="loading-overlay" id="loadingOverlay">
@@ -459,53 +450,7 @@
             }
         });
         
-        // PWA安装横幅逻辑
-        let deferredPrompt;
-        const pwaBanner = document.getElementById('pwa-banner');
-        const installBtn = document.getElementById('installBtn');
-        const dismissBtn = document.getElementById('dismissBtn');
 
-        // 监听PWA安装提示事件
-        window.addEventListener('beforeinstallprompt', (e) => {
-            e.preventDefault();
-            deferredPrompt = e;
-            
-            // 检查是否已经安装或之前已拒绝
-            if (!localStorage.getItem('pwa-dismissed')) {
-                setTimeout(() => {
-                    pwaBanner.classList.add('show');
-                }, 2000);
-            }
-        });
-
-        // 安装按钮点击事件
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                
-                if (outcome === 'accepted') {
-                    console.log('用户接受了PWA安装');
-                } else {
-                    console.log('用户拒绝了PWA安装');
-                }
-                
-                deferredPrompt = null;
-                pwaBanner.classList.remove('show');
-            }
-        });
-
-        // 稍后按钮点击事件
-        dismissBtn.addEventListener('click', () => {
-            pwaBanner.classList.remove('show');
-            localStorage.setItem('pwa-dismissed', 'true');
-        });
-
-        // PWA安装成功后隐藏横幅
-        window.addEventListener('appinstalled', () => {
-            pwaBanner.classList.remove('show');
-            console.log('PWA安装成功');
-        });
     </script>
 </body>
 </html>

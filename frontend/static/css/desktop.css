@@ -2814,3 +2814,110 @@ body.theme-forest .badge-top.badge-category {
     text-align: center;
     margin-top: 10px;
 }
+
+/* 评价界面样式 */
+.evaluation-container {
+    background: var(--theme-secondary-bg);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 10px 30px var(--theme-shadow-color);
+    max-width: 600px;
+    margin: 0 auto;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--theme-border-color);
+}
+
+.evaluation-title {
+    font-size: 2rem;
+    color: var(--theme-text-primary);
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.evaluation-subtitle {
+    color: var(--theme-text-secondary);
+    margin-bottom: 30px;
+    font-size: 1rem;
+    text-align: center;
+}
+
+.rating-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.star {
+    font-size: 30px;
+    color: var(--theme-text-muted);
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.star:hover,
+.star.active {
+    color: var(--theme-accent-color);
+}
+
+.rating-text {
+    text-align: center;
+    color: var(--theme-text-secondary);
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--theme-primary-color);
+}
+
+.checkbox-group label {
+    color: var(--theme-text-primary);
+    cursor: pointer;
+}
+
+.success-message {
+    background: rgba(76, 175, 80, 0.1);
+    color: var(--theme-success-color);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    text-align: center;
+}
+
+.error-message {
+    background: rgba(244, 67, 54, 0.1);
+    color: var(--theme-warning-color);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(244, 67, 54, 0.3);
+    text-align: center;
+}
+
+/* 评价界面响应式设计 */
+@media (max-width: 768px) {
+    .evaluation-container {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .evaluation-title {
+        font-size: 1.5rem;
+    }
+    
+    .star {
+        font-size: 25px;
+    }
+}

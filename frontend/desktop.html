@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🕵️ 侦探推理游戏</title>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/desktop.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
@@ -337,6 +337,78 @@
             </div>
         </div>
 
+        <!-- 游戏评价界面 -->
+        <div id="evaluation-screen" class="screen">
+            <div class="container">
+                <div class="evaluation-container">
+                    <h2 class="evaluation-title"><i class="fas fa-star"></i> 游戏评价</h2>
+                    <p class="evaluation-subtitle">您的反馈将帮助我们改进游戏体验</p>
+                    
+                    <div class="success-message" id="evaluationSuccessMessage" style="display: none;">
+                        感谢您的评价！您的反馈对我们非常重要。
+                    </div>
+                    
+                    <div class="error-message" id="evaluationErrorMessage" style="display: none;">
+                        提交失败，请重试。
+                    </div>
+                    
+                    <form id="desktopEvaluationForm">
+                        <div class="form-group">
+                            <label class="form-label">整体评分 <span style="color: red;">*</span></label>
+                            <div class="rating-container">
+                                <span class="star" data-rating="1">★</span>
+                                <span class="star" data-rating="2">★</span>
+                                <span class="star" data-rating="3">★</span>
+                                <span class="star" data-rating="4">★</span>
+                                <span class="star" data-rating="5">★</span>
+                            </div>
+                            <div class="rating-text" id="desktopRatingText">请选择评分</div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="desktopReason">评价原因 <span style="color: red;">*</span></label>
+                            <textarea class="form-control" id="desktopReason" name="reason" rows="4"
+                                      placeholder="请详细说明您的评分原因，如游戏的优点、不足或建议..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="desktopDifficulty">难度反馈</label>
+                            <select class="form-control" id="desktopDifficulty" name="difficulty">
+                                <option value="">请选择</option>
+                                <option value="too_easy">太简单了</option>
+                                <option value="just_right">难度刚好</option>
+                                <option value="too_hard">太难了</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="desktopMostLiked">最喜欢的方面</label>
+                            <textarea class="form-control" id="desktopMostLiked" name="mostLiked" rows="3"
+                                      placeholder="您最喜欢游戏的哪个方面？（可选）"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label" for="desktopSuggestions">改进建议</label>
+                            <textarea class="form-control" id="desktopSuggestions" name="suggestions" rows="3"
+                                      placeholder="您对游戏有什么改进建议？（可选）"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="desktopRecommend" name="recommend">
+                                <label for="desktopRecommend">我会向朋友推荐这个游戏</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn secondary" onclick="app.showScreen('trial-result-screen')">返回结果</button>
+                            <button type="submit" class="btn primary" id="desktopSubmitBtn">提交评价</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <!-- 规则说明弹窗 -->
         <div id="rules-modal" class="modal">
             <div class="modal-content">
@@ -431,7 +503,7 @@
     <script src="/static/js/ui.js"></script>
     <script src="/static/js/api.js"></script>
     <script src="/static/js/game.js"></script>
-    <script src="/static/js/app.js"></script>
+    <script src="/static/js/desktop.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const versionMeta = document.querySelector('meta[name="app-version"]');

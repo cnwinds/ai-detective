@@ -2474,91 +2474,12 @@ class DetectiveGameApp {
         return trialData.voterIndexMap[voterName];
     }
     
-    // 显示审判结果
-    showTrialResult(result) {
-        const resultContent = document.getElementById('trial-result-content');
-        
-        const verdictClass = result.final_verdict ? 'guilty' : 'innocent';
-        const verdictText = result.final_verdict ? '指控成立' : '指控不成立';
-        const correctnessText = result.is_correct ? '🎉 恭喜！你找到了真凶！' : '😔 很遗憾，你指控了错误的人。';
-        
-        resultContent.innerHTML = `
-            <div class="trial-result">
-                <div class="verdict ${verdictClass}">
-                    <i class="fas fa-balance-scale"></i>
-                    ${verdictText}
-                </div>
-                
-                <div class="correctness-indicator">
-                    <h3>${correctnessText}</h3>
-                </div>
-                
-                <div class="defense-section">
-                    <h4><i class="fas fa-shield-alt"></i> 被告辩护</h4>
-                    <div class="defense-text">${result.accused_defense.replace(/\\n/g, '<br/>').replace(/\n/g, '<br/>')}</div>
-                </div>
-                
-                <div class="testimonies-section">
-                    <h4><i class="fas fa-users"></i> 证人证词</h4>
-                    ${result.witness_testimonies.map(testimony => `
-                        <div class="testimony-item">
-                            <div class="testimony-header">${testimony.witness_name}：</div>
-                            <div>${testimony.testimony.replace(/\\n/g, '<br/>').replace(/\n/g, '<br/>')}</div>
-                        </div>
-                    `).join('')}
-                </div>
-                
-                <div class="vote-summary">
-                    <h4>投票结果</h4>
-                    <div class="vote-stats">
-                        <div class="vote-stat support">
-                            <span class="number">${result.vote_summary.support}</span>
-                            <span>支持</span>
-                        </div>
-                        <div class="vote-stat oppose">
-                            <span class="number">${result.vote_summary.oppose}</span>
-                            <span>反对</span>
-                        </div>
-                    </div>
-                    <p>需要过半数(${Math.floor(result.vote_summary.total / 2) + 1}票)支持才能定罪</p>
-                </div>
-                
-                <div class="votes-section">
-                    <h4><i class="fas fa-vote-yea"></i> 详细投票</h4>
-                    ${result.votes.map(vote => `
-                        <div class="vote-item vote-${vote.vote === '支持' ? 'support' : 'oppose'}">
-                            <div class="vote-header">${vote.voter_name}：${vote.vote}</div>
-                            <div>${vote.reason.replace(/\\n/g, '<br/>').replace(/\n/g, '<br/>')}</div>
-                        </div>
-                    `).join('')}
-                </div>
-                
-                <div class="solution-section">
-                    <h4><i class="fas fa-lightbulb"></i> 案件真相</h4>
-                    <div class="solution-text">${result.case_solution.replace(/\\n/g, '<br/>').replace(/\n/g, '<br/>')}</div>
-                </div>
-                
-                <div class="form-actions">
-                    <button class="btn primary" onclick="app.goToEvaluation()">
-                        <i class="fas fa-star"></i> 游戏评价
-                    </button>
-                    <button class="btn secondary" onclick="app.showScreen('main-menu')">
-                        <i class="fas fa-home"></i> 返回主菜单
-                    </button>
-                    <button class="btn secondary" onclick="app.startNewGame()">
-                        <i class="fas fa-redo"></i> 重新开始
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        this.showScreen('trial-result-screen');
-    }
+
     
     // 跳转到游戏评价页面
     goToEvaluation() {
         if (this.sessionId) {
-            window.location.href = `evaluation.html?session_id=${this.sessionId}`;
+            this.showEvaluationScreen();
         } else {
             this.showMessage('错误', '无法获取游戏会话ID，无法进行评价。');
         }
@@ -2717,6 +2638,198 @@ class DetectiveGameApp {
                 this.resetToDefaultTheme();
             }, 100);
         }
+    }
+    
+    /**
+     * 显示评价界面
+     */
+    showEvaluationScreen() {
+        this.showScreen('evaluation-screen');
+        this.initializeEvaluationForm();
+    }
+    
+    /**
+     * 初始化评价表单
+     */
+    initializeEvaluationForm() {
+        // 检查必要元素是否存在
+        const form = document.getElementById('desktopEvaluationForm');
+        const ratingText = document.getElementById('desktopRatingText');
+        const successMessage = document.getElementById('evaluationSuccessMessage');
+        const errorMessage = document.getElementById('evaluationErrorMessage');
+        
+        if (!form || !ratingText) {
+            console.error('评价表单元素未找到');
+            return;
+        }
+        
+        // 重置表单
+        form.reset();
+        ratingText.textContent = '请选择评分';
+        this.selectedRating = 0;
+        
+        // 隐藏消息
+        if (successMessage) {
+            successMessage.style.display = 'none';
+        }
+        if (errorMessage) {
+            errorMessage.style.display = 'none';
+        }
+        
+        // 绑定星级评分事件
+        this.bindRatingEvents();
+        
+        // 绑定表单提交事件
+        this.bindEvaluationFormEvents();
+    }
+    
+    /**
+     * 绑定星级评分事件
+     */
+    bindRatingEvents() {
+        const stars = document.querySelectorAll('#evaluation-screen .star');
+        const ratingText = document.getElementById('desktopRatingText');
+        const ratingContainer = document.querySelector('#evaluation-screen .rating-container');
+        const ratingTexts = ['', '很不满意', '不满意', '一般', '满意', '非常满意'];
+        
+        // 检查必要元素是否存在
+        if (!ratingText || !ratingContainer) {
+            console.error('评价页面元素未找到');
+            return;
+        }
+        
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                this.selectedRating = parseInt(star.dataset.rating);
+                this.updateStars();
+                if (ratingText) {
+                    ratingText.textContent = ratingTexts[this.selectedRating];
+                }
+            });
+            
+            star.addEventListener('mouseover', () => {
+                const rating = parseInt(star.dataset.rating);
+                this.highlightStars(rating);
+            });
+        });
+        
+        ratingContainer.addEventListener('mouseleave', () => {
+            this.updateStars();
+        });
+    }
+    
+    /**
+     * 高亮星星
+     */
+    highlightStars(rating) {
+        const stars = document.querySelectorAll('#evaluation-screen .star');
+        stars.forEach((star, index) => {
+            if (star && star.classList) {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            }
+        });
+    }
+    
+    /**
+     * 更新星星显示
+     */
+    updateStars() {
+        this.highlightStars(this.selectedRating);
+    }
+    
+    /**
+     * 绑定评价表单事件
+     */
+    bindEvaluationFormEvents() {
+        const form = document.getElementById('desktopEvaluationForm');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            this.submitEvaluation();
+        });
+    }
+    
+    /**
+     * 提交评价
+     */
+    async submitEvaluation() {
+        if (!this.sessionId) {
+            this.showEvaluationError('缺少会话ID，无法提交评价');
+            return;
+        }
+        
+        if (this.selectedRating === 0) {
+            this.showEvaluationError('请选择评分');
+            return;
+        }
+        
+        const reason = document.getElementById('desktopReason').value.trim();
+        if (!reason) {
+            this.showEvaluationError('请填写评价原因');
+            return;
+        }
+        
+        const submitBtn = document.getElementById('desktopSubmitBtn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = '提交中...';
+        
+        try {
+            const response = await fetch(`${this.apiBase}/game/evaluation`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    session_id: this.sessionId,
+                    rating: this.selectedRating,
+                    reason: reason,
+                    difficulty_feedback: document.getElementById('desktopDifficulty').value || null,
+                    most_liked: document.getElementById('desktopMostLiked').value.trim() || null,
+                    suggestions: document.getElementById('desktopSuggestions').value.trim() || null,
+                    would_recommend: document.getElementById('desktopRecommend').checked
+                })
+            });
+            
+            if (response.ok) {
+                this.showEvaluationSuccess();
+                // 3秒后跳转回主菜单
+                setTimeout(() => {
+                    this.showScreen('main-menu');
+                    this.resetToDefaultTheme();
+                }, 3000);
+            } else {
+                const error = await response.json();
+                this.showEvaluationError(error.detail || '提交失败');
+            }
+        } catch (error) {
+            this.logError('提交评价失败:', error);
+            this.showEvaluationError('网络错误，请重试');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = '提交评价';
+        }
+    }
+    
+    /**
+     * 显示评价成功消息
+     */
+    showEvaluationSuccess() {
+        document.getElementById('evaluationSuccessMessage').style.display = 'block';
+        document.getElementById('evaluationErrorMessage').style.display = 'none';
+        document.getElementById('desktopEvaluationForm').style.display = 'none';
+    }
+    
+    /**
+     * 显示评价错误消息
+     */
+    showEvaluationError(message) {
+        const errorElement = document.getElementById('evaluationErrorMessage');
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+        document.getElementById('evaluationSuccessMessage').style.display = 'none';
     }
 }
 

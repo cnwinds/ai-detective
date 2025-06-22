@@ -170,7 +170,7 @@ async def read_root(request: Request):
             html_file = "frontend/mobile.html"
             page_title = "🕵️ AI侦探推理游戏 - 手机版"
         else:
-            html_file = "frontend/index.html"
+            html_file = "frontend/desktop.html"
             page_title = "侦探推理游戏"
         
         # 读取对应的HTML文件
@@ -226,7 +226,7 @@ async def read_root(request: Request):
         if _is_mobile_device(user_agent):
             return FileResponse("frontend/mobile.html")
         else:
-            return FileResponse("frontend/index.html")
+            return FileResponse("frontend/desktop.html")
 
 def _is_mobile_device(user_agent: str) -> bool:
     """
@@ -296,7 +296,7 @@ async def desktop_page(request: Request):
     """
     try:
         # 读取PC端HTML文件
-        with open("frontend/index.html", "r", encoding="utf-8") as f:
+        with open("frontend/desktop.html", "r", encoding="utf-8") as f:
             html_content = f.read()
         
         # 获取版本信息
@@ -326,7 +326,7 @@ async def desktop_page(request: Request):
         
     except Exception as e:
         logger.error(f"读取PC端页面失败: {e}")
-        return FileResponse("frontend/index.html")
+        return FileResponse("frontend/desktop.html")
 
 @app.get("/game_history.html")
 async def game_history():

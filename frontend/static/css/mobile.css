@@ -2030,44 +2030,7 @@ body.theme-forest .badge-category {
     background: rgba(255, 255, 255, 0.5);
 }
 
-/* PWA 横幅样式 */
-.pwa-banner {
-    position: fixed;
-    bottom: -100px;
-    left: 10px;
-    right: 10px;
-    background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
-    color: white;
-    padding: 15px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 4px 15px rgba(66, 153, 225, 0.4);
-    transition: bottom 0.3s ease;
-    z-index: 1000;
-    font-size: 0.9rem;
-}
 
-.pwa-banner.show {
-    bottom: 20px;
-}
-
-.pwa-banner button {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    color: white;
-    padding: 8px 16px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.8rem;
-    margin-left: 10px;
-    transition: background 0.3s ease;
-}
-
-.pwa-banner button:hover {
-    background: rgba(255, 255, 255, 0.3);
-}
 
 /* 加载遮罩 */
 .loading-overlay {

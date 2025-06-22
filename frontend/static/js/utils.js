@@ -65,6 +65,17 @@ class DOMHelper {
     }
     
     /**
+     * 检查元素是否包含指定CSS类
+     * @param {string|Element} element - 元素ID或元素对象
+     * @param {string} className - CSS类名
+     * @returns {boolean}
+     */
+    static hasClass(element, className) {
+        const el = typeof element === 'string' ? this.$(element) : element;
+        return el ? el.classList.contains(className) : false;
+    }
+    
+    /**
      * 添加/移除CSS类
      * @param {string|Element} element - 元素ID或元素对象
      * @param {string} className - CSS类名

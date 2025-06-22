@@ -240,30 +240,58 @@ body {
     margin-bottom: 40px;
 }
 
+/* 美化案情介绍分段样式，保证行高一致 */
 .intro-section {
-    margin-bottom: 35px;
+    margin-bottom: 28px;
     opacity: 0;
-    transform: translateY(20px);
-    transition: all 0.6s ease;
+    animation: fadeInUp 0.7s ease-out forwards;
+}
+.intro-section:last-child {
+    margin-bottom: 0;
 }
 
-.intro-section[style*="block"] {
-    opacity: 1;
-    transform: translateY(0);
+.intro-title {
+    font-size: 2.2rem;
+    font-weight: bold;
+    color: var(--theme-accent-color);
+    margin-bottom: 18px;
+    line-height: 1.2;
+    min-height: 2.7rem;
 }
 
-.intro-section h3 {
-    font-size: 1.4rem;
-    color: var(--theme-text-primary);
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.intro-section h3 i {
+.intro-subtitle {
+    font-size: 1.3rem;
     color: var(--theme-primary-color);
-    font-size: 1.2rem;
+    margin-bottom: 12px;
+    line-height: 1.2;
+    min-height: 1.7rem;
+}
+
+.intro-detail {
+    font-size: 1.05rem;
+    color: var(--theme-text-primary);
+    background: rgba(255,255,255,0.04);
+    border-radius: 8px;
+    padding: 10px 18px;
+    margin-bottom: 6px;
+    line-height: 1.7;
+    min-height: 1.7rem;
+}
+
+.intro-text {
+    font-size: 1.08rem;
+    color: var(--theme-text-secondary);
+    margin-bottom: 8px;
+    line-height: 1.7;
+    min-height: 1.7rem;
+}
+
+.intro-character-card {
+    background: rgba(255,255,255,0.07);
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px var(--theme-shadow-light);
 }
 
 .typewriter-text {

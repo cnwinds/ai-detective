@@ -38,18 +38,14 @@ class DetectiveGameApp {
     // 加载版本信息
     async loadVersionInfo() {
         try {
-            const response = await fetch(`${this.apiBase}/version`);
-            const versionInfo = await response.json();
-            
+            const versionInfo = await APIHelper.get(`${this.apiBase}/version`);
             // 更新主菜单中的版本显示
-            const versionElement = document.getElementById('app-version');
+            const versionElement = DOMHelper.$('#app-version');
             if (versionElement) {
-                versionElement.textContent = `v${versionInfo.version}`;
+                DOMHelper.setText('#app-version', `v${versionInfo.version}`);
             }
-            
             // 更新关于游戏弹窗中的版本信息
             this.updateAboutModalVersion(versionInfo);
-            
             this.log(`版本信息加载成功: ${versionInfo.version}`);
         } catch (error) {
             this.logError('加载版本信息失败:', error);
@@ -61,16 +57,15 @@ class DetectiveGameApp {
     updateAboutModalVersion(versionInfo) {
         try {
             // 查找关于弹窗中的版本信息区域
-            const aboutModal = document.getElementById('about-modal');
+            const aboutModal = DOMHelper.$('#about-modal');
             if (aboutModal) {
                 const versionInfoDiv = aboutModal.querySelector('.version-info');
                 if (versionInfoDiv) {
-                    // 更新版本信息内容
-                    versionInfoDiv.innerHTML = `
+                    DOMHelper.setHTML(versionInfoDiv, `
                         <p><strong>版本：</strong>${versionInfo.version}</p>
                         <p><strong>构建日期：</strong>${versionInfo.build_date}</p>
                         <p><strong>构建编号：</strong>${versionInfo.build_number}</p>
-                    `;
+                    `);
                 }
             }
         } catch (error) {
@@ -97,12 +92,9 @@ class DetectiveGameApp {
     // 加载应用配置
     async loadAppConfig() {
         try {
-            const response = await fetch(`${this.apiBase}/config`);
-            if (response.ok) {
-                const config = await response.json();
-                this.appTimezone = config.timezone;
-                this.log(`应用配置加载成功，时区: ${this.appTimezone}`);
-            }
+            const config = await APIHelper.get(`${this.apiBase}/config`);
+            this.appTimezone = config.timezone;
+            this.log(`应用配置加载成功，时区: ${this.appTimezone}`);
         } catch (error) {
             this.logWarn('加载应用配置失败，使用默认时区:', error);
         }
@@ -110,93 +102,95 @@ class DetectiveGameApp {
     
     // 绑定事件监听器
     bindEvents() {
-        // 主菜单按钮
-        document.getElementById('start-game-btn').addEventListener('click', () => this.showCaseSelection());
-        document.getElementById('rules-btn').addEventListener('click', () => this.showModal('rules-modal'));
-        document.getElementById('about-btn').addEventListener('click', () => this.showModal('about-modal'));
-        
-        // 案例选择
-        document.getElementById('back-to-menu').addEventListener('click', () => {
-            this.showScreen('main-menu');
-            // 重新设置为默认主题
-            this.resetToDefaultTheme();
-        });
-        
-        // 案情介绍
-        document.getElementById('start-investigation-btn').addEventListener('click', () => this.startInvestigation());
-        document.getElementById('skip-intro-btn').addEventListener('click', () => this.skipIntroduction());
-        
-        // 游戏界面
-        document.getElementById('get-hint-btn').addEventListener('click', () => this.getHint());
-        document.getElementById('make-accusation-btn').addEventListener('click', () => this.showAccusationScreen());
-        document.getElementById('ask-question-btn').addEventListener('click', () => this.askQuestion());
-        
-        // 指控界面
-        document.getElementById('submit-accusation-btn').addEventListener('click', () => this.submitAccusation());
-        document.getElementById('cancel-accusation-btn').addEventListener('click', () => this.showScreen('game-screen'));
-        
+        // 批量事件绑定
+        DOMHelper.bindEvents([
+            // 主菜单按钮
+            ['#start-game-btn', 'click', () => this.showCaseSelection()],
+            ['#rules-btn', 'click', () => this.showModal('rules-modal')],
+            ['#about-btn', 'click', () => this.showModal('about-modal')],
+
+            // 案例选择
+            ['#back-to-menu', 'click', () => {
+                this.showScreen('main-menu');
+                this.resetToDefaultTheme();
+            }],
+
+            // 案情介绍
+            ['#start-investigation-btn', 'click', () => this.startInvestigation()],
+            ['#skip-intro-btn', 'click', () => this.skipIntroduction()],
+
+            // 游戏界面
+            ['#get-hint-btn', 'click', () => this.getHint()],
+            ['#make-accusation-btn', 'click', () => this.showAccusationScreen()],
+            ['#ask-question-btn', 'click', () => this.askQuestion()],
+
+            // 指控界面
+            ['#submit-accusation-btn', 'click', () => this.submitAccusation()],
+            ['#cancel-accusation-btn', 'click', () => this.showScreen('game-screen')],
+        ]);
+
         // 模态框关闭
-        document.querySelectorAll('.close-btn').forEach(btn => {
+        DOMHelper.$$('.close-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const modal = e.target.closest('.modal');
                 this.hideModal(modal.id);
             });
         });
-        
+
         // 点击模态框外部关闭
-        document.querySelectorAll('.modal').forEach(modal => {
+        DOMHelper.$$('.modal').forEach(modal => {
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     this.hideModal(modal.id);
                 }
             });
         });
-        
+
         // 问题输入框回车提交
-        document.getElementById('question-input').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                this.askQuestion();
-            }
-        });
+        const questionInput = DOMHelper.$('#question-input');
+        if (questionInput) {
+            questionInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    this.askQuestion();
+                }
+            });
+        }
     }
     
     // 显示/隐藏加载屏幕
     showLoadingScreen() {
-        document.getElementById('loading-screen').style.display = 'flex';
+        DOMHelper.toggle('#loading-screen', true);
     }
     
     hideLoadingScreen() {
-        document.getElementById('loading-screen').style.display = 'none';
+        DOMHelper.toggle('#loading-screen', false);
     }
     
     // 屏幕切换
     showScreen(screenId) {
-        document.querySelectorAll('.screen').forEach(screen => {
+        DOMHelper.$$('.screen').forEach(screen => {
             screen.classList.remove('active');
         });
-        document.getElementById(screenId).classList.add('active');
+        DOMHelper.$(`#${screenId}`).classList.add('active');
     }
     
     // 模态框显示/隐藏
     showModal(modalId) {
-        document.getElementById(modalId).classList.add('active');
+        DOMHelper.$(`#${modalId}`).classList.add('active');
     }
     
     hideModal(modalId) {
-        document.getElementById(modalId).classList.remove('active');
+        DOMHelper.$(`#${modalId}`).classList.remove('active');
     }
     
     // 显示消息模态框
     showMessage(title, content, isHtml = false, callback = null) {
-        document.getElementById('message-title').textContent = title;
-        const messageContent = document.getElementById('message-content');
-        
+        DOMHelper.setText('#message-title', title);
         if (isHtml) {
-            messageContent.innerHTML = content;
+            DOMHelper.setHTML('#message-content', content);
         } else {
-            messageContent.textContent = content;
+            DOMHelper.setText('#message-content', content);
         }
-        
         // 如果有回调函数，设置模态框关闭时的回调
         if (callback) {
             const modal = document.getElementById('message-modal');
@@ -253,13 +247,10 @@ class DetectiveGameApp {
         
         try {
             // 并行加载案例和分类数据
-            const [casesResponse, categoriesResponse] = await Promise.all([
-                fetch(`${this.apiBase}/cases`),
-                fetch(`${this.apiBase}/categories`)
+            const [cases, categories] = await Promise.all([
+                APIHelper.get(`${this.apiBase}/cases`),
+                APIHelper.get(`${this.apiBase}/categories`)
             ]);
-            
-            const cases = await casesResponse.json();
-            const categories = await categoriesResponse.json();
             
             this.renderCaseFilters(categories);
             this.renderCases(cases);
@@ -274,7 +265,7 @@ class DetectiveGameApp {
     
     // 渲染案例过滤器
     renderCaseFilters(categories) {
-        const filtersContainer = document.getElementById('case-filters');
+        const filtersContainer = DOMHelper.$('#case-filters');
         if (!filtersContainer) return;
         
         this.selectedFilters = {
@@ -329,7 +320,7 @@ class DetectiveGameApp {
     
     // 选择过滤标签
     selectFilterTag(type, selectedTag) {
-        const container = document.getElementById(`${type}-tags`);
+        const container = DOMHelper.$(`${type}-tags`);
         const allTags = container.querySelectorAll('.filter-tag');
         
         // 移除所有active状态
@@ -357,7 +348,7 @@ class DetectiveGameApp {
             if (category) params.append('category', category);
             if (difficulty) params.append('difficulty', difficulty);
             
-            const response = await fetch(`${this.apiBase}/cases?${params}`);
+            const response = await APIHelper.get(`${this.apiBase}/cases?${params}`);
             const cases = await response.json();
             
             this.renderCases(cases);
@@ -392,26 +383,22 @@ class DetectiveGameApp {
     
     // 渲染案例列表
     renderCases(cases) {
-        const casesList = document.getElementById('cases-list');
-        casesList.innerHTML = '';
+        const casesList = DOMHelper.$('#cases-list');
+        DOMHelper.setHTML('#cases-list', '');
         
         if (cases.length === 0) {
-            casesList.innerHTML = '<div class="no-cases">没有找到符合条件的案例</div>';
+            DOMHelper.setHTML('#cases-list', '<div class="no-cases">没有找到符合条件的案例</div>');
             return;
         }
         
         cases.forEach((caseData) => {
-            const caseCard = document.createElement('div');
-            caseCard.className = 'case-card';
-            
+            const caseCard = DOMHelper.createElement('div', { className: 'case-card' });
             // 获取分类和难度的中文名称
             const categoryName = this.getCategoryName(caseData.category);
             const difficultyName = this.getDifficultyName(caseData.difficulty);
-            
             // 截取描述，只显示前4行左右的内容
             const shortDescription = this.truncateDescription(caseData.description, 120);
-            
-            caseCard.innerHTML = `
+            DOMHelper.setHTML(caseCard, `
                 <div class="case-badges-top">
                     <span class="badge-top badge-category">${categoryName}</span>
                     <span class="badge-top badge-difficulty badge-${caseData.difficulty}">${difficultyName}</span>
@@ -432,8 +419,7 @@ class DetectiveGameApp {
                         </div>
                     </div>
                 </div>
-            `;
-            
+            `);
             caseCard.addEventListener('click', () => this.startGame(caseData.index));
             casesList.appendChild(caseCard);
         });
@@ -493,18 +479,10 @@ class DetectiveGameApp {
         this.showLoadingScreen();
         
         try {
-            const response = await fetch(`${this.apiBase}/game/start`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ 
-                    case_index: caseIndex,
-                    client_id: this.clientId  // 发送客户端ID
-                }),
+            const gameData = await APIHelper.post(`${this.apiBase}/game/start`, {
+                case_index: caseIndex,
+                client_id: this.clientId  // 发送客户端ID
             });
-            
-            const gameData = await response.json();
             
             this.sessionId = gameData.session_id;
             this.currentCase = gameData.case;
@@ -525,13 +503,158 @@ class DetectiveGameApp {
         }
     }
     
-    // 显示案情介绍
-    showCaseIntroduction() {
-        // 显示案情介绍界面
+    // 生成案情介绍内容数组（参考 mobile 端）
+    generateIntroContent() {
+        const victim = this.currentCase.characters.find(char => 
+            char.name === this.currentCase.victim_name && char.character_type === 'victim'
+        );
+        return [
+            { type: 'title', text: this.currentCase.title, delay: 1000 },
+            { type: 'subtitle', text: '案件详情', delay: 800 },
+            { type: 'detail', label: '受害者', text: this.currentCase.victim_name, delay: 500 },
+            { type: 'detail', label: '年龄职业', text: victim ? `${victim.age}岁，${victim.occupation}` : '信息不详', delay: 500 },
+            { type: 'detail', label: '案发时间', text: this.currentCase.time_of_crime, delay: 500 },
+            { type: 'detail', label: '案发地点', text: this.currentCase.crime_scene, delay: 500 },
+            { type: 'subtitle', text: '案情概述', delay: 800 },
+            { type: 'text', text: this.currentCase.description, delay: 1000 },
+            { type: 'subtitle', text: '相关人员', delay: 800 },
+            ...this.currentCase.characters.map(char => ({
+                type: 'character',
+                character: char,
+                delay: 600
+            })),
+            { type: 'subtitle', text: '调查目标', delay: 800 },
+            { type: 'text', text: '通过与相关人员对话，收集线索和证据，分析案件真相，最终找出真正的凶手。', delay: 800 }
+        ];
+    }
+
+    // 创建案情介绍单项元素
+    createIntroElement(item) {
+        const div = DOMHelper.createElement('div', { className: 'intro-section' });
+        switch (item.type) {
+            case 'title':
+                DOMHelper.setHTML(div, '<h1 class="intro-title"></h1>');
+                break;
+            case 'subtitle':
+                DOMHelper.setHTML(div, '<h2 class="intro-subtitle"></h2>');
+                break;
+            case 'detail':
+                DOMHelper.setHTML(div, `<div class="intro-detail"><strong>${item.label}：</strong><span class="detail-text"></span></div>`);
+                break;
+            case 'text':
+                DOMHelper.setHTML(div, '<p class="intro-text"></p>');
+                break;
+            case 'character':
+                // 以纯文本段落方式输出角色信息
+                const char = item.character;
+                // 角色类型中文
+                const typeText = this._getCharacterTypeText(char.character_type);
+                // 拼接内容：姓名，年龄，职业，类型。简介
+                const info = `${char.name}，${char.age}岁，${char.occupation}，${typeText}。${char.background}`;
+                DOMHelper.setHTML(div, `<p class="intro-text">${info}</p>`);
+                break;
+        }
+        return div;
+    }
+
+    // 打字机动画显示内容
+    async typewriterEffect(element, item) {
+        if (this.skipTypewriter) return null;
+        let cursor = null;
+        switch (item.type) {
+            case 'title':
+                cursor = await this.typewriterTextForElement(element.querySelector('.intro-title'), item.text, 80, 300);
+                break;
+            case 'subtitle':
+                cursor = await this.typewriterTextForElement(element.querySelector('.intro-subtitle'), item.text, 60, 300);
+                break;
+            case 'detail':
+                cursor = await this.typewriterTextForElement(element.querySelector('.detail-text'), item.text, 50, 600);
+                break;
+            case 'text':
+                cursor = await this.typewriterTextForElement(element.querySelector('.intro-text'), item.text, 30, 400);
+                break;
+            case 'character':
+                // 角色卡片直接显示，无需打字机
+                break;
+        }
+        return cursor;
+    }
+
+    // 打字机动画核心
+    async typeText(element, text, speed) {
+        if (this.skipTypewriter) {
+            element.textContent = text;
+            return;
+        }
+        DOMHelper.setHTML(element, '');
+        // 添加光标
+        const cursor = DOMHelper.createElement('span', { className: 'typewriter-cursor' }, '█');
+        element.appendChild(cursor);
+        for (let i = 0; i < text.length; i++) {
+            if (this.skipTypewriter) {
+                element.textContent = text;
+                return;
+            }
+            await new Promise(resolve => setTimeout(resolve, speed));
+            const textNode = document.createTextNode(text[i]);
+            element.insertBefore(textNode, cursor);
+            cursor.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        }
+        return cursor;
+    }
+
+    // 重写案情介绍主流程
+    async showCaseIntroduction() {
         this.showScreen('case-intro-screen');
-        
-        // 开始完整的打字机效果序列
-        this.startFullTypewriterSequence();
+        this.skipTypewriter = false;
+        const introContent = DOMHelper.$('#intro-content');
+        introContent.innerHTML = '';
+        // 增加日志，输出角色数据
+        const contentArr = this.generateIntroContent();
+        for (const item of contentArr) {
+            if (this.skipTypewriter) break;
+            const element = this.createIntroElement(item);
+            introContent.appendChild(element);
+            const cursor = await this.typewriterEffect(element, item);
+            if (cursor) {
+                cursor.style.opacity = '1';
+                await this.delay(350);
+                cursor.remove();
+            }
+            await this.delay(item.delay || 300);
+        }
+        // 动画结束，启用按钮
+        if (!this.skipTypewriter) {
+            DOMHelper.$('#start-investigation-btn').disabled = false;
+        }
+    }
+
+    // 跳过介绍动画，直接显示全部内容
+    skipIntroduction() {
+        this.skipTypewriter = true;
+        const introContent = DOMHelper.$('#intro-content');
+        introContent.innerHTML = '';
+        const contentArr = this.generateIntroContent();
+        for (const item of contentArr) {
+            const element = this.createIntroElement(item);
+            // 直接填充内容
+            switch (item.type) {
+                case 'title':
+                    element.querySelector('.intro-title').textContent = item.text; break;
+                case 'subtitle':
+                    element.querySelector('.intro-subtitle').textContent = item.text; break;
+                case 'detail':
+                    element.querySelector('.detail-text').textContent = item.text; break;
+                case 'text':
+                    element.querySelector('.intro-text').textContent = item.text; break;
+                case 'character':
+                    // 角色卡片已生成
+                    break;
+            }
+            introContent.appendChild(element);
+        }
+        DOMHelper.$('#start-investigation-btn').disabled = false;
     }
     
     // 根据案件类型自动应用主题
@@ -575,167 +698,67 @@ class DetectiveGameApp {
     
     // 渲染介绍页面的角色信息
     renderIntroCharacters() {
-        const charactersGrid = document.getElementById('intro-characters');
+        const charactersGrid = DOMHelper.$('#intro-characters');
         charactersGrid.innerHTML = '';
         
         this.currentCase.characters.forEach(character => {
-            const characterCard = document.createElement('div');
+            const characterCard = DOMHelper.createElement('div');
             characterCard.className = 'intro-character-card';
             characterCard.innerHTML = this._createCharacterCardHTML(character, 'intro');
             charactersGrid.appendChild(characterCard);
         });
     }
     
-    // 完整的打字机效果序列
-    async startFullTypewriterSequence() {
-        // 重置跳过标志
-        this.skipTypewriter = false;
-        
-        // 清空所有内容
-        this.clearIntroContent();
-        
-        // 步骤1: 显示案件标题
-        if (!this.skipTypewriter) {
-            await this.delay(500); // 开始前的停顿
-            await this.typewriterText('intro-case-title', this.currentCase.title, 80);
-            await this.delay(1000);
-        }
-        
-        // 步骤2: 显示案件详情部分
-        if (!this.skipTypewriter) {
-            // 显示案件详情区域
-            document.getElementById('case-details-section').style.display = 'block';
-            await this.delay(300);
-            
-            // 打字机显示"案件详情"标题
-            await this.typewriterTextForElement(
-                document.querySelector('#case-details-title span'), 
-                '案件详情', 
-                70
-            );
-            await this.delay(500);
-            
-            // 逐个显示案件详情
-            await this.typewriterCaseDetails();
-            await this.delay(1000);
-        }
-        
-        // 步骤3: 显示案情概述部分
-        if (!this.skipTypewriter) {
-            // 显示案情概述区域
-            document.getElementById('description-section').style.display = 'block';
-            await this.delay(300);
-            
-            // 打字机显示"案情概述"标题
-            await this.typewriterTextForElement(
-                document.querySelector('#description-title span'), 
-                '案情概述', 
-                70
-            );
-            await this.delay(500);
-            
-            // 打字机显示案情描述
-            await this.typewriterText('intro-description', this.currentCase.description, 40);
-            await this.delay(1000);
-        }
-        
-        // 步骤4: 显示相关人员部分
-        if (!this.skipTypewriter) {
-            // 显示相关人员区域
-            document.getElementById('characters-section').style.display = 'block';
-            await this.delay(300);
-            
-            // 打字机显示"相关人员"标题
-            await this.typewriterTextForElement(
-                document.querySelector('#characters-title span'), 
-                '相关人员', 
-                70
-            );
-            await this.delay(500);
-            
-            // 逐个显示角色信息
-            await this.typewriterCharacters();
-            await this.delay(1000);
-        }
-        
-        // 步骤5: 显示调查目标部分
-        if (!this.skipTypewriter) {
-            // 显示调查目标区域
-            document.getElementById('goals-section').style.display = 'block';
-            await this.delay(300);
-            
-            // 打字机显示"调查目标"标题
-            await this.typewriterTextForElement(
-                document.querySelector('#goals-title span'), 
-                '调查目标', 
-                70
-            );
-            await this.delay(500);
-            
-            // 显示调查目标
-            await this.typewriterGoals();
-            await this.delay(800);
-        }
-        
-        // 最后启用开始按钮
-        if (!this.skipTypewriter) {
-            document.getElementById('start-investigation-btn').disabled = false;
-        }
-    }
-    
     // 清空介绍内容
     clearIntroContent() {
         // 清空标题
-        document.getElementById('intro-case-title').textContent = '';
+        DOMHelper.setText('#intro-case-title', '');
         
         // 隐藏所有区域
-        document.getElementById('case-details-section').style.display = 'none';
-        document.getElementById('description-section').style.display = 'none';
-        document.getElementById('characters-section').style.display = 'none';
-        document.getElementById('goals-section').style.display = 'none';
+        DOMHelper.$('#case-details-section').style.display = 'none';
+        DOMHelper.$('#description-section').style.display = 'none';
+        DOMHelper.$('#characters-section').style.display = 'none';
+        DOMHelper.$('#goals-section').style.display = 'none';
         
         // 清空所有标题
-        document.querySelector('#case-details-title span').textContent = '';
-        document.querySelector('#description-title span').textContent = '';
-        document.querySelector('#characters-title span').textContent = '';
-        document.querySelector('#goals-title span').textContent = '';
+        DOMHelper.setText(DOMHelper.$('#case-details-title span'), '');
+        DOMHelper.setText(DOMHelper.$('#description-title span'), '');
+        DOMHelper.setText(DOMHelper.$('#characters-title span'), '');
+        DOMHelper.setText(DOMHelper.$('#goals-title span'), '');
         
         // 清空案件详情标签
-        document.getElementById('victim-label').textContent = '';
-        document.getElementById('victim-age-label').textContent = '';
-        document.getElementById('death-time-label').textContent = '';
-        document.getElementById('death-location-label').textContent = '';
+        DOMHelper.setText(DOMHelper.$('#victim-label'), '');
+        DOMHelper.setText(DOMHelper.$('#victim-age-label'), '');
+        DOMHelper.setText(DOMHelper.$('#death-time-label'), '');
+        DOMHelper.setText(DOMHelper.$('#death-location-label'), '');
         
         // 清空案件详情内容
-        document.getElementById('victim-name').textContent = '';
-        document.getElementById('victim-age-occupation').textContent = '';
-        document.getElementById('death-time').textContent = '';
-        document.getElementById('death-location').textContent = '';
+        DOMHelper.setText(DOMHelper.$('#victim-name'), '');
+        DOMHelper.setText(DOMHelper.$('#victim-age-occupation'), '');
+        DOMHelper.setText(DOMHelper.$('#death-time'), '');
+        DOMHelper.setText(DOMHelper.$('#death-location'), '');
         
         // 清空案件详情图标
-        document.getElementById('victim-icon').innerHTML = '';
-        document.getElementById('victim-age-icon').innerHTML = '';
-        document.getElementById('death-time-icon').innerHTML = '';
-        document.getElementById('death-location-icon').innerHTML = '';
+        DOMHelper.setHTML(DOMHelper.$('#victim-icon'), '');
+        DOMHelper.setHTML(DOMHelper.$('#victim-age-icon'), '');
+        DOMHelper.setHTML(DOMHelper.$('#death-time-icon'), '');
+        DOMHelper.setHTML(DOMHelper.$('#death-location-icon'), '');
         
         // 重置案件详情项目状态
-        const detailItems = document.querySelectorAll('.detail-item');
-        detailItems.forEach(item => item.classList.remove('show'));
+        DOMHelper.$$('.detail-item').forEach(item => item.classList.remove('show'));
         
         // 清空内容
-        document.getElementById('intro-description').innerHTML = '';
-        document.getElementById('intro-characters').innerHTML = '';
+        DOMHelper.setHTML(DOMHelper.$('#intro-description'), '');
+        DOMHelper.setHTML(DOMHelper.$('#intro-characters'), '');
         
         // 清空调查目标
-        const goals = document.querySelectorAll('.goal-item span');
-        goals.forEach(goal => goal.textContent = '');
+        DOMHelper.$$('.goal-item span').forEach(goal => DOMHelper.setText(goal, ''));
         
         // 重置目标项目状态
-        const goalItems = document.querySelectorAll('.goal-item');
-        goalItems.forEach(item => item.classList.remove('show'));
+        DOMHelper.$$('.goal-item').forEach(item => item.classList.remove('show'));
         
         // 禁用开始按钮
-        document.getElementById('start-investigation-btn').disabled = true;
+        DOMHelper.$('#start-investigation-btn').disabled = true;
     }
     
     // 通用打字机效果方法
@@ -748,7 +771,7 @@ class DetectiveGameApp {
             return;
         }
         
-        const element = document.getElementById(elementId);
+        const element = DOMHelper.$(elementId);
         if (!element) {
             console.warn(`typewriterText: Element not found: ${elementId}`);
             return;
@@ -757,8 +780,7 @@ class DetectiveGameApp {
         element.innerHTML = '';
         
         // 添加光标
-        const cursor = document.createElement('span');
-        cursor.className = 'typewriter-cursor';
+        const cursor = DOMHelper.createElement('span', { className: 'typewriter-cursor' });
         cursor.textContent = '|';
         element.appendChild(cursor);
         
@@ -781,11 +803,15 @@ class DetectiveGameApp {
     async typewriterIcon(elementId, iconClasses, speed = 100) {
         if (this.skipTypewriter) return;
         
-        const element = document.getElementById(elementId);
+        const element = DOMHelper.$(elementId);
+        if (!element) {
+            console.warn(`typewriterIcon: 未找到元素: ${elementId}`);
+            return;
+        }
         element.innerHTML = '';
         
         // 创建图标元素
-        const icon = document.createElement('i');
+        const icon = DOMHelper.createElement('i');
         icon.className = iconClasses;
         icon.style.opacity = '0';
         icon.style.transform = 'scale(0)';
@@ -849,7 +875,7 @@ class DetectiveGameApp {
             }
         ];
         
-        const detailElements = document.querySelectorAll('.detail-item');
+        const detailElements = DOMHelper.$$('.detail-item');
         
         for (let i = 0; i < detailItems.length; i++) {
             if (this.skipTypewriter) break;
@@ -877,12 +903,12 @@ class DetectiveGameApp {
     
     // 打字机效果显示角色信息
     async typewriterCharacters() {
-        const charactersGrid = document.getElementById('intro-characters');
+        const charactersGrid = DOMHelper.$('#intro-characters');
         charactersGrid.innerHTML = '';
         
         for (const character of this.currentCase.characters) {
             // 创建角色卡片
-            const characterCard = document.createElement('div');
+            const characterCard = DOMHelper.createElement('div');
             characterCard.className = 'intro-character-card';
             characterCard.style.opacity = '0';
             characterCard.style.transform = 'translateY(20px)';
@@ -915,8 +941,8 @@ class DetectiveGameApp {
             '找出真凶并进行指控'
         ];
         
-        const goalItems = document.querySelectorAll('.goal-item');
-        const goalElements = document.querySelectorAll('.goal-item span');
+        const goalItems = DOMHelper.$$('.goal-item');
+        const goalElements = DOMHelper.$$('.goal-item span');
         
         for (let i = 0; i < goals.length && i < goalElements.length; i++) {
             await this.delay(300);
@@ -936,7 +962,7 @@ class DetectiveGameApp {
     }
     
     // 为元素添加打字机效果（支持任意元素）
-    async typewriterTextForElement(element, text, speed = 50) {
+    async typewriterTextForElement(element, text, speed = 50, waitAfter = 0) {
         // 检查参数是否有效
         if (!element) {
             console.warn('typewriterTextForElement: Invalid element:', element);
@@ -951,20 +977,21 @@ class DetectiveGameApp {
         element.innerHTML = '';
         
         // 添加光标
-        const cursor = document.createElement('span');
-        cursor.className = 'typewriter-cursor';
+        const cursor = DOMHelper.createElement('span', { className: 'typewriter-cursor span' });
         cursor.textContent = '|';
         element.appendChild(cursor);
         
         // 逐字显示文本
         for (let i = 0; i < text.length; i++) {
             await new Promise(resolve => setTimeout(resolve, speed));
-            
             // 在光标前插入字符
             const textNode = document.createTextNode(text[i]);
             element.insertBefore(textNode, cursor);
         }
-        
+        // 整行显示完成后等待（光标一直显示）
+        if (waitAfter > 0) {
+            await new Promise(resolve => setTimeout(resolve, waitAfter));
+        }
         // 移除光标
         cursor.remove();
     }
@@ -976,40 +1003,28 @@ class DetectiveGameApp {
         this.showScreen('game-screen');
     }
     
-    // 跳过介绍
-    skipIntroduction() {
-        // 停止当前的打字机效果
-        this.skipTypewriter = true;
-        
-        // 立即显示所有内容
-        this.showAllIntroContent();
-        
-        // 启用开始按钮
-        document.getElementById('start-investigation-btn').disabled = false;
-    }
-    
     // 立即显示所有介绍内容
     showAllIntroContent() {
         // 填充标题
-        document.getElementById('intro-case-title').textContent = this.currentCase.title;
+        DOMHelper.setText('#intro-case-title', this.currentCase.title);
         
         // 显示所有区域
-        document.getElementById('case-details-section').style.display = 'block';
-        document.getElementById('description-section').style.display = 'block';
-        document.getElementById('characters-section').style.display = 'block';
-        document.getElementById('goals-section').style.display = 'block';
+        DOMHelper.$('#case-details-section').style.display = 'block';
+        DOMHelper.$('#description-section').style.display = 'block';
+        DOMHelper.$('#characters-section').style.display = 'block';
+        DOMHelper.$('#goals-section').style.display = 'block';
         
         // 填充所有标题
-        document.querySelector('#case-details-title span').textContent = '案件详情';
-        document.querySelector('#description-title span').textContent = '案情概述';
-        document.querySelector('#characters-title span').textContent = '相关人员';
-        document.querySelector('#goals-title span').textContent = '调查目标';
+        DOMHelper.setText(DOMHelper.$('#case-details-title span'), '案件详情');
+        DOMHelper.setText(DOMHelper.$('#description-title span'), '案情概述');
+        DOMHelper.setText(DOMHelper.$('#characters-title span'), '相关人员');
+        DOMHelper.setText(DOMHelper.$('#goals-title span'), '调查目标');
         
         // 显示案件详情
         this.showCaseDetailsInstant();
         
         // 填充案情描述
-        document.getElementById('intro-description').textContent = this.currentCase.description;
+        DOMHelper.setHTML(DOMHelper.$('#intro-description'), this.currentCase.description);
         
         // 显示角色信息
         this.renderIntroCharactersInstant();
@@ -1018,16 +1033,16 @@ class DetectiveGameApp {
         this.showGoalsInstant();
         
         // 启用开始按钮
-        document.getElementById('start-investigation-btn').disabled = false;
+        DOMHelper.$('#start-investigation-btn').disabled = false;
     }
     
     // 立即显示角色信息
     renderIntroCharactersInstant() {
-        const charactersGrid = document.getElementById('intro-characters');
+        const charactersGrid = DOMHelper.$('#intro-characters');
         charactersGrid.innerHTML = '';
         
         this.currentCase.characters.forEach(character => {
-            const characterCard = document.createElement('div');
+            const characterCard = DOMHelper.createElement('div');
             characterCard.className = 'intro-character-card show';
             characterCard.innerHTML = this._createCharacterCardHTML(character, 'intro');
             charactersGrid.appendChild(characterCard);
@@ -1039,26 +1054,25 @@ class DetectiveGameApp {
         const victim = this._getVictimCharacter();
         
         // 填充标签文本
-        document.getElementById('victim-label').textContent = '受害者';
-        document.getElementById('victim-age-label').textContent = '年龄职业';
-        document.getElementById('death-time-label').textContent = '时间';
-        document.getElementById('death-location-label').textContent = '地点';
+        DOMHelper.setText(DOMHelper.$('#victim-label'), '受害者');
+        DOMHelper.setText(DOMHelper.$('#victim-age-label'), '年龄职业');
+        DOMHelper.setText(DOMHelper.$('#death-time-label'), '时间');
+        DOMHelper.setText(DOMHelper.$('#death-location-label'), '地点');
         
         // 填充案件详情内容
-        document.getElementById('victim-name').textContent = this.currentCase.victim_name || '未知';
-        document.getElementById('victim-age-occupation').textContent = victim ? `${victim.age}岁，${victim.occupation}` : '信息不详';
-        document.getElementById('death-time').textContent = this.currentCase.time_of_crime || '时间不详';
-        document.getElementById('death-location').textContent = this.currentCase.crime_scene || '地点不详';
+        DOMHelper.setText(DOMHelper.$('#victim-name'), this.currentCase.victim_name || '未知');
+        DOMHelper.setText(DOMHelper.$('#victim-age-occupation'), victim ? `${victim.age}岁，${victim.occupation}` : '信息不详');
+        DOMHelper.setText(DOMHelper.$('#death-time'), this.currentCase.time_of_crime || '时间不详');
+        DOMHelper.setText(DOMHelper.$('#death-location'), this.currentCase.crime_scene || '地点不详');
         
         // 显示图标
-        document.getElementById('victim-icon').innerHTML = '<i class="fas fa-user-injured"></i>';
-        document.getElementById('victim-age-icon').innerHTML = '<i class="fas fa-id-card"></i>';
-        document.getElementById('death-time-icon').innerHTML = '<i class="fas fa-clock"></i>';
-        document.getElementById('death-location-icon').innerHTML = '<i class="fas fa-map-marker-alt"></i>';
+        DOMHelper.setHTML(DOMHelper.$('#victim-icon'), '<i class="fas fa-user-injured"></i>');
+        DOMHelper.setHTML(DOMHelper.$('#victim-age-icon'), '<i class="fas fa-id-card"></i>');
+        DOMHelper.setHTML(DOMHelper.$('#death-time-icon'), '<i class="fas fa-clock"></i>');
+        DOMHelper.setHTML(DOMHelper.$('#death-location-icon'), '<i class="fas fa-map-marker-alt"></i>');
         
         // 显示所有详情项目
-        const detailItems = document.querySelectorAll('.detail-item');
-        detailItems.forEach(item => item.classList.add('show'));
+        DOMHelper.$$('.detail-item').forEach(item => item.classList.add('show'));
     }
     
     // 立即显示调查目标
@@ -1069,21 +1083,21 @@ class DetectiveGameApp {
             '找出真凶并进行指控'
         ];
         
-        const goalItems = document.querySelectorAll('.goal-item');
-        const goalElements = document.querySelectorAll('.goal-item span');
+        const goalItems = DOMHelper.$$('.goal-item');
+        const goalElements = DOMHelper.$$('.goal-item span');
         
         goalItems.forEach(item => item.classList.add('show'));
         
         for (let i = 0; i < goals.length && i < goalElements.length; i++) {
-            goalElements[i].textContent = goals[i];
+            DOMHelper.setText(goalElements[i], goals[i]);
         }
     }
 
     // 初始化游戏界面
     initializeGame() {
         // 更新案例信息
-        document.getElementById('case-title').textContent = this.currentCase.title;
-        document.getElementById('case-description').textContent = this.currentCase.description;
+        DOMHelper.setText('#case-title', this.currentCase.title);
+        DOMHelper.setHTML('#case-description', this.currentCase.description);
         
         // 调试信息
         this.log('初始化游戏界面，案件数据:', this.currentCase);
@@ -1123,9 +1137,9 @@ class DetectiveGameApp {
             return;
         }
 
-        const victimNameEl = document.getElementById('game-victim-name');     
-        const crimeSceneEl = document.getElementById('game-crime-scene');
-        const crimeTimeEl = document.getElementById('game-crime-time');
+        const victimNameEl = DOMHelper.$('#game-victim-name');     
+        const crimeSceneEl = DOMHelper.$('#game-crime-scene');
+        const crimeTimeEl = DOMHelper.$('#game-crime-time');
         
         this.log('🔄 正在更新被害人信息...');
         this.log('DOM元素查找结果:', {
@@ -1168,8 +1182,8 @@ class DetectiveGameApp {
     // 更新游戏统计信息
     updateGameStats() {
         // 更新轮次计数显示在提问按钮中
-        const currentRoundEl = document.getElementById('current-round');
-        const maxRoundsEl = document.getElementById('max-rounds');
+        const currentRoundEl = DOMHelper.$('#current-round');
+        const maxRoundsEl = DOMHelper.$('#max-rounds');
         
         if (currentRoundEl) {
             currentRoundEl.textContent = this.gameState.current_round;
@@ -1179,8 +1193,8 @@ class DetectiveGameApp {
         }
         
         // 更新提示次数显示在获取提示按钮中
-        const hintsUsedEl = document.getElementById('hints-used');
-        const maxHintsEl = document.getElementById('max-hints');
+        const hintsUsedEl = DOMHelper.$('#hints-used');
+        const maxHintsEl = DOMHelper.$('#max-hints');
         
         if (hintsUsedEl) {
             hintsUsedEl.textContent = this.gameState.hints_used;
@@ -1190,7 +1204,7 @@ class DetectiveGameApp {
         }
         
         // 更新提示按钮状态
-        const hintBtn = document.getElementById('get-hint-btn');
+        const hintBtn = DOMHelper.$('#get-hint-btn');
         if (hintBtn) {
             hintBtn.disabled = this.gameState.hints_used >= this.gameState.max_hints;
             
@@ -1205,7 +1219,7 @@ class DetectiveGameApp {
     
     // 渲染角色列表
     renderCharacters() {
-        const charactersList = document.getElementById('characters-list');
+        const charactersList = DOMHelper.$('#characters-list');
         charactersList.innerHTML = '';
         
         // 过滤掉受害者，因为死者无法进行对话
@@ -1214,8 +1228,7 @@ class DetectiveGameApp {
         );
         
         availableCharacters.forEach(character => {
-            const characterCard = document.createElement('div');
-            characterCard.className = 'character-card';
+            const characterCard = DOMHelper.createElement('div', { className: 'character-card' });
             characterCard.innerHTML = this._createCharacterCardHTML(character, 'game');
             characterCard.addEventListener('click', () => this.selectCharacter(character));
             charactersList.appendChild(characterCard);
@@ -1238,7 +1251,7 @@ class DetectiveGameApp {
         this.selectedCharacter = character;
         
         // 更新角色卡片状态
-        document.querySelectorAll('.character-card').forEach(card => {
+        DOMHelper.$$('.character-card').forEach(card => {
             card.classList.remove('active');
         });
         event.currentTarget.classList.add('active');
@@ -1259,10 +1272,10 @@ class DetectiveGameApp {
         }
         
         // 轮次未用完，显示问题输入区域
-        document.getElementById('question-input-area').style.display = 'block';
+        DOMHelper.$('#question-input-area').style.display = 'block';
         
         // 立即显示空白的参考问题区域，但允许用户开始输入
-        const questionsList = document.getElementById('suggested-questions-list');
+        const questionsList = DOMHelper.$('#suggested-questions-list');
         questionsList.innerHTML = this._createLoadingSuggestionsHTML();
         
         // 异步获取参考问题，不阻塞用户操作
@@ -1280,11 +1293,11 @@ class DetectiveGameApp {
             this.log('角色类型:', characterType);
             
             // 隐藏默认标题，显示角色标题
-            document.getElementById('default-header').style.display = 'none';
-            document.getElementById('character-header').style.display = 'block';
+            DOMHelper.$('#default-header').style.display = 'none';
+            DOMHelper.$('#character-header').style.display = 'block';
             
             // 设置角色头像图标
-            const avatarIcon = document.getElementById('character-avatar-icon');
+            const avatarIcon = DOMHelper.$('#character-avatar-icon');
             if (avatarIcon) {
                 switch (characterType.toLowerCase()) {
                     case 'suspect':
@@ -1305,23 +1318,23 @@ class DetectiveGameApp {
             }
             
             // 设置角色基本信息
-            const nameDisplay = document.getElementById('character-name-display');
-            const occupationDisplay = document.getElementById('character-occupation-display');
-            const typeDisplay = document.getElementById('character-type-display');
-            const backgroundText = document.getElementById('character-background-text');
+            const nameDisplay = DOMHelper.$('#character-name-display');
+            const occupationDisplay = DOMHelper.$('#character-occupation-display');
+            const typeDisplay = DOMHelper.$('#character-type-display');
+            const backgroundText = DOMHelper.$('#character-background-text');
             
-            if (nameDisplay) nameDisplay.textContent = character.name || '未知';
-            if (occupationDisplay) occupationDisplay.textContent = character.occupation || '职业不详';
+            if (nameDisplay) DOMHelper.setText(nameDisplay, character.name || '未知');
+            if (occupationDisplay) DOMHelper.setText(occupationDisplay, character.occupation || '职业不详');
             
             // 设置角色类型标签
             if (typeDisplay) {
-                typeDisplay.textContent = this._getCharacterTypeText(characterType);
+                DOMHelper.setText(typeDisplay, this._getCharacterTypeText(characterType));
                 typeDisplay.className = `character-type-badge-small ${characterType.toLowerCase()}`;
             }
             
             // 设置背景信息
             if (backgroundText) {
-                backgroundText.textContent = character.background || '暂无背景信息';
+                DOMHelper.setText(backgroundText, character.background || '暂无背景信息');
             }
             this.log('角色背景信息显示成功');
             
@@ -1334,7 +1347,7 @@ class DetectiveGameApp {
     
     // 显示特定角色的对话历史
     showCharacterConversation(character) {
-        const conversationArea = document.getElementById('conversation-area');
+        const conversationArea = DOMHelper.$('#conversation-area');
         conversationArea.innerHTML = '';
         
         // 获取该角色的对话历史
@@ -1354,8 +1367,7 @@ class DetectiveGameApp {
         } else {
             // 显示对话历史
             characterConversations.forEach(msg => {
-                const conversationItem = document.createElement('div');
-                conversationItem.className = 'conversation-item';
+                const conversationItem = DOMHelper.createElement('div', { className: 'conversation-item' });
                 conversationItem.innerHTML = this._createConversationItemHTML(msg.question, msg.response);
                 conversationArea.appendChild(conversationItem);
             });
@@ -1371,7 +1383,7 @@ class DetectiveGameApp {
         }
         
         // 检查是否已经有了加载提示（在selectCharacter中已设置）
-        const questionsList = document.getElementById('suggested-questions-list');
+        const questionsList = DOMHelper.$('#suggested-questions-list');
         if (!questionsList.querySelector('.loading-suggestions')) {
             // 如果没有加载提示，则显示
             questionsList.innerHTML = this._createLoadingSuggestionsHTML();
@@ -1428,15 +1440,14 @@ class DetectiveGameApp {
     
     // 渲染参考问题
     renderSuggestedQuestions(questions) {
-        const questionsList = document.getElementById('suggested-questions-list');
+        const questionsList = DOMHelper.$('#suggested-questions-list');
         questionsList.innerHTML = '';
         
         questions.forEach(question => {
-            const questionBtn = document.createElement('button');
-            questionBtn.className = 'suggested-question';
+            const questionBtn = DOMHelper.createElement('button', { className: 'suggested-question' });
             questionBtn.textContent = question;
             questionBtn.addEventListener('click', () => {
-                document.getElementById('question-input').value = question;
+                DOMHelper.setText('#question-input', question);
             });
             questionsList.appendChild(questionBtn);
         });
@@ -1455,7 +1466,7 @@ class DetectiveGameApp {
             return;
         }
         
-        const questionInput = document.getElementById('question-input');
+        const questionInput = DOMHelper.$('#question-input');
         const question = questionInput.value.trim();
         
         if (!question) {
@@ -1463,7 +1474,7 @@ class DetectiveGameApp {
             return;
         }
         
-        const askBtn = document.getElementById('ask-question-btn');
+        const askBtn = DOMHelper.$('#ask-question-btn');
         askBtn.disabled = true;
         askBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提问中...';
         
@@ -1596,7 +1607,7 @@ class DetectiveGameApp {
     
     // 添加问题到对话
     addQuestionToConversation(question) {
-        const conversationArea = document.getElementById('conversation-area');
+        const conversationArea = DOMHelper.$('#conversation-area');
         
         // 隐藏欢迎消息
         const welcomeMessage = conversationArea.querySelector('.welcome-message');
@@ -1604,8 +1615,7 @@ class DetectiveGameApp {
             welcomeMessage.style.display = 'none';
         }
         
-        const conversationItem = document.createElement('div');
-        conversationItem.className = 'conversation-item';
+        const conversationItem = DOMHelper.createElement('div', { className: 'conversation-item' });
         conversationItem.innerHTML = this._createConversationItemHTML(question);
         
         conversationArea.appendChild(conversationItem);
@@ -1616,11 +1626,10 @@ class DetectiveGameApp {
     
     // 创建响应容器
     createResponseContainer() {
-        const conversationArea = document.getElementById('conversation-area');
+        const conversationArea = DOMHelper.$('#conversation-area');
         const lastItem = conversationArea.lastElementChild;
         
-        const responseDiv = document.createElement('div');
-        responseDiv.className = 'response streaming';
+        const responseDiv = DOMHelper.createElement('div', { className: 'response streaming' });
         responseDiv.innerHTML = '<span class="typing-indicator">正在输入...</span>';
         
         lastItem.appendChild(responseDiv);
@@ -1635,7 +1644,7 @@ class DetectiveGameApp {
         container.innerHTML = text + '<span class="cursor">|</span>';
         
         // 滚动到底部
-        const conversationArea = document.getElementById('conversation-area');
+        const conversationArea = DOMHelper.$('#conversation-area');
         conversationArea.scrollTop = conversationArea.scrollHeight;
     }
     
@@ -1645,15 +1654,14 @@ class DetectiveGameApp {
         container.innerHTML = text;
         
         // 滚动到底部
-        const conversationArea = document.getElementById('conversation-area');
+        const conversationArea = DOMHelper.$('#conversation-area');
         conversationArea.scrollTop = conversationArea.scrollHeight;
     }
     
     // 显示证据发现通知
     showEvidenceNotification(evidence) {
         // 创建证据通知
-        const notification = document.createElement('div');
-        notification.className = 'evidence-notification';
+        const notification = DOMHelper.createElement('div', { className: 'evidence-notification' });
         notification.innerHTML = `
             <div class="evidence-notification-content">
                 <div class="evidence-icon">🔍</div>
@@ -1711,9 +1719,9 @@ class DetectiveGameApp {
     
     // 禁用问题输入
     disableQuestionInput() {
-        const questionInputDiv = document.querySelector('.question-input');
-        const questionsList = document.getElementById('suggested-questions-list');
-        const questionInputArea = document.getElementById('question-input-area');
+        const questionInputDiv = DOMHelper.$('.question-input');
+        const questionsList = DOMHelper.$('#suggested-questions-list');
+        const questionInputArea = DOMHelper.$('#question-input-area');
         
         // 确保问题输入区域是显示的，并添加轮次结束样式
         if (questionInputArea) {
@@ -1727,7 +1735,7 @@ class DetectiveGameApp {
         }
         
         // 隐藏"参考问题："标题
-        const suggestedQuestions = document.querySelector('.suggested-questions');
+        const suggestedQuestions = DOMHelper.$('.suggested-questions');
         if (suggestedQuestions) {
             const h4 = suggestedQuestions.querySelector('h4');
             if (h4) h4.style.display = 'none';
@@ -1757,7 +1765,7 @@ class DetectiveGameApp {
     
     // 清空对话
     clearConversation() {
-        const conversationArea = document.getElementById('conversation-area');
+        const conversationArea = DOMHelper.$('#conversation-area');
         conversationArea.innerHTML = `
             <div class="welcome-message">
                 <i class="fas fa-arrow-left"></i>
@@ -1766,19 +1774,19 @@ class DetectiveGameApp {
         `;
         
         // 恢复默认标题，隐藏角色标题
-        document.getElementById('default-header').style.display = 'block';
-        document.getElementById('character-header').style.display = 'none';
+        DOMHelper.$('#default-header').style.display = 'block';
+        DOMHelper.$('#character-header').style.display = 'none';
         
         // 收起背景信息
-        const expandableArea = document.getElementById('character-background-expandable');
-        const toggleBtn = document.getElementById('toggle-background-btn');
+        const expandableArea = DOMHelper.$('#character-background-expandable');
+        const toggleBtn = DOMHelper.$('#toggle-background-btn');
         if (expandableArea) expandableArea.style.display = 'none';
         if (toggleBtn) {
             toggleBtn.classList.remove('expanded');
             toggleBtn.title = '展开背景信息';
         }
         
-        document.getElementById('question-input-area').style.display = 'none';
+        DOMHelper.$('#question-input-area').style.display = 'none';
     }
     
     // 添加证据
@@ -1787,9 +1795,8 @@ class DetectiveGameApp {
         this.updateEvidenceDisplay();
         
         // 显示证据通知
-        const conversationArea = document.getElementById('conversation-area');
-        const notification = document.createElement('div');
-        notification.className = 'evidence-notification';
+        const conversationArea = DOMHelper.$('#conversation-area');
+        const notification = DOMHelper.createElement('div', { className: 'evidence-notification' });
         notification.innerHTML = `
             <i class="fas fa-search"></i>
             <strong>发现新证据：${evidence.name}</strong><br>
@@ -1803,7 +1810,7 @@ class DetectiveGameApp {
     
     // 更新证据显示
     updateEvidenceDisplay() {
-        const evidenceList = document.getElementById('evidence-list');
+        const evidenceList = DOMHelper.$('#evidence-list');
         
         if (this.evidenceList.length === 0) {
             evidenceList.innerHTML = '<p class="no-evidence">暂无发现的证据</p>';
@@ -1812,8 +1819,7 @@ class DetectiveGameApp {
         
         evidenceList.innerHTML = '';
         this.evidenceList.forEach(evidence => {
-            const evidenceItem = document.createElement('div');
-            evidenceItem.className = 'evidence-item';
+            const evidenceItem = DOMHelper.createElement('div', { className: 'evidence-item' });
             evidenceItem.innerHTML = `
                 <div class="evidence-name">${evidence.name}</div>
                 <div class="evidence-description">${evidence.description}</div>
@@ -1825,7 +1831,7 @@ class DetectiveGameApp {
     
     // 更新提示历史显示
     updateHintsDisplay() {
-        const hintsList = document.getElementById('hints-list');
+        const hintsList = DOMHelper.$('#hints-list');
         
         if (this.hintsHistory.length === 0) {
             hintsList.innerHTML = '<p class="no-hints">暂无获取的提示</p>';
@@ -1834,8 +1840,7 @@ class DetectiveGameApp {
         
         hintsList.innerHTML = '';
         this.hintsHistory.forEach(hint => {
-            const hintItem = document.createElement('div');
-            hintItem.className = 'hint-item';
+            const hintItem = DOMHelper.createElement('div', { className: 'hint-item' });
             hintItem.innerHTML = `
                 <div class="hint-content">${hint.content}</div>
                 <div class="hint-timestamp">${hint.timestamp}</div>
@@ -1846,7 +1851,7 @@ class DetectiveGameApp {
     
     // 获取提示
     async getHint() {
-        const hintBtn = document.getElementById('get-hint-btn');
+        const hintBtn = DOMHelper.$('#get-hint-btn');
         hintBtn.disabled = true;
         hintBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 生成中...';
         
@@ -1911,13 +1916,13 @@ class DetectiveGameApp {
     
     // 填充指控选择框
     populateAccusationSelect() {
-        const accusedSelect = document.getElementById('accused-select');
+        const accusedSelect = DOMHelper.$('#accused-select');
         accusedSelect.innerHTML = '<option value="">请选择...</option>';
         
         this.currentCase.characters.forEach(character => {
             // 过滤掉专家和受害者，因为他们不能被指控
             if (character.character_type !== 'expert' && character.character_type !== 'victim') {
-                const option = document.createElement('option');
+                const option = DOMHelper.createElement('option');
                 option.value = character.name;
                 option.textContent = `${character.name} (${character.occupation})`;
                 accusedSelect.appendChild(option);
@@ -1927,8 +1932,8 @@ class DetectiveGameApp {
     
     // 提交指控
     async submitAccusation() {
-        const accusedName = document.getElementById('accused-select').value;
-        const reasoning = document.getElementById('accusation-reasoning').value.trim();
+        const accusedName = DOMHelper.$('#accused-select').value;
+        const reasoning = DOMHelper.$('#accusation-reasoning').value.trim();
         
         if (!accusedName) {
             this.showMessage('提示', '请选择被指控者');
@@ -1940,7 +1945,7 @@ class DetectiveGameApp {
             return;
         }
         
-        const submitBtn = document.getElementById('submit-accusation-btn');
+        const submitBtn = DOMHelper.$('#submit-accusation-btn');
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 审判中...';
         
@@ -1960,7 +1965,7 @@ class DetectiveGameApp {
         // 切换到审判结果界面
         this.showScreen('trial-result-screen');
         
-        const resultContent = document.getElementById('trial-result-content');
+        const resultContent = DOMHelper.$('#trial-result-content');
         resultContent.innerHTML = `
             <div class="trial-result">
                 <div class="trial-header">
@@ -1971,7 +1976,7 @@ class DetectiveGameApp {
             </div>
         `;
         
-        const trialSteps = document.getElementById('trial-steps');
+        const trialSteps = DOMHelper.$('#trial-steps');
         let currentStep = null;
         let trialData = {};
         
@@ -2043,10 +2048,9 @@ class DetectiveGameApp {
                 
             case 'evaluation_chunk':
                 // 确保评估容器存在
-                let evaluationContainer = document.getElementById('content-evaluation');
+                let evaluationContainer = DOMHelper.$('#content-evaluation');
                 if (!evaluationContainer) {
-                    const stepDiv = document.createElement('div');
-                    stepDiv.className = 'trial-step';
+                    const stepDiv = DOMHelper.createElement('div', { className: 'trial-step' });
                     stepDiv.id = 'step-evaluation';
                     stepDiv.innerHTML = `
                         <div class="step-header">
@@ -2070,8 +2074,7 @@ class DetectiveGameApp {
                 break;
                 
             case 'reasoning_challenge':
-                const challengeDiv = document.createElement('div');
-                challengeDiv.className = 'reasoning-challenge';
+                const challengeDiv = DOMHelper.createElement('div', { className: 'reasoning-challenge' });
                 challengeDiv.innerHTML = `
                     <div class="challenge-content">
                         <h3>⚠️ 指控理由不充分</h3>
@@ -2084,8 +2087,7 @@ class DetectiveGameApp {
                 break;
                 
             case 'step':
-                const stepDiv = document.createElement('div');
-                stepDiv.className = 'trial-step';
+                const stepDiv = DOMHelper.createElement('div', { className: 'trial-step' });
                 stepDiv.id = `step-${data.step}`;
                 stepDiv.setAttribute('data-step', data.step); // 添加data-step属性用于CSS样式
                 stepDiv.innerHTML = `
@@ -2102,10 +2104,9 @@ class DetectiveGameApp {
                 
             case 'defense_chunk':
                 // 确保辩护容器存在
-                let defenseContainer = document.getElementById('content-defense');
+                let defenseContainer = DOMHelper.$('#content-defense');
                 if (!defenseContainer) {
-                    const stepDiv = document.createElement('div');
-                    stepDiv.className = 'trial-step';
+                    const stepDiv = DOMHelper.createElement('div', { className: 'trial-step' });
                     stepDiv.id = 'step-defense';
                     stepDiv.innerHTML = `
                         <div class="step-header">
@@ -2127,10 +2128,9 @@ class DetectiveGameApp {
                 
             case 'witness_start':
                 // 确保证人证词容器存在
-                let testimoniesContainer = document.getElementById('content-testimonies');
+                let testimoniesContainer = DOMHelper.$('#content-testimonies');
                 if (!testimoniesContainer) {
-                    const stepDiv = document.createElement('div');
-                    stepDiv.className = 'trial-step';
+                    const stepDiv = DOMHelper.createElement('div', { className: 'trial-step' });
                     stepDiv.id = 'step-testimonies';
                     stepDiv.innerHTML = `
                         <div class="step-header">
@@ -2140,11 +2140,10 @@ class DetectiveGameApp {
                     `;
                     trialSteps.appendChild(stepDiv);
                     stepDiv.scrollIntoView({ behavior: 'smooth' });
-                    testimoniesContainer = document.getElementById('content-testimonies');
+                    testimoniesContainer = DOMHelper.$('#content-testimonies');
                 }
                 
-                const witnessDiv = document.createElement('div');
-                witnessDiv.className = 'witness-testimony';
+                const witnessDiv = DOMHelper.createElement('div', { className: 'witness-testimony' });
                 witnessDiv.id = `witness-${data.index}`;
                 witnessDiv.innerHTML = `
                     <h4><i class="fas fa-user"></i> ${data.witness_name} 作证</h4>
@@ -2169,10 +2168,9 @@ class DetectiveGameApp {
                 
             case 'vote_start':
                 // 确保投票容器存在
-                let votingContainer = document.getElementById('content-voting');
+                let votingContainer = DOMHelper.$('#content-voting');
                 if (!votingContainer) {
-                    const stepDiv = document.createElement('div');
-                    stepDiv.className = 'trial-step';
+                    const stepDiv = DOMHelper.createElement('div', { className: 'trial-step' });
                     stepDiv.id = 'step-voting';
                     stepDiv.innerHTML = `
                         <div class="step-header">
@@ -2182,11 +2180,10 @@ class DetectiveGameApp {
                     `;
                     trialSteps.appendChild(stepDiv);
                     stepDiv.scrollIntoView({ behavior: 'smooth' });
-                    votingContainer = document.getElementById('content-voting');
+                    votingContainer = DOMHelper.$('#content-voting');
                 }
                 
-                const voteDiv = document.createElement('div');
-                voteDiv.className = 'vote-item';
+                const voteDiv = DOMHelper.createElement('div', { className: 'vote-item' });
                 voteDiv.id = `vote-${data.index}`;
                 voteDiv.innerHTML = `
                     <h4><i class="fas fa-vote-yea"></i> ${data.voter_name} 投票</h4>
@@ -2205,7 +2202,7 @@ class DetectiveGameApp {
                 
             case 'vote_chunk':
                 // 清除思考提示（如果存在）
-                const voteContentElement = document.getElementById(`vote-content-${this._getVoterIndex(data.voter_name, trialData)}`);
+                const voteContentElement = DOMHelper.$(`vote-content-${this._getVoterIndex(data.voter_name, trialData)}`);
                 if (voteContentElement && voteContentElement.querySelector('.thinking-indicator')) {
                     voteContentElement.innerHTML = '';
                 }
@@ -2222,7 +2219,7 @@ class DetectiveGameApp {
                 });
                 
                 // 更新投票显示
-                const voteElement = document.getElementById(`vote-content-${trialData.votes.length - 1}`);
+                const voteElement = DOMHelper.$(`vote-content-${trialData.votes.length - 1}`);
                 if (voteElement) {
                     // 先移除光标
                     this._finalizeTrialStep(`vote-content-${this._getVoterIndex(data.voter_name, trialData)}`);
@@ -2242,10 +2239,9 @@ class DetectiveGameApp {
                 
             case 'vote_summary':
                 // 确保投票容器存在
-                let votingSummaryContainer = document.getElementById('content-voting');
+                let votingSummaryContainer = DOMHelper.$('#content-voting');
                 if (!votingSummaryContainer) {
-                    const stepDiv = document.createElement('div');
-                    stepDiv.className = 'trial-step';
+                    const stepDiv = DOMHelper.createElement('div', { className: 'trial-step' });
                     stepDiv.id = 'step-voting';
                     stepDiv.innerHTML = `
                         <div class="step-header">
@@ -2255,7 +2251,7 @@ class DetectiveGameApp {
                     `;
                     trialSteps.appendChild(stepDiv);
                     stepDiv.scrollIntoView({ behavior: 'smooth' });
-                    votingSummaryContainer = document.getElementById('content-voting');
+                    votingSummaryContainer = DOMHelper.$('#content-voting');
                 }
                 
                 votingSummaryContainer.innerHTML += `
@@ -2281,11 +2277,10 @@ class DetectiveGameApp {
                 const verdictText = data.final_verdict ? '指控成立' : '指控不成立';
                 
                 // 确保verdict容器存在
-                let verdictContainer = document.getElementById('content-verdict');
+                let verdictContainer = DOMHelper.$('#content-verdict');
                 if (!verdictContainer) {
                     // 创建审判结果步骤
-                    const stepDiv = document.createElement('div');
-                    stepDiv.className = 'trial-step';
+                    const stepDiv = DOMHelper.createElement('div', { className: 'trial-step' });
                     stepDiv.id = 'step-verdict';
                     stepDiv.innerHTML = `
                         <div class="step-header">
@@ -2295,7 +2290,7 @@ class DetectiveGameApp {
                     `;
                     trialSteps.appendChild(stepDiv);
                     stepDiv.scrollIntoView({ behavior: 'smooth' });
-                    verdictContainer = document.getElementById('content-verdict');
+                    verdictContainer = DOMHelper.$('#content-verdict');
                 }
                 
                 verdictContainer.innerHTML = `
@@ -2310,11 +2305,10 @@ class DetectiveGameApp {
                 const correctnessText = data.is_correct ? '🎉 恭喜！你找到了真凶！' : '😔 很遗憾，你指控了错误的人。';
                 
                 // 确保verdict容器存在
-                let correctnessContainer = document.getElementById('content-verdict');
+                let correctnessContainer = DOMHelper.$('#content-verdict');
                 if (!correctnessContainer) {
                     // 创建审判结果步骤
-                    const stepDiv = document.createElement('div');
-                    stepDiv.className = 'trial-step';
+                    const stepDiv = DOMHelper.createElement('div', { className: 'trial-step' });
                     stepDiv.id = 'step-verdict';
                     stepDiv.innerHTML = `
                         <div class="step-header">
@@ -2324,7 +2318,7 @@ class DetectiveGameApp {
                     `;
                     trialSteps.appendChild(stepDiv);
                     stepDiv.scrollIntoView({ behavior: 'smooth' });
-                    correctnessContainer = document.getElementById('content-verdict');
+                    correctnessContainer = DOMHelper.$('#content-verdict');
                 }
                 
                 correctnessContainer.innerHTML += `
@@ -2336,11 +2330,10 @@ class DetectiveGameApp {
                 
             case 'solution_chunk':
                 // 确保solution容器存在
-                let solutionContainer = document.getElementById('content-solution');
+                let solutionContainer = DOMHelper.$('#content-solution');
                 if (!solutionContainer) {
                     // 创建案件真相步骤
-                    const stepDiv = document.createElement('div');
-                    stepDiv.className = 'trial-step';
+                    const stepDiv = DOMHelper.createElement('div', { className: 'trial-step' });
                     stepDiv.id = 'step-solution';
                     stepDiv.innerHTML = `
                         <div class="step-header">
@@ -2389,7 +2382,7 @@ class DetectiveGameApp {
     
     // 添加内容到审判步骤（内部使用）
     _appendToTrialContent(elementId, content) {
-        const element = document.getElementById(elementId);
+        const element = DOMHelper.$(elementId);
         if (element) {
             if (!element.querySelector('.streaming-text')) {
                 element.innerHTML = '<div class="streaming-text"></div>';
@@ -2419,15 +2412,13 @@ class DetectiveGameApp {
     
     // 完成审判步骤（内部使用）
     _finalizeTrialStep(elementId) {
-        const element = document.getElementById(elementId);
+        const element = DOMHelper.$(elementId);
         if (element) {
             // 移除所有光标元素
-            const cursors = element.querySelectorAll('.cursor');
-            cursors.forEach(cursor => cursor.remove());
+            DOMHelper.$$('.cursor').forEach(cursor => cursor.remove());
             
             // 额外保险：移除所有包含竖线的span元素
-            const spans = element.querySelectorAll('span');
-            spans.forEach(span => {
+            DOMHelper.$$('span').forEach(span => {
                 if (span.textContent === '|' || span.innerHTML === '|') {
                     span.remove();
                 }
@@ -2534,7 +2525,7 @@ class DetectiveGameApp {
     
     // 获取浏览器指纹信息（简化版，内部使用）
     _getBrowserFingerprint() {
-        const canvas = document.createElement('canvas');
+        const canvas = DOMHelper.createElement('canvas');
         const ctx = canvas.getContext('2d');
         ctx.textBaseline = 'top';
         ctx.font = '14px Arial';
@@ -2561,9 +2552,10 @@ class DetectiveGameApp {
 
     // 通用角色卡片模板生成函数（内部使用）
     _createCharacterCardHTML(character, cardType = 'intro') {
+        // 增加日志，输出每个角色数据
+        console.log('生成角色卡片:', character);
         const typeClass = character.character_type;
         const typeText = this._getCharacterTypeText(character.character_type);
-        
         switch (cardType) {
             case 'intro':
                 return `
@@ -2653,10 +2645,10 @@ class DetectiveGameApp {
      */
     initializeEvaluationForm() {
         // 检查必要元素是否存在
-        const form = document.getElementById('desktopEvaluationForm');
-        const ratingText = document.getElementById('desktopRatingText');
-        const successMessage = document.getElementById('evaluationSuccessMessage');
-        const errorMessage = document.getElementById('evaluationErrorMessage');
+        const form = DOMHelper.$('#desktopEvaluationForm');
+        const ratingText = DOMHelper.$('#desktopRatingText');
+        const successMessage = DOMHelper.$('#evaluationSuccessMessage');
+        const errorMessage = DOMHelper.$('#evaluationErrorMessage');
         
         if (!form || !ratingText) {
             console.error('评价表单元素未找到');
@@ -2665,7 +2657,7 @@ class DetectiveGameApp {
         
         // 重置表单
         form.reset();
-        ratingText.textContent = '请选择评分';
+        DOMHelper.setText(ratingText, '请选择评分');
         this.selectedRating = 0;
         
         // 隐藏消息
@@ -2687,9 +2679,9 @@ class DetectiveGameApp {
      * 绑定星级评分事件
      */
     bindRatingEvents() {
-        const stars = document.querySelectorAll('#evaluation-screen .star');
-        const ratingText = document.getElementById('desktopRatingText');
-        const ratingContainer = document.querySelector('#evaluation-screen .rating-container');
+        const stars = DOMHelper.$$('#evaluation-screen .star');
+        const ratingText = DOMHelper.$('#desktopRatingText');
+        const ratingContainer = DOMHelper.$('#evaluation-screen .rating-container');
         const ratingTexts = ['', '很不满意', '不满意', '一般', '满意', '非常满意'];
         
         // 检查必要元素是否存在
@@ -2703,7 +2695,7 @@ class DetectiveGameApp {
                 this.selectedRating = parseInt(star.dataset.rating);
                 this.updateStars();
                 if (ratingText) {
-                    ratingText.textContent = ratingTexts[this.selectedRating];
+                    DOMHelper.setText(ratingText, ratingTexts[this.selectedRating]);
                 }
             });
             
@@ -2722,7 +2714,7 @@ class DetectiveGameApp {
      * 高亮星星
      */
     highlightStars(rating) {
-        const stars = document.querySelectorAll('#evaluation-screen .star');
+        const stars = DOMHelper.$$('#evaluation-screen .star');
         stars.forEach((star, index) => {
             if (star && star.classList) {
                 if (index < rating) {
@@ -2745,7 +2737,7 @@ class DetectiveGameApp {
      * 绑定评价表单事件
      */
     bindEvaluationFormEvents() {
-        const form = document.getElementById('desktopEvaluationForm');
+        const form = DOMHelper.$('#desktopEvaluationForm');
         form.addEventListener('submit', (e) => {
             e.preventDefault();
             this.submitEvaluation();
@@ -2766,13 +2758,13 @@ class DetectiveGameApp {
             return;
         }
         
-        const reason = document.getElementById('desktopReason').value.trim();
+        const reason = DOMHelper.$('#desktopReason').value.trim();
         if (!reason) {
             this.showEvaluationError('请填写评价原因');
             return;
         }
         
-        const submitBtn = document.getElementById('desktopSubmitBtn');
+        const submitBtn = DOMHelper.$('#desktopSubmitBtn');
         submitBtn.disabled = true;
         submitBtn.textContent = '提交中...';
         
@@ -2786,10 +2778,10 @@ class DetectiveGameApp {
                     session_id: this.sessionId,
                     rating: this.selectedRating,
                     reason: reason,
-                    difficulty_feedback: document.getElementById('desktopDifficulty').value || null,
-                    most_liked: document.getElementById('desktopMostLiked').value.trim() || null,
-                    suggestions: document.getElementById('desktopSuggestions').value.trim() || null,
-                    would_recommend: document.getElementById('desktopRecommend').checked
+                    difficulty_feedback: DOMHelper.$('#desktopDifficulty').value || null,
+                    most_liked: DOMHelper.$('#desktopMostLiked').value.trim() || null,
+                    suggestions: DOMHelper.$('#desktopSuggestions').value.trim() || null,
+                    would_recommend: DOMHelper.$('#desktopRecommend').checked
                 })
             });
             
@@ -2817,19 +2809,18 @@ class DetectiveGameApp {
      * 显示评价成功消息
      */
     showEvaluationSuccess() {
-        document.getElementById('evaluationSuccessMessage').style.display = 'block';
-        document.getElementById('evaluationErrorMessage').style.display = 'none';
-        document.getElementById('desktopEvaluationForm').style.display = 'none';
+        DOMHelper.setHTML(DOMHelper.$('#evaluationSuccessMessage'), '评价成功！');
+        DOMHelper.setHTML(DOMHelper.$('#evaluationErrorMessage'), '');
+        DOMHelper.$('#desktopEvaluationForm').style.display = 'none';
     }
     
     /**
      * 显示评价错误消息
      */
     showEvaluationError(message) {
-        const errorElement = document.getElementById('evaluationErrorMessage');
-        errorElement.textContent = message;
-        errorElement.style.display = 'block';
-        document.getElementById('evaluationSuccessMessage').style.display = 'none';
+        DOMHelper.setText(DOMHelper.$('#evaluationErrorMessage'), message);
+        DOMHelper.setHTML(DOMHelper.$('#evaluationSuccessMessage'), '');
+        DOMHelper.$('#desktopEvaluationForm').style.display = 'block';
     }
 }
 

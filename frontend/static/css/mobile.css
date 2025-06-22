@@ -310,26 +310,20 @@ html, body {
     -webkit-overflow-scrolling: touch;
 }
 
-/* 案情介绍页面 */
-#case-intro-screen {
-    background: var(--theme-primary-bg);
-    overflow-y: auto;
-}
-
 .intro-container {
     display: flex;
     flex-direction: column;
+    height: 100vh;
     min-height: 100vh;
-    position: relative;
 }
 
+/* 让 intro-content 自动填满剩余空间，内容可滚动，底部留出按钮空间 */
 .intro-content {
     flex: 1;
     padding: 20px;
     padding-bottom: 120px; /* 为底部按钮留出更多空间 */
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    max-height: calc(100vh - 120px); /* 确保内容不会被按钮挡住 */
 }
 
 .intro-section {
@@ -476,6 +470,7 @@ html, body {
 }
 
 .intro-footer {
+    flex-shrink: 0;
     position: fixed;
     bottom: 0;
     left: 0;
@@ -1003,12 +998,13 @@ body.theme-forest .badge-category {
     z-index: 100;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .modal-content-body {
     flex: 1;
     padding: 20px;
-    overflow-y: auto;
     color: #ffffff;
 }
 

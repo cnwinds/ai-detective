@@ -42,16 +42,16 @@ class MobileDetectiveApp {
             this.ensureClassicTheme();
             
             // 初始化完成后立即隐藏加载屏幕
-            const loadingScreen = document.querySelector('#loading-screen');
-            if (loadingScreen && loadingScreen.classList.contains('active')) {
+            const loadingScreen = DOMHelper.$('#loading-screen');
+            if (loadingScreen && DOMHelper.hasClass(loadingScreen, 'active')) {
                 this.hideLoadingScreen();
             }
             
         } catch (error) {
             console.error('初始化失败:', error);
             // 错误情况下也要检查是否还在加载屏幕
-            const loadingScreen = document.querySelector('#loading-screen');
-            if (loadingScreen && loadingScreen.classList.contains('active')) {
+            const loadingScreen = DOMHelper.$('#loading-screen');
+            if (loadingScreen && DOMHelper.hasClass(loadingScreen, 'active')) {
                 this.hideLoadingScreen();
             }
         }
@@ -255,8 +255,8 @@ class MobileDetectiveApp {
     async startGame(caseIndex) {
         try {
             const data = await APIHelper.post(`${this.apiBase}/game/start`, {
-                case_index: caseIndex,
-                client_id: this.clientId
+                    case_index: caseIndex,
+                    client_id: this.clientId
             });
             
             if (data.session_id) {
@@ -299,12 +299,12 @@ class MobileDetectiveApp {
     async loadGameState() {
         try {
             const gameState = await APIHelper.get(`${this.apiBase}/game/${this.sessionId}/state`);
-            this.questionCount = gameState.current_round || 0;
-            this.maxQuestions = gameState.max_rounds || 30;
-            this.hintsUsed = gameState.hints_used || 0;
-            this.maxHints = gameState.max_hints || 3;
-            this.updateHintDisplay();
-            console.log(`游戏状态加载成功 - 当前轮次: ${this.questionCount}/${this.maxQuestions}, 提示: ${this.hintsUsed}/${this.maxHints}`);
+                this.questionCount = gameState.current_round || 0;
+                this.maxQuestions = gameState.max_rounds || 30;
+                this.hintsUsed = gameState.hints_used || 0;
+                this.maxHints = gameState.max_hints || 3;
+                this.updateHintDisplay();
+                console.log(`游戏状态加载成功 - 当前轮次: ${this.questionCount}/${this.maxQuestions}, 提示: ${this.hintsUsed}/${this.maxHints}`);
         } catch (error) {
             console.error('加载游戏状态失败:', error);
             console.warn('获取游戏状态失败，使用默认值');
@@ -330,11 +330,11 @@ class MobileDetectiveApp {
     
     selectCharacter(character) {
         // 更新选中状态
-        document.querySelectorAll('.character-card').forEach(card => {
-            card.classList.remove('selected');
+        DOMHelper.$$('.character-card').forEach(card => {
+            DOMHelper.removeClass(card, 'selected');
         });
         
-        event.currentTarget.classList.add('selected');
+        DOMHelper.addClass(event.currentTarget, 'selected');
         
         // 使用新的选择角色方法
         this.selectCharacterForChat(character);
@@ -519,7 +519,7 @@ class MobileDetectiveApp {
         // 隐藏底部输入区域
         DOMHelper.toggle('#bottom-input', false);
         
-        modalArea.style.display = 'flex';
+        DOMHelper.toggle('#modal-content-area', true, 'flex');
         this.closeSidebarMenu();
     }
     
@@ -540,14 +540,14 @@ class MobileDetectiveApp {
             `);
         } else {
             const evidenceHTML = this.evidenceList.map(evidence => `
-                <div class="evidence-item">
+                        <div class="evidence-item">
                     <div class="evidence-header">
                         <h4>${evidence.title}</h4>
                         <span class="evidence-type">${evidence.type}</span>
-                    </div>
+                        </div>
                     <div class="evidence-description">
                         ${evidence.description}
-                    </div>
+                </div>
                     ${evidence.relevance ? `
                         <div class="evidence-relevance">
                             <strong>相关性：</strong>${evidence.relevance}
@@ -566,21 +566,21 @@ class MobileDetectiveApp {
         // 隐藏底部输入区域
         DOMHelper.toggle('#bottom-input', false);
         
-        modalArea.style.display = 'flex';
+        DOMHelper.toggle('#modal-content-area', true, 'flex');
         this.closeSidebarMenu();
     }
     
     showHints() {
-        const modalArea = document.getElementById('modal-content-area');
-        const modalTitle = document.getElementById('modal-content-title');
-        const modalBody = document.getElementById('modal-content-body');
+        const modalArea = DOMHelper.$('#modal-content-area');
+        const modalTitle = DOMHelper.$('#modal-content-title');
+        const modalBody = DOMHelper.$('#modal-content-body');
         
-        modalTitle.textContent = '获得的提示';
+        DOMHelper.setText('#modal-content-title', '获得的提示');
         
         const canGetMoreHints = (this.hintsUsed || 0) < (this.maxHints || 3);
         
         if (this.hintsHistory.length === 0) {
-            modalBody.innerHTML = `
+            DOMHelper.setHTML('#modal-content-body', `
                 <div class="no-hints">
                     <i class="fas fa-lightbulb"></i>
                     <p>暂无获得的提示</p>
@@ -592,9 +592,9 @@ class MobileDetectiveApp {
                         <span>获取新提示 (${this.hintsUsed || 0}/${this.maxHints || 3})</span>
                     </button>
                 </div>
-            `;
+            `);
         } else {
-            modalBody.innerHTML = `
+            DOMHelper.setHTML('#modal-content-body', `
                 <div class="hints-list">
                     ${this.hintsHistory.map((hint, index) => `
                         <div class="hint-item">
@@ -612,12 +612,12 @@ class MobileDetectiveApp {
                         <span>获取新提示 (${this.hintsUsed || 0}/${this.maxHints || 3})</span>
                     </button>
                 </div>
-            `;
+            `);
         }
         
         // 绑定获取新提示按钮的点击事件
         setTimeout(() => {
-            const getNewHintBtn = document.getElementById('get-new-hint-btn');
+            const getNewHintBtn = DOMHelper.$('#get-new-hint-btn');
             if (getNewHintBtn && !getNewHintBtn.disabled) {
                 getNewHintBtn.addEventListener('click', async () => {
                     await this.getHint();
@@ -628,12 +628,9 @@ class MobileDetectiveApp {
         }, 100);
         
         // 隐藏底部输入区域
-        const bottomInput = document.getElementById('bottom-input');
-        if (bottomInput) {
-            bottomInput.style.display = 'none';
-        }
+        DOMHelper.toggle('#bottom-input', false);
         
-        modalArea.style.display = 'flex';
+        DOMHelper.toggle('#modal-content-area', true, 'flex');
         this.closeSidebarMenu();
     }
     
@@ -672,7 +669,7 @@ class MobileDetectiveApp {
         // 隐藏底部输入区域
         DOMHelper.toggle('#bottom-input', false);
         
-        modalArea.style.display = 'flex';
+        DOMHelper.toggle('#modal-content-area', true, 'flex');
         this.closeSidebarMenu();
     }
     
@@ -690,7 +687,7 @@ class MobileDetectiveApp {
         DOMHelper.setText('#modal-content-title', '内容标题');
         
         // 隐藏模态内容区域
-        modalArea.style.display = 'none';
+        DOMHelper.toggle('#modal-content-area', false);
         
         // 显示底部输入区域（如果当前有选中的角色）
         if (this.selectedCharacter) {
@@ -752,7 +749,7 @@ class MobileDetectiveApp {
         `;
         
         // 隐藏底部输入区域
-        const bottomInput = document.getElementById('bottom-input');
+        const bottomInput = DOMHelper.$('#bottom-input');
         if (bottomInput) {
             bottomInput.style.display = 'none';
         }
@@ -784,7 +781,7 @@ class MobileDetectiveApp {
             } else {
                 console.log('WebSocket未连接，无法获取建议问题');
                 // WebSocket未连接时隐藏建议问题区域
-                const suggestedQuestionsArea = document.getElementById('suggested-questions');
+                const suggestedQuestionsArea = DOMHelper.$('#suggested-questions');
                 if (suggestedQuestionsArea) {
                     suggestedQuestionsArea.style.display = 'none';
                 }
@@ -792,7 +789,7 @@ class MobileDetectiveApp {
         } catch (error) {
             console.error('加载建议问题失败:', error);
             // 加载失败时隐藏建议问题区域
-            const suggestedQuestionsArea = document.getElementById('suggested-questions');
+            const suggestedQuestionsArea = DOMHelper.$('#suggested-questions');
             if (suggestedQuestionsArea) {
                 suggestedQuestionsArea.style.display = 'none';
             }
@@ -802,8 +799,8 @@ class MobileDetectiveApp {
     renderSuggestedQuestions(questions) {
         console.log('开始渲染建议问题:', questions);
         
-        const suggestionsList = document.getElementById('suggested-list');
-        const suggestedQuestionsArea = document.getElementById('suggested-questions');
+        const suggestionsList = DOMHelper.$('#suggested-list');
+        const suggestedQuestionsArea = DOMHelper.$('#suggested-questions');
         
         if (!suggestionsList) {
             console.log('suggested-list element not found');
@@ -820,11 +817,11 @@ class MobileDetectiveApp {
         if (questions && questions.length > 0) {
             console.log(`渲染 ${questions.length} 个建议问题`);
             questions.forEach((question, index) => {
-                const suggestionBtn = document.createElement('button');
-                suggestionBtn.className = 'suggestion-btn';
-                suggestionBtn.textContent = question;
+                const suggestionBtn = DOMHelper.createElement('button', {
+                    className: 'suggestion-btn'
+                }, question);
                 suggestionBtn.addEventListener('click', () => {
-                    const questionInput = this.$('#question-input');
+                    const questionInput = DOMHelper.$('#question-input');
                     if (questionInput) {
                         questionInput.value = question;
                         this.handleQuestionInput({ target: { value: question } });
@@ -959,7 +956,7 @@ class MobileDetectiveApp {
                                 // 如果当前显示的是案件详情页面，也要刷新以更新聊天次数
                                 const modalArea = DOMHelper.$('#modal-content-area');
                                 const modalTitle = DOMHelper.$('#modal-content-title');
-                                if (modalArea && modalArea.style.display === 'flex' && 
+                                if (modalArea && DOMHelper.hasClass(modalArea, 'active') && 
                                     modalTitle && modalTitle.textContent === '案件详情') {
                                     // 延迟刷新案件详情页面，确保聊天历史已更新
                                     setTimeout(() => {
@@ -1060,8 +1057,8 @@ class MobileDetectiveApp {
     
     updateSendButtonCounter() {
         DOMHelper.setHTML('#send-question-btn', `
-            <i class="fas fa-paper-plane"></i>
-            <span class="question-counter">${this.questionCount}/${this.maxQuestions}</span>
+                <i class="fas fa-paper-plane"></i>
+                <span class="question-counter">${this.questionCount}/${this.maxQuestions}</span>
         `);
     }
     
@@ -1169,7 +1166,7 @@ class MobileDetectiveApp {
         
         try {
             const data = await APIHelper.post(`${this.apiBase}/game/hint`, {
-                session_id: this.sessionId
+                    session_id: this.sessionId
             });
             
             if (data.hint) {
@@ -1529,7 +1526,7 @@ class MobileDetectiveApp {
                     `);
                     trialSteps.appendChild(stepDiv);
                     stepDiv.scrollIntoView({ behavior: 'smooth' });
-                    verdictContainer = document.getElementById('mobile-content-verdict');
+                    verdictContainer = DOMHelper.$('#mobile-content-verdict');
                 }
                 
                 verdictContainer.innerHTML = `
@@ -1665,7 +1662,7 @@ class MobileDetectiveApp {
         });
         
         // 开始观察审判内容区域
-        const trialContainer = document.querySelector('#mobile-trial-result-content');
+        const trialContainer = DOMHelper.$('#mobile-trial-result-content');
         if (trialContainer) {
             this.contentObserver.observe(trialContainer, {
                 childList: true,
@@ -1697,7 +1694,7 @@ class MobileDetectiveApp {
             
             requestAnimationFrame(() => {
                 try {
-                    const trialContainer = document.querySelector('.trial-container');
+                    const trialContainer = DOMHelper.$('.trial-container');
                     if (trialContainer) {
                         // 计算是否需要滚动
                         const scrollTop = trialContainer.scrollTop;
@@ -1751,7 +1748,7 @@ class MobileDetectiveApp {
             
             requestAnimationFrame(() => {
                 try {
-                    const trialContainer = document.querySelector('.trial-container');
+                    const trialContainer = DOMHelper.$('.trial-container');
                     if (trialContainer) {
                         // 简化滚动逻辑：只滚动容器到底部
                         trialContainer.scrollTo({
@@ -1811,7 +1808,7 @@ class MobileDetectiveApp {
         this.$('#evaluationErrorMessage').style.display = 'none';
         
         // 清除所有星级选择
-        const stars = document.querySelectorAll('#evaluation-screen .star');
+        const stars = DOMHelper.$$('#evaluation-screen .star');
         stars.forEach(star => star.classList.remove('active'));
         
         // 绑定评分交互事件
@@ -1819,8 +1816,8 @@ class MobileDetectiveApp {
     }
 
     bindEvaluationEvents() {
-        const stars = document.querySelectorAll('#evaluation-screen .star');
-        const ratingText = document.getElementById('mobileRatingText');
+        const stars = DOMHelper.$$('#evaluation-screen .star');
+        const ratingText = DOMHelper.$('#mobileRatingText');
         const ratingTexts = ['', '很不满意', '不满意', '一般', '满意', '非常满意'];
         
         // 移除之前的事件监听器
@@ -1829,7 +1826,7 @@ class MobileDetectiveApp {
         });
         
         // 重新获取星级元素并绑定事件
-        const newStars = document.querySelectorAll('#evaluation-screen .star');
+        const newStars = DOMHelper.$$('#evaluation-screen .star');
         newStars.forEach(star => {
             star.addEventListener('click', () => {
                 this.selectedRating = parseInt(star.dataset.rating);
@@ -1870,7 +1867,7 @@ class MobileDetectiveApp {
         });
         
         // 鼠标离开评分区域时恢复到已选择的评分
-        const ratingContainer = document.querySelector('#evaluation-screen .rating-container');
+        const ratingContainer = DOMHelper.$('#evaluation-screen .rating-container');
         if (ratingContainer) {
             ratingContainer.addEventListener('mouseleave', () => {
                 this.updateStars();
@@ -1883,7 +1880,7 @@ class MobileDetectiveApp {
         }
         
         // 绑定表单提交事件
-        const form = document.getElementById('mobileEvaluationForm');
+        const form = DOMHelper.$('#mobileEvaluationForm');
         if (form) {
             form.removeEventListener('submit', this.handleEvaluationSubmit);
             form.addEventListener('submit', (e) => this.handleEvaluationSubmit(e));
@@ -1891,7 +1888,7 @@ class MobileDetectiveApp {
     }
 
     highlightStars(rating) {
-        const stars = document.querySelectorAll('#evaluation-screen .star');
+        const stars = DOMHelper.$$('#evaluation-screen .star');
         stars.forEach((star, index) => {
             if (index < rating) {
                 star.classList.add('active');
@@ -1934,26 +1931,26 @@ class MobileDetectiveApp {
         
         try {
             const data = await APIHelper.post(`${this.apiBase}/game/evaluation`, {
-                session_id: this.sessionId,
-                rating: this.selectedRating,
-                reason: reason,
+                    session_id: this.sessionId,
+                    rating: this.selectedRating,
+                    reason: reason,
                 difficulty_feedback: DOMHelper.$('#mobileDifficulty').value || null,
                 most_liked: DOMHelper.$('#mobileMostLiked').value.trim() || null,
                 suggestions: DOMHelper.$('#mobileSuggestions').value.trim() || null,
                 would_recommend: DOMHelper.$('#mobileRecommend').checked
             });
             
-            this.showEvaluationSuccess();
-            // 添加触觉反馈
-            if (navigator.vibrate) {
-                navigator.vibrate([100, 50, 100]);
-            }
-            // 3秒后返回主界面
-            setTimeout(() => {
-                this.showScreen('main-menu');
-                // 重新设置为默认主题
-                this.ensureClassicTheme();
-            }, 3000);
+                this.showEvaluationSuccess();
+                // 添加触觉反馈
+                if (navigator.vibrate) {
+                    navigator.vibrate([100, 50, 100]);
+                }
+                // 3秒后返回主界面
+                setTimeout(() => {
+                    this.showScreen('main-menu');
+                    // 重新设置为默认主题
+                    this.ensureClassicTheme();
+                }, 3000);
         } catch (error) {
             console.error('提交评价失败:', error);
             this.showEvaluationError('网络错误，请重试');
@@ -2042,11 +2039,11 @@ class MobileDetectiveApp {
         DOMHelper.setText('#evidence-count', '0');
         
         DOMHelper.setHTML('#evidence-list', `
-            <div class="no-evidence">
-                <i class="fas fa-search"></i>
-                <p>还没有收集到证据</p>
-                <small>通过询问角色来发现线索</small>
-            </div>
+                <div class="no-evidence">
+                    <i class="fas fa-search"></i>
+                    <p>还没有收集到证据</p>
+                    <small>通过询问角色来发现线索</small>
+                </div>
         `);
         
         // 重置角色菜单
@@ -2054,8 +2051,8 @@ class MobileDetectiveApp {
         
         // 重置发送按钮计数器
         DOMHelper.setHTML('#send-question-btn', `
-            <i class="fas fa-paper-plane"></i>
-            <span class="question-counter">0/30</span>
+                <i class="fas fa-paper-plane"></i>
+                <span class="question-counter">0/30</span>
         `);
         
         // 重置提示显示
@@ -2131,10 +2128,10 @@ class MobileDetectiveApp {
     
     clearConversation() {
         DOMHelper.setHTML('#conversation-area', `
-            <div class="welcome-message">
-                <i class="fas fa-comments"></i>
-                <p>从左侧菜单选择角色开始询问</p>
-            </div>
+                <div class="welcome-message">
+                    <i class="fas fa-comments"></i>
+                    <p>从左侧菜单选择角色开始询问</p>
+                </div>
         `);
         
         this.conversationHistory = [];

@@ -71,79 +71,13 @@
         <!-- 案情介绍界面 -->
         <div id="case-intro-screen" class="screen">
             <div class="container">
-                <div class="case-intro-content">
-                    <div class="case-intro-header">
-                        <h2 id="intro-case-title">案件标题</h2>
+                <div class="intro-container">
+                    <!-- 案情内容区域 -->
+                    <div class="intro-content" id="intro-content">
+                        <!-- 内容将通过JavaScript动态生成 -->
                     </div>
-                    
-                    <div class="case-intro-body">
-                        <div class="intro-section" id="case-details-section" style="display: none;">
-                            <h3 id="case-details-title"><i class="fas fa-info-circle"></i> <span></span></h3>
-                            <div class="case-details-grid">
-                                <div class="detail-item">
-                                    <span class="detail-icon" id="victim-icon"></span>
-                                    <div class="detail-content">
-                                        <span class="detail-label" id="victim-label"></span>
-                                        <span class="detail-value" id="victim-name"></span>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-icon" id="victim-age-icon"></span>
-                                    <div class="detail-content">
-                                        <span class="detail-label" id="victim-age-label"></span>
-                                        <span class="detail-value" id="victim-age-occupation"></span>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-icon" id="death-time-icon"></span>
-                                    <div class="detail-content">
-                                        <span class="detail-label" id="death-time-label"></span>
-                                        <span class="detail-value" id="death-time"></span>
-                                    </div>
-                                </div>
-                                <div class="detail-item">
-                                    <span class="detail-icon" id="death-location-icon"></span>
-                                    <div class="detail-content">
-                                        <span class="detail-label" id="death-location-label"></span>
-                                        <span class="detail-value" id="death-location"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="intro-section" id="description-section" style="display: none;">
-                            <h3 id="description-title"><i class="fas fa-scroll"></i> <span></span></h3>
-                            <div id="intro-description" class="typewriter-text">
-                                <!-- 案情描述将通过打字机效果显示 -->
-                            </div>
-                        </div>
-                        
-                        <div class="intro-section" id="characters-section" style="display: none;">
-                            <h3 id="characters-title"><i class="fas fa-users"></i> <span></span></h3>
-                            <div id="intro-characters" class="intro-characters-grid">
-                                <!-- 角色信息将动态生成 -->
-                            </div>
-                        </div>
-                        
-                        <div class="intro-section" id="goals-section" style="display: none;">
-                            <h3 id="goals-title"><i class="fas fa-crosshairs"></i> <span></span></h3>
-                            <div class="investigation-goals">
-                                <div class="goal-item">
-                                    <i class="fas fa-search"></i>
-                                    <span></span>
-                                </div>
-                                <div class="goal-item">
-                                    <i class="fas fa-puzzle-piece"></i>
-                                    <span></span>
-                                </div>
-                                <div class="goal-item">
-                                    <i class="fas fa-gavel"></i>
-                                    <span></span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
+
+                    <!-- 底部固定按钮 -->
                     <div class="case-intro-footer">
                         <button id="start-investigation-btn" class="btn primary large" disabled>
                             <i class="fas fa-play"></i>
@@ -496,13 +430,9 @@
     </div>
 
     <!-- 主题系统脚本 - 必须在应用程序脚本之前加载 -->
+    <script src="/static/js/utils.js"></script>
     <script src="/static/js/theme-manager.js"></script>
     <script src="/static/js/theme-selector.js"></script>
-    
-    <script src="/static/js/utils.js"></script>
-    <script src="/static/js/ui.js"></script>
-    <script src="/static/js/api.js"></script>
-    <script src="/static/js/game.js"></script>
     <script src="/static/js/desktop.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {

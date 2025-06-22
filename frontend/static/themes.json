@@ -12,7 +12,13 @@
         "warningColor": "#f44336",
         "textPrimary": "#ffffff",
         "textSecondary": "rgba(255, 255, 255, 0.9)",
-        "textMuted": "rgba(255, 255, 255, 0.7)"
+        "textMuted": "rgba(255, 255, 255, 0.7)",
+        "characters": {
+          "suspect": "#f44336",
+          "witness": "#2196F3",
+          "victim": "#FFC107",
+          "expert": "#4CAF50"
+        }
       }
     },
     "midnight": {
@@ -27,7 +33,13 @@
         "warningColor": "#ff5722",
         "textPrimary": "#ffffff",
         "textSecondary": "rgba(255, 255, 255, 0.9)",
-        "textMuted": "rgba(255, 255, 255, 0.7)"
+        "textMuted": "rgba(255, 255, 255, 0.7)",
+        "characters": {
+          "suspect": "#ff5722",
+          "witness": "#bb86fc",
+          "victim": "#03dac6",
+          "expert": "#00c853"
+        }
       }
     },
     "crime": {
@@ -42,7 +54,13 @@
         "warningColor": "#d32f2f",
         "textPrimary": "#ffffff",
         "textSecondary": "rgba(255, 255, 255, 0.9)",
-        "textMuted": "rgba(255, 255, 255, 0.7)"
+        "textMuted": "rgba(255, 255, 255, 0.7)",
+        "characters": {
+          "suspect": "#d32f2f",
+          "witness": "#ff9b45",
+          "victim": "#f4e7e1",
+          "expert": "#4caf50"
+        }
       }
     },
     "cold": {
@@ -57,7 +75,13 @@
         "warningColor": "#ff5722",
         "textPrimary": "#ffffff",
         "textSecondary": "rgba(255, 255, 255, 0.9)",
-        "textMuted": "rgba(255, 255, 255, 0.7)"
+        "textMuted": "rgba(255, 255, 255, 0.7)",
+        "characters": {
+          "suspect": "#ff5722",
+          "witness": "#8ccdeb",
+          "victim": "#ffe3a9",
+          "expert": "#00c853"
+        }
       }
     },
     "forest": {
@@ -72,7 +96,13 @@
         "warningColor": "#ff5722",
         "textPrimary": "#ffffff",
         "textSecondary": "rgba(255, 255, 255, 0.9)",
-        "textMuted": "rgba(255, 255, 255, 0.7)"
+        "textMuted": "rgba(255, 255, 255, 0.7)",
+        "characters": {
+          "suspect": "#d32f2f",
+          "witness": "#98CD00",
+          "victim": "#FFFADC",
+          "expert": "#4caf50"
+        }
       }
     },
     "ocean": {
@@ -87,7 +117,13 @@
         "warningColor": "#ff5722",
         "textPrimary": "#ffffff",
         "textSecondary": "rgba(255, 255, 255, 0.9)",
-        "textMuted": "rgba(255, 255, 255, 0.7)"
+        "textMuted": "rgba(255, 255, 255, 0.7)",
+        "characters": {
+          "suspect": "#ff5722",
+          "witness": "#56DFCF",
+          "victim": "#FFEDF3",
+          "expert": "#4caf50"
+        }
       }
     }
   },
@@ -100,39 +136,5 @@
     "supernatural": "midnight",
     "financial_crime": "cold",
     "missing_person": "ocean"
-  },
-  "characterThemeColors": {
-    "suspect": {
-      "classic": "#f44336",
-      "midnight": "#ff5722",
-      "crime": "#d32f2f",
-      "cold": "#ff5722",
-      "forest": "#d32f2f",
-      "ocean": "#ff5722"
-    },
-    "witness": {
-      "classic": "#2196F3",
-      "midnight": "#bb86fc",
-      "crime": "#ff9b45",
-      "cold": "#8ccdeb",
-      "forest": "#98CD00",
-      "ocean": "#56DFCF"
-    },
-    "victim": {
-      "classic": "#FFC107",
-      "midnight": "#03dac6",
-      "crime": "#f4e7e1",
-      "cold": "#ffe3a9",
-      "forest": "#FFFADC",
-      "ocean": "#FFEDF3"
-    },
-    "expert": {
-      "classic": "#4CAF50",
-      "midnight": "#00c853",
-      "crime": "#4caf50",
-      "cold": "#00c853",
-      "forest": "#4caf50",
-      "ocean": "#4caf50"
-    }
   }
 }

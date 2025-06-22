@@ -15,13 +15,12 @@
     --theme-text-accent: #E0E7FF;
     --theme-border-color: rgba(255, 255, 255, 0.2);
     --theme-shadow-color: rgba(0, 0, 0, 0.1);
-    /* --theme-primary-gradient 已被 --theme-primary-bg 替代，由主题管理器动态设置 */
     
     /* 角色类型颜色 */
-    --suspect-color: #FF5722;
-    --witness-color: #2196F3;
-    --victim-color: #FFC107;
-    --expert-color: #4CAF50;
+    --theme-suspect-color: #FF5722;
+    --theme-witness-color: #2196F3;
+    --theme-victim-color: #FFC107;
+    --theme-expert-color: #4CAF50;
 }
 
 /* 全局样式重置 */
@@ -1197,26 +1196,26 @@ body.theme-forest .badge-category {
 
 .character-type-badge.suspect {
     background: rgba(244, 67, 54, 0.2);
-    color: var(--suspect-color);
-    border: 1px solid var(--suspect-color);
+    color: var(--theme-suspect-color);
+        border: 1px solid var(--theme-suspect-color);
 }
 
 .character-type-badge.witness {
     background: rgba(33, 150, 243, 0.2);
-    color: var(--witness-color);
-    border: 1px solid var(--witness-color);
+    color: var(--theme-witness-color);
+        border: 1px solid var(--theme-witness-color);
 }
 
 .character-type-badge.victim {
     background: rgba(255, 193, 7, 0.2);
-    color: var(--victim-color);
-    border: 1px solid var(--victim-color);
+    color: var(--theme-victim-color);
+        border: 1px solid var(--theme-victim-color);
 }
 
 .character-type-badge.expert {
     background: rgba(76, 175, 80, 0.2);
-    color: var(--expert-color);
-    border: 1px solid var(--expert-color);
+    color: var(--theme-expert-color);
+        border: 1px solid var(--theme-expert-color);
 }
 
 .character-item i.fas {

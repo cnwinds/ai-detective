@@ -6,29 +6,26 @@
 
 ## 开发规范
 
-### 1. SASS规范
+### 1. CSS规范
 
-#### 1.1 创建通用变量文件
-- **文件**: `frontend/static/sass/common.sass`
-- **目的**: 集中管理技术性共用变量和基础样式
-- **包含内容**:
-  - 基础颜色变量（非主题相关）
-  - 技术性间距、圆角、过渡动画变量
-  - 通用混入（mixins）
-  - 基础工具函数
-  - 跨平台通用的技术性样式
+#### 1.1 平台独立的CSS架构
+- **desktop.css**: 桌面端完整的独立样式文件
+- **mobile.css**: 移动端完整的独立样式文件
+- **设计原则**:
+  - 每个平台使用完全独立的CSS文件
+  - 不提取公共部分，避免复杂的依赖关系
+  - 各平台可以自由定制样式而不影响其他平台
+  - 便于维护和调试，样式问题定位更准确
 
-#### 1.2 重构现有CSS文件为SASS
-- **desktop.sass**: 引用`common.sass`，专注桌面端特有的UI设计
-- **mobile.sass**: 引用`common.sass`，专注移动端特有的UI设计
-- **平台差异考虑**:
-  - Mobile和Desktop显示效果差异较大
-  - 仅提取技术性共用部分（变量、混入、工具函数）
-  - 各平台保持独立的UI样式设计
+#### 1.2 CSS编写规范
+- **命名约定**: 使用BEM命名规范或语义化类名
+- **组织结构**: 按功能模块组织CSS代码
+- **注释规范**: 为复杂样式添加清晰的注释
 - **优势**:
-  - 减少技术性代码重复
-  - 保持平台UI独立性
-  - 便于SASS功能使用和维护
+  - 简单直观，无需预处理器
+  - 平台完全独立，互不影响
+  - 便于新手理解和维护
+  - 减少构建复杂度
 
 ### 2. JavaScript架构优化
 
@@ -130,7 +127,7 @@ const formattedDate = Utils.formatDate(new Date());
 
 #### 3.1 引用顺序规范
 ```html
-<!-- SASS编译后的CSS文件引用顺序 -->
+<!-- CSS文件引用顺序 -->
 <link rel="stylesheet" href="static/css/desktop.css">
 
 <!-- JavaScript文件引用顺序 -->
@@ -141,62 +138,96 @@ const formattedDate = Utils.formatDate(new Date());
 
 ## 最佳实践
 
-### 1. SASS编写规范
+### 1. CSS编写规范
 
-#### 1.1 使用SASS变量和混入
-```sass
-// 好的做法 - 使用SASS变量
-.button
-  background-color: $primary-color
-  padding: $spacing-md
-  border-radius: $radius-md
-  @include transition-base
+#### 1.1 使用CSS自定义属性（CSS变量）
+```css
+/* 好的做法 - 使用CSS变量 */
+:root {
+  --primary-color: #64b5f6;
+  --spacing-md: 1rem;
+  --radius-md: 0.5rem;
+  --transition-duration: 0.3s;
+}
 
-// 避免的做法 - 硬编码值
-.button
-  background-color: #64b5f6
-  padding: 1rem
-  border-radius: 0.5rem
-  transition: all 0.3s ease
+.button {
+  background-color: var(--primary-color);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  transition: all var(--transition-duration) ease;
+}
+
+/* 避免的做法 - 硬编码值 */
+.button {
+  background-color: #64b5f6;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
 ```
 
-#### 1.2 使用混入和继承
-```sass
-// 好的做法 - 使用混入和继承
-.custom-button
-  @extend %btn-base
-  @include gradient-background(45deg, red, blue)
-  // 只添加特有样式
+#### 1.2 使用模块化CSS类
+```css
+/* 好的做法 - 基础类和组合类 */
+.btn-base {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-duration) ease;
+}
 
-// 避免的做法 - 重复定义基础样式
-.custom-button
-  display: inline-flex
-  align-items: center
-  padding: $spacing-sm $spacing-lg
-  // ... 重复的基础样式
-  background-image: linear-gradient(45deg, red, blue)
+.btn-gradient {
+  background-image: linear-gradient(45deg, red, blue);
+}
+
+.custom-button {
+  /* 组合使用: btn-base btn-gradient custom-button */
+  /* 只添加特有样式 */
+  font-weight: bold;
+}
+
+/* 避免的做法 - 重复定义基础样式 */
+.custom-button {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-duration) ease;
+  background-image: linear-gradient(45deg, red, blue);
+  font-weight: bold;
+}
 ```
 
-#### 1.3 平台差异化处理
-```sass
-// common.sass - 仅技术性共用部分
-$base-font-size: 16px
-$transition-duration: 0.3s
+#### 1.3 平台独立的CSS架构
+```css
+/* desktop.css - 桌面端完整样式 */
+:root {
+  --base-font-size: 16px;
+  --transition-duration: 0.3s;
+  --desktop-sidebar-width: 300px;
+  --desktop-content-max-width: 1200px;
+}
 
-@mixin transition-base
-  transition: all $transition-duration ease
+.container {
+  max-width: var(--desktop-content-max-width);
+  margin: 0 auto;
+}
 
-// desktop.sass - 桌面端特有设计
-@import 'common'
+/* mobile.css - 移动端完整样式 */
+:root {
+  --base-font-size: 14px;
+  --transition-duration: 0.3s;
+  --mobile-header-height: 60px;
+  --mobile-bottom-nav-height: 80px;
+}
 
-$desktop-sidebar-width: 300px
-$desktop-content-max-width: 1200px
-
-// mobile.sass - 移动端特有设计
-@import 'common'
-
-$mobile-header-height: 60px
-$mobile-bottom-nav-height: 80px
+.container {
+  width: 100%;
+  padding: 0 1rem;
+}
 ```
 
 ### 2. JavaScript编写规范
@@ -310,13 +341,9 @@ try {
 ```
 frontend/
 ├── static/
-│   ├── sass/
-│   │   ├── common.sass        # 技术性共用变量和混入
-│   │   ├── desktop.sass       # 桌面端特有样式
-│   │   └── mobile.sass        # 移动端特有样式
 │   ├── css/
-│   │   ├── desktop.css        # 编译后的桌面端样式
-│   │   └── mobile.css         # 编译后的移动端样式
+│   │   ├── desktop.css        # 桌面端完整独立样式
+│   │   └── mobile.css         # 移动端完整独立样式
 │   ├── js/
 │   │   ├── utils.js           # 通用工具类
 │   │   ├── theme-manager.js   # 主题管理核心类
@@ -334,10 +361,10 @@ frontend/
 - 考虑将大型JavaScript文件拆分为更小的模块
 - 使用ES6模块系统或构建工具
 
-### 2. SASS样式组件化
-- 创建更多可复用的SASS混入和占位符选择器
-- 利用SASS的嵌套、变量、函数等特性提高开发效率
-- 考虑使用SASS模块系统进行更好的代码组织
+### 2. CSS样式组件化
+- 创建更多可复用的CSS类和组件
+- 利用CSS自定义属性和现代CSS特性提高开发效率
+- 考虑使用CSS模块或组件化方案进行更好的代码组织
 
 ### 3. 类型安全
 - 考虑引入TypeScript提高代码质量
@@ -357,11 +384,11 @@ frontend/
 ## 总结
 
 通过本次重构，我们实现了：
-- **减少技术性代码重复**: 通过SASS共享变量、混入和工具函数
-- **提高可维护性**: 集中管理技术性样式，保持平台UI独立性
-- **改善开发体验**: 利用SASS特性提供便捷的开发工具
-- **增强一致性**: 统一的技术架构，差异化的UI设计
-- **平台适配性**: 充分考虑Mobile和Desktop的显示差异
+- **平台独立性**: 每个平台使用完全独立的CSS文件，避免复杂依赖
+- **提高可维护性**: 样式问题定位更准确，调试更简单
+- **改善开发体验**: 使用现代CSS特性如自定义属性提供便捷的开发工具
+- **增强一致性**: 统一的开发规范，差异化的平台设计
+- **平台适配性**: 充分考虑Mobile和Desktop的显示差异，各自独立优化
 - **主题管理系统**: 实现了完整的主题管理架构，支持动态切换、预览、持久化和事件回调
 - **用户体验提升**: 通过主题选择器提供直观的主题切换界面，支持案件类型自动匹配
 

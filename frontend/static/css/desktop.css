@@ -24,11 +24,11 @@
     --badge-bg-alpha: 0.15;
     --badge-shadow-alpha: 0.3;
     
-    /* 角色类型颜色 */
-    --suspect-color: #FF5722;
-    --witness-color: #2196F3;
-    --victim-color: #FFC107;
-    --expert-color: #4CAF50;
+    /* 角色类型颜色 - 由主题管理器动态设置 */
+    --theme-suspect-color: #FF5722;
+    --theme-witness-color: #2196F3;
+    --theme-victim-color: #FFC107;
+    --theme-expert-color: #4CAF50;
 }
 
 * {

@@ -42,7 +42,6 @@ class ThemeManager {
             const data = await response.json();
             this.themes = data.themes;
             this.caseThemeMapping = data.caseThemeMapping;
-            this.characterThemeColors = data.characterThemeColors;
         } catch (error) {
             console.error('加载主题配置失败:', error);
             throw error;
@@ -106,17 +105,16 @@ class ThemeManager {
      * @param {string} themeName - 主题名称
      */
     updateCharacterColors(themeName) {
-        if (!this.characterThemeColors || !this.characterThemeColors.suspect) {
+        const theme = this.themes[themeName];
+        if (!theme || !theme.colors || !theme.colors.characters) {
             return;
         }
 
         const root = document.documentElement;
-        const characterTypes = ['suspect', 'witness', 'victim', 'expert'];
+        const characterColors = theme.colors.characters;
         
-        characterTypes.forEach(type => {
-            if (this.characterThemeColors[type] && this.characterThemeColors[type][themeName]) {
-                root.style.setProperty(`--${type}-color`, this.characterThemeColors[type][themeName]);
-            }
+        Object.entries(characterColors).forEach(([type, color]) => {
+            root.style.setProperty(`--theme-${type}-color`, color);
         });
     }
 

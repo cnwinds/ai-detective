@@ -457,8 +457,6 @@ html, body {
     color: rgba(255, 255, 255, 0.95);
 }
 
-
-
 /* 打字机效果 */
 .typewriter-cursor {
     display: inline-block;
@@ -466,7 +464,6 @@ html, body {
     margin-left: 2px;
     font-size: 1em;
     line-height: 1;
-    /* 移除CSS动画，改用JavaScript控制 */
 }
 
 .intro-footer {
@@ -651,10 +648,6 @@ html, body {
 }
 
 /* 移动端主题适配的标签样式增强 */
-.badge {
-    position: relative;
-    overflow: hidden;
-}
 
 /* 为不同主题的难度标签提供更好的对比度 */
 body.theme-classic .badge-difficulty,
@@ -1181,15 +1174,6 @@ body.theme-forest .badge-category {
     font-size: 0.6em;
 }
 
-.character-type-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.8em;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
 .character-type-badge.suspect {
     background: rgba(244, 67, 54, 0.2);
     color: var(--theme-suspect-color);
@@ -1290,22 +1274,7 @@ body.theme-forest .badge-category {
     box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
 }
 
-.content-panel {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-    overflow-y: auto;
-}
 
-.content-panel.active {
-    opacity: 1;
-    visibility: visible;
-}
 
 .panel-content {
     padding: 20px;
@@ -2374,7 +2343,43 @@ body.theme-forest .badge-category {
 
 .form-control option {
     padding: 8px;
-    background: #2d3748;
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
+}
+
+/* 针对移动端select元素的特殊样式 */
+select.form-control {
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
+    cursor: pointer;
+}
+
+select.form-control:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+/* 移动端指控页面被指控者选择下拉框 */
+#mobile-accused-select {
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
+    border: 1px solid var(--theme-border-color);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+#mobile-accused-select:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--theme-primary-color);
+}
+
+#mobile-accused-select:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--theme-primary-color);
+    box-shadow: 0 0 0 2px rgba(100, 181, 246, 0.2);
+}
+
+#mobile-accused-select option {
+    background: var(--theme-secondary-bg);
     color: var(--theme-text-primary);
 }
 
@@ -2806,9 +2811,7 @@ body.theme-forest .badge-category {
 }
 
 .trial-intro {
-    background: linear-gradient(145deg, 
-        rgba(255, 255, 255, 0.15) 0%, 
-        rgba(255, 255, 255, 0.05) 100%);
+    background: var(--theme-primary-bg);
     padding: 20px;
     text-align: center;
     border-radius: 12px;

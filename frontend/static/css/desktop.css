@@ -29,6 +29,12 @@
     --theme-witness-color: #2196F3;
     --theme-victim-color: #FFC107;
     --theme-expert-color: #4CAF50;
+    
+    /* 审判结果相关主题变量 */
+    --theme-success-bg: rgba(76, 175, 80, 0.1);
+    --theme-warning-bg: rgba(244, 67, 54, 0.1);
+    --theme-dark-bg: #1a1a2e;
+    --theme-text-light: #ffffff;
 }
 
 * {
@@ -253,7 +259,7 @@ body {
 .intro-title {
     font-size: 2.2rem;
     font-weight: bold;
-    color: var(--theme-accent-color);
+    color: var(--theme-text-primary);
     margin-bottom: 18px;
     line-height: 1.2;
     min-height: 2.7rem;
@@ -262,7 +268,7 @@ body {
 .intro-subtitle {
     font-size: 1.3rem;
     color: var(--theme-primary-color);
-    margin-bottom: 12px;
+    margin-top: 15px;
     line-height: 1.2;
     min-height: 1.7rem;
 }
@@ -274,6 +280,13 @@ body {
     border-radius: 8px;
     padding: 10px 18px;
     margin-bottom: 6px;
+    line-height: 1.7;
+    min-height: 1.7rem;
+}
+
+.intro-detail-content {
+    font-size: 1.05rem;
+    color: var(--theme-text-primary);
     line-height: 1.7;
     min-height: 1.7rem;
 }
@@ -308,11 +321,10 @@ body {
 
 .typewriter-cursor {
     display: inline-block;
-    width: 2px;
-    height: 1.2em;
-    background: var(--theme-text-primary);
-    animation: blink 1s infinite;
+    color: var(--theme-text-primary);
     margin-left: 2px;
+    font-family: monospace;
+    line-height: 1;
 }
 
 .intro-characters-grid {
@@ -483,16 +495,7 @@ body {
     }
 }
 
-/* 打字机光标增强效果 */
-.typewriter-cursor {
-    display: inline-block;
-    width: 2px;
-    height: 1.2em;
-    background: var(--theme-text-primary);
-    animation: blink 1s infinite;
-    margin-left: 2px;
-    box-shadow: 0 0 5px rgba(255, 255, 255, 0.3);
-}
+/* 打字机光标增强效果已移至上方统一定义 */
 
 /* 角色卡片动画 */
 .intro-character-card.show {
@@ -651,7 +654,7 @@ body {
 }
 
 .case-card {
-    background: var(--theme-text-primary);
+    background: var(--theme-primary-bg);
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 2px 8px var(--theme-shadow-light);
@@ -861,7 +864,8 @@ body.theme-forest .badge-top.badge-category {
 
 /* 游戏界面 */
 .game-header {
-    background: white;
+    background: var(--theme-primary-bg);
+    border: 1px solid var(--theme-border-color);
     border-radius: 15px;
     padding: 20px;
     margin-bottom: 20px;
@@ -875,7 +879,7 @@ body.theme-forest .badge-top.badge-category {
 .case-info h2 {
     margin: 0 0 10px 0;
     font-size: 1.5rem;
-    color: #333;
+    color: var(--theme-text-primary);
 }
 
 .case-victim-info {
@@ -883,10 +887,10 @@ body.theme-forest .badge-top.badge-category {
     gap: 20px;
     margin: 15px 0;
     padding: 12px;
-    background: #667eea;
+    background: var(--theme-secondary-bg);
     border-radius: 8px;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid var(--theme-border-color);
     flex-wrap: wrap;
 }
 
@@ -894,31 +898,31 @@ body.theme-forest .badge-top.badge-category {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-size: 0.9rem;
     min-width: 180px;
 }
 
 .victim-detail i {
-    color: #ffed4e;
+    color: var(--theme-accent-color);
     font-size: 1rem;
     width: 18px;
     text-align: center;
 }
 
 .victim-detail strong {
-    color: #f0f0f0;
+    color: var(--theme-text-secondary);
     margin-right: 4px;
 }
 
 .victim-detail span span {
-    color: #ffffff;
+    color: var(--theme-text-primary);
     font-weight: 600;
 }
 
 .case-info p {
     margin: 15px 0 0 0;
-    color: #666;
+    color: var(--theme-text-secondary);
     line-height: 1.4;
     font-weight: 400;
 }
@@ -934,16 +938,17 @@ body.theme-forest .badge-top.badge-category {
 
 /* 角色面板 */
 .characters-panel {
-    background: white;
+    background: var(--theme-secondary-bg);
+    border: 1px solid var(--theme-border-color);
     border-radius: 15px;
     padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px var(--theme-shadow-color);
     display: flex;
     flex-direction: column;
 }
 
 .characters-panel h3 {
-    color: #333;
+    color: var(--theme-text-primary);
     margin-bottom: 20px;
     display: flex;
     align-items: center;
@@ -956,7 +961,7 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .character-card {
-    background: #f8f9fa;
+    background: var(--theme-secondary-bg);
     border-radius: 8px;
     padding: 8px 12px;
     margin-bottom: 6px;
@@ -969,14 +974,14 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .character-card:hover {
-    background: #e9ecef;
-    border-color: #667eea;
+    background: var(--theme-primary-bg);
+    border-color: var(--theme-primary-color);
 }
 
 .character-card.active {
-    background: #667eea;
-    color: white;
-    border-color: #5a6fd8;
+    background: var(--theme-primary-color);
+    color: var(--theme-text-primary);
+    border-color: var(--theme-primary-color);
 }
 
 .character-info-left {
@@ -1018,9 +1023,10 @@ body.theme-forest .badge-top.badge-category {
 
 /* 对话面板 */
 .conversation-panel {
-    background: white;
+    background: var(--theme-secondary-bg);
+    border: 1px solid var(--theme-border-color);
     border-radius: 15px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px var(--theme-shadow-color);
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -1028,8 +1034,8 @@ body.theme-forest .badge-top.badge-category {
 
 /* 整合的对话标题区域 */
 .conversation-header-integrated {
-    background: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
+    background: var(--theme-primary-bg);
+    border-bottom: 1px solid var(--theme-border-color);
 }
 
 .default-conversation-header {
@@ -1038,7 +1044,7 @@ body.theme-forest .badge-top.badge-category {
 
 .default-conversation-header h3 {
     margin: 0;
-    color: #333;
+    color: var(--theme-text-primary);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -1059,14 +1065,14 @@ body.theme-forest .badge-top.badge-category {
 .character-avatar-small {
     width: 35px;
     height: 35px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-primary-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--theme-text-primary);
     font-size: 1rem;
-    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 2px 6px var(--theme-shadow-color);
     flex-shrink: 0;
     margin-top: 2px;
 }
@@ -1104,7 +1110,7 @@ body.theme-forest .badge-top.badge-category {
 
 .character-title-line h3 {
     margin: 0;
-    color: #333;
+    color: var(--theme-text-primary);
     font-size: 1.1rem;
     font-weight: 600;
 }
@@ -1238,7 +1244,7 @@ body.theme-forest .badge-top.badge-category {
 
 .response {
     background: var(--theme-secondary-bg);
-    color: #333;
+    color: var(--theme-text-primary);
     padding: 12px 18px;
     border-radius: 18px 18px 18px 5px;
     max-width: 80%;
@@ -1246,16 +1252,16 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .evidence-notification {
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
+    background: var(--theme-warning-color);
+    border: 1px solid var(--theme-border-color);
     border-radius: 10px;
     padding: 15px;
     margin: 10px 0;
-    color: #856404;
+    color: var(--theme-text-primary);
 }
 
 .evidence-notification i {
-    color: #f39c12;
+    color: var(--theme-accent-color);
     margin-right: 10px;
 }
 
@@ -1321,7 +1327,7 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .suggested-questions h4 {
-    color: #333;
+    color: var(--theme-text-primary);
     margin-bottom: 8px;
     font-size: 0.95rem;
 }
@@ -1363,13 +1369,15 @@ body.theme-forest .badge-top.badge-category {
 
 .question-input textarea {
     flex: 1;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--theme-border-color);
     border-radius: 10px;
     padding: 12px;
     resize: vertical;
     font-family: inherit;
     font-size: 0.95rem;
     min-height: 72px;
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
 }
 
 .question-input .btn {
@@ -1381,15 +1389,16 @@ body.theme-forest .badge-top.badge-category {
 .question-input textarea:focus {
     outline: none;
     border-color: var(--theme-primary-color);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px var(--theme-shadow-light);
 }
 
 /* 信息面板 */
 .info-panel {
-    background: var(--theme-text-primary);
+    background: var(--theme-secondary-bg);
+    border: 1px solid var(--theme-border-color);
     border-radius: 15px;
     padding: 20px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 10px var(--theme-shadow-color);
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -1412,43 +1421,43 @@ body.theme-forest .badge-top.badge-category {
 .evidence-section h3,
 .hints-section h3,
 .notes-section h3 {
-    color: #333;
+    color: var(--theme-text-primary);
     margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 8px;
     font-size: 1.05rem;
     padding-bottom: 8px;
-    border-bottom: 2px solid #f0f0f0;
+    border-bottom: 2px solid var(--theme-border-color);
 }
 
 .evidence-list {
     max-height: 300px; /* 增加证据列表的最大高度 */
     overflow-y: auto;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--theme-border-color);
     border-radius: 8px;
     padding: 10px;
-    background: #fafafa;
+    background: var(--theme-primary-bg);
 }
 
 .evidence-item {
-    background: white;
+    background: var(--theme-secondary-bg);
     border-radius: 6px;
     padding: 10px;
     margin-bottom: 8px;
-    border-left: 4px solid #28a745;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid var(--theme-success-color);
+    box-shadow: 0 1px 3px var(--theme-shadow-color);
     transition: all 0.2s ease;
 }
 
 .evidence-item:hover {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 6px var(--theme-shadow-color);
     transform: translateY(-1px);
 }
 
 .evidence-name {
     font-weight: bold;
-    color: #333;
+    color: var(--theme-text-primary);
     margin-bottom: 4px;
     font-size: 0.95rem;
     display: flex;
@@ -1463,16 +1472,16 @@ body.theme-forest .badge-top.badge-category {
 
 .evidence-description {
     font-size: 0.85rem;
-    color: #666;
+    color: var(--theme-text-secondary);
     margin-bottom: 4px;
     line-height: 1.4;
 }
 
 .evidence-significance {
     font-size: 0.8rem;
-    color: #28a745;
+    color: var(--theme-success-color);
     font-style: italic;
-    background: #f0f8f0;
+    background: var(--theme-primary-bg);
     padding: 2px 6px;
     border-radius: 4px;
     display: inline-block;
@@ -1480,12 +1489,12 @@ body.theme-forest .badge-top.badge-category {
 
 .no-evidence {
     text-align: center;
-    color: #999;
+    color: var(--theme-text-muted);
     padding: 30px 20px;
     font-style: italic;
-    background: #f8f9fa;
+    background: var(--theme-primary-bg);
     border-radius: 8px;
-    border: 2px dashed #dee2e6;
+    border: 2px dashed var(--theme-border-color);
 }
 
 .no-evidence::before {
@@ -1499,38 +1508,38 @@ body.theme-forest .badge-top.badge-category {
 .hints-list {
     max-height: 200px;
     overflow-y: auto;
-    border: 1px solid #e9ecef;
+    border: 1px solid var(--theme-border-color);
     border-radius: 8px;
     padding: 10px;
-    background: #fafafa;
+    background: var(--theme-primary-bg);
     margin-bottom: 15px;
 }
 
 .hint-item {
-    background: white;
+    background: var(--theme-secondary-bg);
     border-radius: 6px;
     padding: 10px;
     margin-bottom: 8px;
-    border-left: 4px solid #ffc107;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid var(--theme-warning-color);
+    box-shadow: 0 1px 3px var(--theme-shadow-color);
     transition: all 0.2s ease;
 }
 
 .hint-item:hover {
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 6px var(--theme-shadow-color);
     transform: translateY(-1px);
 }
 
 .hint-content {
     font-size: 0.9rem;
-    color: #333;
+    color: var(--theme-text-primary);
     line-height: 1.4;
     margin-bottom: 4px;
 }
 
 .hint-timestamp {
     font-size: 0.75rem;
-    color: #666;
+    color: var(--theme-text-secondary);
     font-style: italic;
     display: flex;
     align-items: center;
@@ -1544,12 +1553,12 @@ body.theme-forest .badge-top.badge-category {
 
 .no-hints {
     text-align: center;
-    color: #999;
+    color: var(--theme-text-muted);
     padding: 20px;
     font-style: italic;
-    background: #f8f9fa;
+    background: var(--theme-primary-bg);
     border-radius: 8px;
-    border: 2px dashed #dee2e6;
+    border: 2px dashed var(--theme-border-color);
 }
 
 .no-hints::before {
@@ -1562,18 +1571,20 @@ body.theme-forest .badge-top.badge-category {
 #notes-area {
     width: 100%;
     height: 180px; /* 稍微减少笔记区域高度 */
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--theme-border-color);
     border-radius: 8px;
     padding: 12px;
     resize: vertical;
     font-family: inherit;
     font-size: 0.9rem;
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
 }
 
 #notes-area:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: var(--theme-primary-color);
+    box-shadow: 0 0 0 3px var(--theme-shadow-light);
 }
 
 /* 按钮样式 */
@@ -1598,8 +1609,8 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .btn.primary {
-    background: #667eea;
-    color: white;
+    background: var(--theme-primary-color);
+    color: var(--theme-text-primary);
 }
 
 .btn.primary:hover:not(:disabled) {
@@ -1640,7 +1651,7 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .btn.accusation-btn:hover:not(:disabled) {
-    background: #c82333;
+    background: var(--theme-danger-color);
 }
 
 .btn .button-text {
@@ -1677,10 +1688,10 @@ body.theme-forest .badge-top.badge-category {
 
 /* 指控界面 */
 .accusation-form {
-    background: var(--theme-text-primary);
+    background: var(--theme-secondary-bg);
     border-radius: 15px;
     padding: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 5px 15px var(--theme-shadow-color);
     max-width: 600px;
     margin: 0 auto;
 }
@@ -1693,22 +1704,42 @@ body.theme-forest .badge-top.badge-category {
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
-    color: #333;
+    color: var(--theme-text-primary);
 }
 
 .form-control {
     width: 100%;
     padding: 12px;
-    border: 1px solid #dee2e6;
+    border: 1px solid var(--theme-border-color);
     border-radius: 8px;
     font-size: 0.95rem;
     font-family: inherit;
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
 }
 
 .form-control:focus {
     outline: none;
     border-color: var(--theme-primary-color);
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 3px var(--theme-shadow-color);
+}
+
+/* 下拉框选项样式 */
+.form-control option {
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
+    padding: 8px 12px;
+}
+
+/* 针对select元素的特殊样式 */
+select.form-control {
+    background: var(--theme-secondary-bg);
+    color: var(--theme-text-primary);
+    cursor: pointer;
+}
+
+select.form-control:hover {
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .form-actions {
@@ -1720,33 +1751,43 @@ body.theme-forest .badge-top.badge-category {
 
 /* 审判结果 */
 .trial-result {
-    background: white;
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.15) 0%, 
+        rgba(255, 255, 255, 0.05) 100%);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border-radius: 15px;
     padding: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--theme-border-color);
     max-width: 800px;
     margin: 0 auto;
+    transition: all 0.3s ease;
 }
 
 .verdict {
     text-align: center;
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     margin-bottom: 30px;
     font-size: 1.2rem;
-    font-weight: bold;
+    font-weight: 600;
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.15) 0%, 
+        rgba(255, 255, 255, 0.05) 100%);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--theme-border-color);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    color: var(--theme-text-primary);
 }
 
 .verdict.guilty {
-    background: #d4edda;
-    color: #155724;
-    border: 1px solid #c3e6cb;
+    border-left: 4px solid var(--theme-success-color);
 }
 
 .verdict.innocent {
-    background: #f8f9fa;
-    color: #495057;
-    border: 1px solid #dee2e6;
+    border-left: 4px solid var(--theme-warning-color);
 }
 
 .defense-section,
@@ -1758,7 +1799,7 @@ body.theme-forest .badge-top.badge-category {
 .defense-section h4,
 .testimonies-section h4,
 .votes-section h4 {
-    color: #333;
+    color: var(--theme-text-primary);
     margin-bottom: 15px;
     display: flex;
     align-items: center;
@@ -1766,47 +1807,71 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .defense-text {
-    background: #f8f9fa;
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.15) 0%, 
+        rgba(255, 255, 255, 0.05) 100%);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     padding: 15px;
-    border-radius: 8px;
-    border-left: 4px solid #007bff;
+    border-radius: 12px;
+    border-left: 4px solid var(--theme-primary-color);
+    border: 1px solid var(--theme-border-color);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     line-height: 1.6;
     white-space: pre-wrap; /* 保留换行符和空格 */
+    color: var(--theme-text-primary);
+    margin-bottom: 20px;
 }
 
 .testimony-item,
 .vote-item {
-    background: #f8f9fa;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 10px;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    padding: 16px;
+    border-radius: 12px;
+    border-left: 4px solid var(--theme-warning-color);
+    border: 1px solid var(--theme-border-color);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+    color: var(--theme-text-primary);
 }
+
+.testimony-item {
+    border-left: 4px solid var(--theme-primary-color);
+}
+
 
 .testimony-header,
 .vote-header {
     font-weight: bold;
-    color: #333;
+    color: var(--theme-text-primary);
     margin-bottom: 8px;
 }
 
 .vote-support {
-    border-left: 4px solid #28a745;
+    border-left: 4px solid var(--theme-success-color);
 }
 
 .vote-oppose {
-    border-left: 4px solid #6c757d;
+    border-left: 4px solid var(--theme-text-secondary);
 }
 
 .vote-summary {
-    background: #e9ecef;
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.15) 0%, 
+        rgba(255, 255, 255, 0.05) 100%);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--theme-border-color);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     padding: 20px;
-    border-radius: 10px;
+    border-radius: 12px;
     text-align: center;
     margin: 20px 0;
 }
 
 .vote-summary h4 {
-    color: #333;
+    color: var(--theme-text-primary);
     margin-bottom: 15px;
 }
 
@@ -1827,43 +1892,81 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .vote-stat.support .number {
-    color: #28a745;
+    color: #27ae60;
 }
 
 .vote-stat.oppose .number {
-    color: #6c757d;
+    color: #e74c3c;
 }
 
 .solution-section {
-    background: #fff3cd;
-    border: 1px solid #ffeaa7;
-    border-radius: 10px;
+    background: linear-gradient(145deg, 
+        rgba(255, 255, 255, 0.15) 0%, 
+        rgba(255, 255, 255, 0.05) 100%);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    border: 1px solid var(--theme-warning-color);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     padding: 20px;
     margin-top: 25px;
 }
 
 .solution-section h4 {
-    color: #856404;
+    color: var(--theme-warning-color);
     margin-bottom: 15px;
 }
 
 .solution-text {
-    color: #856404;
+    color: var(--theme-warning-color);
     line-height: 1.6;
     white-space: pre-wrap; /* 保留换行符和空格 */
 }
 
+/* 审判步骤样式 */
+.trial-header {
+    background: var(--theme-primary-bg);
+    color: var(--theme-text-primary);
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid var(--theme-border-color);
+    border-radius: 15px 15px 0 0;
+}
+
+.trial-header h2 {
+    margin: 0 0 8px 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.trial-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1.1rem;
+}
+
+.trial-step:last-child {
+    border-bottom: none;
+}
+
+.correctness-indicator h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--theme-text-primary);
+}
+
 /* 失败结束语的特殊样式 */
 .trial-step[data-step="end"] .solution-text {
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    color: #ecf0f1;
+    background: linear-gradient(135deg, var(--theme-dark-bg) 0%, var(--theme-text-secondary) 100%);
+    color: var(--theme-text-light);
     padding: 30px;
     border-radius: 15px;
     text-align: center;
     font-style: italic;
     line-height: 1.8;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px var(--theme-shadow-color);
+    border: 1px solid var(--theme-border-color);
 }
 
 .trial-step[data-step="end"] .solution-text::before {
@@ -1872,6 +1975,29 @@ body.theme-forest .badge-top.badge-category {
     font-size: 2rem;
     margin-bottom: 20px;
     opacity: 0.7;
+}
+
+/* 动画定义 */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
+}
+
+@keyframes thinkingDots {
+    0%, 20% { opacity: 0.2; }
+    50% { opacity: 1; }
+    80%, 100% { opacity: 0.2; }
 }
 
 /* 模态框 */
@@ -1883,7 +2009,7 @@ body.theme-forest .badge-top.badge-category {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: var(--theme-overlay-bg);
     backdrop-filter: blur(5px);
 }
 
@@ -1894,26 +2020,26 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .modal-content {
-    background: white;
+    background: var(--theme-secondary-bg);
     border-radius: 15px;
     max-width: 600px;
     width: 90%;
     max-height: 80vh;
     overflow-y: auto;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 10px 30px var(--theme-shadow-color);
     animation: modalSlideIn 0.3s ease;
 }
 
 .modal-header {
     padding: 20px 25px;
-    border-bottom: 1px solid #dee2e6;
+    border-bottom: 1px solid var(--theme-border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 .modal-header h3 {
-    color: #333;
+    color: var(--theme-text-primary);
     margin: 0;
     display: flex;
     align-items: center;
@@ -1937,8 +2063,8 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .close-btn:hover {
-    background: var(--theme-secondary-bg);
-    color: #333;
+    background: var(--theme-primary-bg);
+    color: var(--theme-text-primary);
 }
 
 .modal-body {
@@ -1951,7 +2077,7 @@ body.theme-forest .badge-top.badge-category {
 
 .rules-content h4,
 .about-content h4 {
-    color: #333;
+    color: var(--theme-text-primary);
     margin: 20px 0 10px 0;
     display: flex;
     align-items: center;
@@ -2235,7 +2361,7 @@ body.theme-forest .badge-top.badge-category {
     padding: 15px;
     color: #666;
     font-size: 13px;
-    background: #f8f9fa;
+    background: var(--theme-secondary-bg);
     border-radius: 8px;
     border: 1px solid #e9ecef;
 }
@@ -2348,10 +2474,7 @@ body.theme-forest .badge-top.badge-category {
     font-weight: bold;
 }
 
-@keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
-}
+/* blink动画已在上方定义 */
 
 .typing-indicator {
     color: #666;
@@ -2372,7 +2495,7 @@ body.theme-forest .badge-top.badge-category {
 .trial-intro {
     text-align: center;
     padding: 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--theme-primary-bg);
     color: white;
     border-radius: 15px;
     margin-bottom: 30px;
@@ -2385,8 +2508,9 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .trial-step {
-    background: white;
+    border: 1px solid var(--theme-border-color);
     border-radius: 15px;
+    margin-top: 25px;
     margin-bottom: 25px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     overflow: hidden;
@@ -2394,14 +2518,14 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .step-header {
-    background: #f8f9fa;
+    background: var(--theme-secondary-bg);
     padding: 20px;
     border-bottom: 2px solid #e9ecef;
 }
 
 .step-header h3 {
     margin: 0;
-    color: #333;
+    color: var(--theme-text-primary);
     display: flex;
     align-items: center;
     gap: 10px;
@@ -2414,12 +2538,14 @@ body.theme-forest .badge-top.badge-category {
 .streaming-text {
     line-height: 1.6;
     font-size: 1rem;
-    color: #333;
+    color: var(--theme-text-primary);
     white-space: pre-wrap; /* 保留换行符和空格 */
 }
 
 .witness-testimony {
-    background: #f8f9fa;
+    background: linear-gradient(145deg, 
+    rgba(255, 255, 255, 0.15) 0%, 
+    rgba(255, 255, 255, 0.05) 100%);
     border-radius: 10px;
     padding: 20px;
     margin-bottom: 20px;
@@ -2428,41 +2554,33 @@ body.theme-forest .badge-top.badge-category {
 
 .witness-testimony h4 {
     margin: 0 0 15px 0;
-    color: #333;
+    color: var(--theme-text-primary);
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 8px;   
 }
 
 .testimony-content {
-    background: white;
+    color: var(--theme-text-secondary);
     padding: 15px;
     border-radius: 8px;
     border: 1px solid #dee2e6;
     white-space: pre-wrap; /* 保留换行符和空格 */
 }
 
-.vote-item {
-    background: #f8f9fa;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 20px;
-    border-left: 4px solid #6c757d;
-}
-
 .vote-item h4 {
     margin: 0 0 15px 0;
-    color: #333;
+    color: var(--theme-text-primary);
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
 .vote-content {
-    background: white;
     padding: 15px;
     border-radius: 8px;
     border: 1px solid #dee2e6;
+    color: var(--theme-text-primary);
 }
 
 .vote-content.vote-support {
@@ -2495,8 +2613,7 @@ body.theme-forest .badge-top.badge-category {
 }
 
 .vote-reason {
-    font-style: italic;
-    color: #666;
+    color: var(--theme-text-secondary);
     line-height: 1.5;
     white-space: pre-wrap; /* 保留换行符和空格 */
 }
@@ -2507,24 +2624,18 @@ body.theme-forest .badge-top.badge-category {
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border-radius: 10px;
     border: 2px dashed #dee2e6;
     margin: 10px 0;
     animation: thinkingPulse 2s ease-in-out infinite;
+    color: var(--theme-text-muted);
 }
 
 .thinking-indicator i {
     font-size: 1.5rem;
-    color: #6c757d;
+    color: var(--theme-text-muted);
     margin-right: 12px;
     animation: brainPulse 1.5s ease-in-out infinite;
-}
-
-.thinking-text {
-    color: #495057;
-    font-weight: 500;
-    margin-right: 8px;
 }
 
 .thinking-dots {
@@ -2586,7 +2697,7 @@ body.theme-forest .badge-top.badge-category {
 .trial-actions {
     text-align: center;
     padding: 30px;
-    background: #f8f9fa;
+    background: var(--theme-secondary-bg);
     border-radius: 15px;
     margin-top: 30px;
 }
@@ -2621,7 +2732,8 @@ body.theme-forest .badge-top.badge-category {
 
 /* 案例过滤器样式 */
 .case-filters {
-    background: white;
+    background: var(--theme-primary-bg);
+    border: 1px solid var(--theme-border-color);
     border-radius: 12px;
     padding: 15px;
     margin-bottom: 20px;
@@ -2639,7 +2751,7 @@ body.theme-forest .badge-top.badge-category {
 .filter-label {
     font-size: 0.9rem;
     font-weight: 600;
-    color: #333;
+    color: var(--theme-text-primary);
     margin-bottom: 8px;
     display: block;
 }
@@ -2734,7 +2846,7 @@ body.theme-forest .badge-top.badge-category {
     padding: 60px 20px;
     color: #666;
     font-size: 18px;
-    background: white;
+    background: var(--theme-primary-bg);
     border-radius: 15px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }

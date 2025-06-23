@@ -11,6 +11,7 @@ class DetectiveGameApp {
         this.conversationHistory = []; // 存储所有角色的对话历史
         this.hintsHistory = []; // 存储获取的提示历史
         this.appTimezone = 'Asia/Shanghai'; // 默认时区
+        this.selectedRating = 0; // 初始化评分变量
 
         
         // 客户端唯一标识（基于浏览器指纹和localStorage）
@@ -75,13 +76,15 @@ class DetectiveGameApp {
     
     async init() {
         try {
+            this.bindEvents();
             // 加载应用配置（包括时区）
             await this.loadAppConfig();
-            
             // 加载版本信息
             await this.loadVersionInfo();
-            
-            this.bindEvents();
+        
+            // 确保使用经典主题配色
+            this.ensureClassicTheme();
+
             this.hideLoadingScreen();
         } catch (error) {
             this.logError('初始化失败:', error);
@@ -89,6 +92,29 @@ class DetectiveGameApp {
         }
     }
     
+    /**
+     * 确保使用经典主题配色
+     */
+    ensureClassicTheme() {
+        // 等待主题管理器加载完成后应用经典主题
+        if (window.themeManager) {
+            if (window.themeManager.isReady()) {
+                window.themeManager.applyTheme('classic');
+                console.log('已强制应用经典主题配色');
+            } else {
+                window.themeManager.waitForReady().then(() => {
+                    window.themeManager.applyTheme('classic');
+                    console.log('主题管理器加载完成，已应用经典主题配色');
+                });
+            }
+        } else {
+            // 如果主题管理器还未加载，等待一段时间后重试
+            setTimeout(() => {
+                this.ensureClassicTheme();
+            }, 100);
+        }
+    }
+
     // 加载应用配置
     async loadAppConfig() {
         try {
@@ -320,7 +346,7 @@ class DetectiveGameApp {
     
     // 选择过滤标签
     selectFilterTag(type, selectedTag) {
-        const container = DOMHelper.$(`${type}-tags`);
+        const container = DOMHelper.$(`#${type}-tags`);
         const allTags = container.querySelectorAll('.filter-tag');
         
         // 移除所有active状态
@@ -348,8 +374,7 @@ class DetectiveGameApp {
             if (category) params.append('category', category);
             if (difficulty) params.append('difficulty', difficulty);
             
-            const response = await APIHelper.get(`${this.apiBase}/cases?${params}`);
-            const cases = await response.json();
+            const cases = await APIHelper.get(`${this.apiBase}/cases?${params}`);
             
             this.renderCases(cases);
         } catch (error) {
@@ -516,7 +541,7 @@ class DetectiveGameApp {
             { type: 'detail', label: '案发时间', text: this.currentCase.time_of_crime, delay: 500 },
             { type: 'detail', label: '案发地点', text: this.currentCase.crime_scene, delay: 500 },
             { type: 'subtitle', text: '案情概述', delay: 800 },
-            { type: 'text', text: this.currentCase.description, delay: 1000 },
+            { type: 'detail', text: this.currentCase.description, delay: 1000 },
             { type: 'subtitle', text: '相关人员', delay: 800 },
             ...this.currentCase.characters.map(char => ({
                 type: 'character',
@@ -524,13 +549,15 @@ class DetectiveGameApp {
                 delay: 600
             })),
             { type: 'subtitle', text: '调查目标', delay: 800 },
-            { type: 'text', text: '通过与相关人员对话，收集线索和证据，分析案件真相，最终找出真正的凶手。', delay: 800 }
+            { type: 'detail', text: '通过与相关人员对话，收集线索和证据，分析案件真相，最终找出真正的凶手。', delay: 800 }
         ];
     }
 
     // 创建案情介绍单项元素
     createIntroElement(item) {
-        const div = DOMHelper.createElement('div', { className: 'intro-section' });
+        // 对于detail和character类型使用intro-detail类名，其他类型使用intro-section
+        const className = (item.type === 'detail' || item.type === 'character') ? 'intro-detail' : 'intro-section';
+        const div = DOMHelper.createElement('div', { className });
         switch (item.type) {
             case 'title':
                 DOMHelper.setHTML(div, '<h1 class="intro-title"></h1>');
@@ -539,10 +566,8 @@ class DetectiveGameApp {
                 DOMHelper.setHTML(div, '<h2 class="intro-subtitle"></h2>');
                 break;
             case 'detail':
-                DOMHelper.setHTML(div, `<div class="intro-detail"><strong>${item.label}：</strong><span class="detail-text"></span></div>`);
-                break;
-            case 'text':
-                DOMHelper.setHTML(div, '<p class="intro-text"></p>');
+                const labelHtml = item.label ? `<strong>${item.label}：</strong>` : '';
+                DOMHelper.setHTML(div, `<div class="intro-detail-content">${labelHtml}<span class="detail-text"></span></div>`);
                 break;
             case 'character':
                 // 以纯文本段落方式输出角色信息
@@ -551,7 +576,8 @@ class DetectiveGameApp {
                 const typeText = this._getCharacterTypeText(char.character_type);
                 // 拼接内容：姓名，年龄，职业，类型。简介
                 const info = `${char.name}，${char.age}岁，${char.occupation}，${typeText}。${char.background}`;
-                DOMHelper.setHTML(div, `<p class="intro-text">${info}</p>`);
+                item.text = info
+                DOMHelper.setHTML(div, `<div class="intro-detail-content"><span class="detail-text"></span></div>`);
                 break;
         }
         return div;
@@ -571,37 +597,48 @@ class DetectiveGameApp {
             case 'detail':
                 cursor = await this.typewriterTextForElement(element.querySelector('.detail-text'), item.text, 50, 600);
                 break;
-            case 'text':
-                cursor = await this.typewriterTextForElement(element.querySelector('.intro-text'), item.text, 30, 400);
-                break;
             case 'character':
-                // 角色卡片直接显示，无需打字机
+                cursor = await this.typewriterTextForElement(element.querySelector('.detail-text'), item.text, 50, 600);
                 break;
         }
         return cursor;
     }
 
-    // 打字机动画核心
-    async typeText(element, text, speed) {
-        if (this.skipTypewriter) {
-            element.textContent = text;
+    // 为元素添加打字机效果（支持任意元素）
+    async typewriterTextForElement(element, text, speed = 50, waitAfter = 0) {
+        // 检查参数是否有效
+        if (!element) {
+            console.warn('typewriterTextForElement: Invalid element:', element);
             return;
         }
-        DOMHelper.setHTML(element, '');
-        // 添加光标
-        const cursor = DOMHelper.createElement('span', { className: 'typewriter-cursor' }, '█');
-        element.appendChild(cursor);
-        for (let i = 0; i < text.length; i++) {
-            if (this.skipTypewriter) {
-                element.textContent = text;
-                return;
-            }
-            await new Promise(resolve => setTimeout(resolve, speed));
-            const textNode = document.createTextNode(text[i]);
-            element.insertBefore(textNode, cursor);
-            cursor.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+        
+        if (!text || typeof text !== 'string') {
+            console.warn('typewriterTextForElement: Invalid text:', text);
+            return;
         }
-        return cursor;
+        
+        element.innerHTML = '';
+        
+        // 创建文本容器和光标容器
+        const textContainer = DOMHelper.createElement('span');
+        const cursor = DOMHelper.createElement('span', { className: 'typewriter-cursor' });
+        cursor.textContent = '█'; // 使用实心方块字符
+        
+        element.appendChild(textContainer);
+        element.appendChild(cursor);
+        
+        // 逐字显示文本
+        for (let i = 0; i < text.length; i++) {
+            await new Promise(resolve => setTimeout(resolve, speed));
+            // 更新文本容器内容
+            textContainer.textContent = text.substring(0, i + 1);
+        }
+        // 整行显示完成后等待（光标一直显示）
+        if (waitAfter > 0) {
+            await new Promise(resolve => setTimeout(resolve, waitAfter));
+        }
+        // 移除光标
+        cursor.remove();
     }
 
     // 重写案情介绍主流程
@@ -649,8 +686,7 @@ class DetectiveGameApp {
                 case 'text':
                     element.querySelector('.intro-text').textContent = item.text; break;
                 case 'character':
-                    // 角色卡片已生成
-                    break;
+                    element.querySelector('.detail-text').textContent = item.text; break;
             }
             introContent.appendChild(element);
         }
@@ -696,137 +732,6 @@ class DetectiveGameApp {
         }
     }
     
-    // 渲染介绍页面的角色信息
-    renderIntroCharacters() {
-        const charactersGrid = DOMHelper.$('#intro-characters');
-        charactersGrid.innerHTML = '';
-        
-        this.currentCase.characters.forEach(character => {
-            const characterCard = DOMHelper.createElement('div');
-            characterCard.className = 'intro-character-card';
-            characterCard.innerHTML = this._createCharacterCardHTML(character, 'intro');
-            charactersGrid.appendChild(characterCard);
-        });
-    }
-    
-    // 清空介绍内容
-    clearIntroContent() {
-        // 清空标题
-        DOMHelper.setText('#intro-case-title', '');
-        
-        // 隐藏所有区域
-        DOMHelper.$('#case-details-section').style.display = 'none';
-        DOMHelper.$('#description-section').style.display = 'none';
-        DOMHelper.$('#characters-section').style.display = 'none';
-        DOMHelper.$('#goals-section').style.display = 'none';
-        
-        // 清空所有标题
-        DOMHelper.setText(DOMHelper.$('#case-details-title span'), '');
-        DOMHelper.setText(DOMHelper.$('#description-title span'), '');
-        DOMHelper.setText(DOMHelper.$('#characters-title span'), '');
-        DOMHelper.setText(DOMHelper.$('#goals-title span'), '');
-        
-        // 清空案件详情标签
-        DOMHelper.setText(DOMHelper.$('#victim-label'), '');
-        DOMHelper.setText(DOMHelper.$('#victim-age-label'), '');
-        DOMHelper.setText(DOMHelper.$('#death-time-label'), '');
-        DOMHelper.setText(DOMHelper.$('#death-location-label'), '');
-        
-        // 清空案件详情内容
-        DOMHelper.setText(DOMHelper.$('#victim-name'), '');
-        DOMHelper.setText(DOMHelper.$('#victim-age-occupation'), '');
-        DOMHelper.setText(DOMHelper.$('#death-time'), '');
-        DOMHelper.setText(DOMHelper.$('#death-location'), '');
-        
-        // 清空案件详情图标
-        DOMHelper.setHTML(DOMHelper.$('#victim-icon'), '');
-        DOMHelper.setHTML(DOMHelper.$('#victim-age-icon'), '');
-        DOMHelper.setHTML(DOMHelper.$('#death-time-icon'), '');
-        DOMHelper.setHTML(DOMHelper.$('#death-location-icon'), '');
-        
-        // 重置案件详情项目状态
-        DOMHelper.$$('.detail-item').forEach(item => item.classList.remove('show'));
-        
-        // 清空内容
-        DOMHelper.setHTML(DOMHelper.$('#intro-description'), '');
-        DOMHelper.setHTML(DOMHelper.$('#intro-characters'), '');
-        
-        // 清空调查目标
-        DOMHelper.$$('.goal-item span').forEach(goal => DOMHelper.setText(goal, ''));
-        
-        // 重置目标项目状态
-        DOMHelper.$$('.goal-item').forEach(item => item.classList.remove('show'));
-        
-        // 禁用开始按钮
-        DOMHelper.$('#start-investigation-btn').disabled = true;
-    }
-    
-    // 通用打字机效果方法
-    async typewriterText(elementId, text, speed = 50) {
-        if (this.skipTypewriter) return;
-        
-        // 检查text是否有效
-        if (!text || typeof text !== 'string') {
-            console.warn(`typewriterText: Invalid text for element ${elementId}:`, text);
-            return;
-        }
-        
-        const element = DOMHelper.$(elementId);
-        if (!element) {
-            console.warn(`typewriterText: Element not found: ${elementId}`);
-            return;
-        }
-        
-        element.innerHTML = '';
-        
-        // 添加光标
-        const cursor = DOMHelper.createElement('span', { className: 'typewriter-cursor' });
-        cursor.textContent = '|';
-        element.appendChild(cursor);
-        
-        // 逐字显示文本
-        for (let i = 0; i < text.length; i++) {
-            if (this.skipTypewriter) break;
-            
-            await new Promise(resolve => setTimeout(resolve, speed));
-            
-            // 在光标前插入字符
-            const textNode = document.createTextNode(text[i]);
-            element.insertBefore(textNode, cursor);
-        }
-        
-        // 移除光标
-        cursor.remove();
-    }
-    
-    // 图标打字机效果方法
-    async typewriterIcon(elementId, iconClasses, speed = 100) {
-        if (this.skipTypewriter) return;
-        
-        const element = DOMHelper.$(elementId);
-        if (!element) {
-            console.warn(`typewriterIcon: 未找到元素: ${elementId}`);
-            return;
-        }
-        element.innerHTML = '';
-        
-        // 创建图标元素
-        const icon = DOMHelper.createElement('i');
-        icon.className = iconClasses;
-        icon.style.opacity = '0';
-        icon.style.transform = 'scale(0)';
-        icon.style.transition = 'all 0.3s ease';
-        
-        element.appendChild(icon);
-        
-        // 延迟后显示图标
-        await new Promise(resolve => setTimeout(resolve, speed));
-        
-        if (!this.skipTypewriter) {
-            icon.style.opacity = '1';
-            icon.style.transform = 'scale(1)';
-        }
-    }
     
     // 根据姓名查找受害人角色信息（内部使用）
     _getVictimCharacter() {
@@ -836,164 +741,11 @@ class DetectiveGameApp {
         );
     }
     
-    // 打字机效果显示案件详情
-    async typewriterCaseDetails() {
-        const victim = this._getVictimCharacter();
-        
-        const detailItems = [
-            {
-                iconId: 'victim-icon',
-                iconClass: 'fas fa-user-injured',
-                labelId: 'victim-label',
-                labelText: '受害者',
-                valueId: 'victim-name',
-                value: this.currentCase.victim_name || '未知'
-            },
-            {
-                iconId: 'victim-age-icon',
-                iconClass: 'fas fa-id-card',
-                labelId: 'victim-age-label',
-                labelText: '年龄职业',
-                valueId: 'victim-age-occupation',
-                value: victim ? `${victim.age}岁，${victim.occupation}` : '信息不详'
-            },
-            {
-                iconId: 'death-time-icon',
-                iconClass: 'fas fa-clock',
-                labelId: 'death-time-label',
-                labelText: '时间',
-                valueId: 'death-time',
-                value: this.currentCase.time_of_crime || '时间不详'
-            },
-            {
-                iconId: 'death-location-icon',
-                iconClass: 'fas fa-map-marker-alt',
-                labelId: 'death-location-label',
-                labelText: '地点',
-                valueId: 'death-location',
-                value: this.currentCase.crime_scene || '地点不详'
-            }
-        ];
-        
-        const detailElements = DOMHelper.$$('.detail-item');
-        
-        for (let i = 0; i < detailItems.length; i++) {
-            if (this.skipTypewriter) break;
-            
-            const detail = detailItems[i];
-            const element = detailElements[i];
-            
-            // 显示图标
-            await this.typewriterIcon(detail.iconId, detail.iconClass, 100);
-            await this.delay(200);
-            
-            // 打字机显示标签文本
-            await this.typewriterText(detail.labelId, detail.labelText, 60);
-            await this.delay(200);
-            
-            // 打字机显示值文本
-            await this.typewriterText(detail.valueId, detail.value, 60);
-            
-            // 添加显示动画
-            element.classList.add('show');
-            
-            await this.delay(400);
-        }
-    }
     
-    // 打字机效果显示角色信息
-    async typewriterCharacters() {
-        const charactersGrid = DOMHelper.$('#intro-characters');
-        charactersGrid.innerHTML = '';
-        
-        for (const character of this.currentCase.characters) {
-            // 创建角色卡片
-            const characterCard = DOMHelper.createElement('div');
-            characterCard.className = 'intro-character-card';
-            characterCard.style.opacity = '0';
-            characterCard.style.transform = 'translateY(20px)';
-            characterCard.style.transition = 'all 0.5s ease';
-            characterCard.innerHTML = this._createCharacterCardHTML(character, 'intro-empty');
-            
-            charactersGrid.appendChild(characterCard);
-            
-            // 动画显示卡片
-            await this.delay(200);
-            characterCard.style.opacity = '1';
-            characterCard.style.transform = 'translateY(0)';
-            
-            // 打字机效果显示角色信息
-            await this.delay(300);
-            await this.typewriterTextForElement(characterCard.querySelector('.intro-character-name'), character.name, 60);
-            await this.delay(200);
-            await this.typewriterTextForElement(characterCard.querySelector('.intro-character-occupation'), character.occupation, 50);
-            await this.delay(200);
-            await this.typewriterTextForElement(characterCard.querySelector('.intro-character-type'), typeText, 40);
-            await this.delay(400);
-        }
-    }
-    
-    // 打字机效果显示调查目标
-    async typewriterGoals() {
-        const goals = [
-            '通过询问相关人员收集线索',
-            '分析证据，寻找矛盾之处', 
-            '找出真凶并进行指控'
-        ];
-        
-        const goalItems = DOMHelper.$$('.goal-item');
-        const goalElements = DOMHelper.$$('.goal-item span');
-        
-        for (let i = 0; i < goals.length && i < goalElements.length; i++) {
-            await this.delay(300);
-            
-            // 显示目标项目动画
-            goalItems[i].classList.add('show');
-            await this.delay(200);
-            
-            // 打字机效果显示文本
-            await this.typewriterTextForElement(goalElements[i], goals[i], 45);
-        }
-    }
     
     // 延迟方法
     delay(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
-    }
-    
-    // 为元素添加打字机效果（支持任意元素）
-    async typewriterTextForElement(element, text, speed = 50, waitAfter = 0) {
-        // 检查参数是否有效
-        if (!element) {
-            console.warn('typewriterTextForElement: Invalid element:', element);
-            return;
-        }
-        
-        if (!text || typeof text !== 'string') {
-            console.warn('typewriterTextForElement: Invalid text:', text);
-            return;
-        }
-        
-        element.innerHTML = '';
-        
-        // 添加光标
-        const cursor = DOMHelper.createElement('span', { className: 'typewriter-cursor span' });
-        cursor.textContent = '|';
-        element.appendChild(cursor);
-        
-        // 逐字显示文本
-        for (let i = 0; i < text.length; i++) {
-            await new Promise(resolve => setTimeout(resolve, speed));
-            // 在光标前插入字符
-            const textNode = document.createTextNode(text[i]);
-            element.insertBefore(textNode, cursor);
-        }
-        // 整行显示完成后等待（光标一直显示）
-        if (waitAfter > 0) {
-            await new Promise(resolve => setTimeout(resolve, waitAfter));
-        }
-        // 移除光标
-        cursor.remove();
     }
     
     // 开始调查
@@ -1274,11 +1026,19 @@ class DetectiveGameApp {
         // 轮次未用完，显示问题输入区域
         DOMHelper.$('#question-input-area').style.display = 'block';
         
-        // 立即显示空白的参考问题区域，但允许用户开始输入
-        const questionsList = DOMHelper.$('#suggested-questions-list');
-        questionsList.innerHTML = this._createLoadingSuggestionsHTML();
+        // 显示参考问题区域
+        const suggestedQuestions = DOMHelper.$('.suggested-questions');
+        if (suggestedQuestions) {
+            suggestedQuestions.style.display = 'block';
+        }
         
-        // 异步获取参考问题，不阻塞用户操作
+        // 显示参考问题加载状态
+        const questionsList = DOMHelper.$('#suggested-questions-list');
+        if (questionsList) {
+            questionsList.innerHTML = this._createLoadingSuggestionsHTML();
+        }
+        
+        // 获取参考问题
         this.getSuggestedQuestions(character);
     }
     
@@ -1734,11 +1494,10 @@ class DetectiveGameApp {
             questionInputDiv.style.display = 'none';
         }
         
-        // 隐藏"参考问题："标题
+        // 保持参考问题区域显示，但显示轮次结束提示
         const suggestedQuestions = DOMHelper.$('.suggested-questions');
         if (suggestedQuestions) {
-            const h4 = suggestedQuestions.querySelector('h4');
-            if (h4) h4.style.display = 'none';
+            suggestedQuestions.style.display = 'block';
         }
         
         // 显示简洁的轮次结束提示
@@ -2038,12 +1797,7 @@ class DetectiveGameApp {
         
         switch (data.type) {
             case 'start':
-                trialSteps.innerHTML = `
-                    <div class="trial-intro">
-                        <h3>🏛️ 审判开始</h3>
-                        <p>现在开始审理对 <strong>${data.accused_name}</strong> 的指控</p>
-                    </div>
-                `;
+                trialSteps.innerHTML = ``;
                 break;
                 
             case 'evaluation_chunk':
@@ -2202,7 +1956,7 @@ class DetectiveGameApp {
                 
             case 'vote_chunk':
                 // 清除思考提示（如果存在）
-                const voteContentElement = DOMHelper.$(`vote-content-${this._getVoterIndex(data.voter_name, trialData)}`);
+                const voteContentElement = DOMHelper.$(`#vote-content-${this._getVoterIndex(data.voter_name, trialData)}`);
                 if (voteContentElement && voteContentElement.querySelector('.thinking-indicator')) {
                     voteContentElement.innerHTML = '';
                 }
@@ -2219,7 +1973,7 @@ class DetectiveGameApp {
                 });
                 
                 // 更新投票显示
-                const voteElement = DOMHelper.$(`vote-content-${trialData.votes.length - 1}`);
+                const voteElement = DOMHelper.$(`#vote-content-${trialData.votes.length - 1}`);
                 if (voteElement) {
                     // 先移除光标
                     this._finalizeTrialStep(`vote-content-${this._getVoterIndex(data.voter_name, trialData)}`);
@@ -2361,9 +2115,6 @@ class DetectiveGameApp {
                         <button class="btn secondary" onclick="app.showScreen('main-menu')">
                             <i class="fas fa-home"></i> 返回主菜单
                         </button>
-                        <button class="btn secondary" onclick="app.startNewGame()">
-                            <i class="fas fa-redo"></i> 重新开始
-                        </button>
                     </div>
                 `;
                 console.log('评价按钮已添加');
@@ -2382,7 +2133,7 @@ class DetectiveGameApp {
     
     // 添加内容到审判步骤（内部使用）
     _appendToTrialContent(elementId, content) {
-        const element = DOMHelper.$(elementId);
+        const element = DOMHelper.$(`#${elementId}`);
         if (element) {
             if (!element.querySelector('.streaming-text')) {
                 element.innerHTML = '<div class="streaming-text"></div>';
@@ -2412,7 +2163,7 @@ class DetectiveGameApp {
     
     // 完成审判步骤（内部使用）
     _finalizeTrialStep(elementId) {
-        const element = DOMHelper.$(elementId);
+        const element = DOMHelper.$(`#${elementId}`);
         if (element) {
             // 移除所有光标元素
             DOMHelper.$$('.cursor').forEach(cursor => cursor.remove());
@@ -2587,8 +2338,7 @@ class DetectiveGameApp {
         return `
             <div class="loading-suggestions">
                 <i class="fas fa-spinner fa-spin"></i>
-                <span>正在生成参考问题...</span>
-                <p style="font-size: 12px; color: var(--theme-text-secondary); margin-top: 5px;">您可以直接在上方输入框中提问，无需等待</p>
+                <p style="font-size: 12px; color: var(--theme-text-secondary);">正在生成参考问题... (您可以直接在输入框中提问，无需等待)</p>
             </div>
         `;
     }
@@ -2685,8 +2435,18 @@ class DetectiveGameApp {
         const ratingTexts = ['', '很不满意', '不满意', '一般', '满意', '非常满意'];
         
         // 检查必要元素是否存在
+        console.log('检查评价页面元素:', {
+            stars: stars.length,
+            ratingText: !!ratingText,
+            ratingContainer: !!ratingContainer
+        });
+        
         if (!ratingText || !ratingContainer) {
-            console.error('评价页面元素未找到');
+            console.error('评价页面元素未找到:', {
+                ratingText: !!ratingText,
+                ratingContainer: !!ratingContainer,
+                evaluationScreen: !!DOMHelper.$('#evaluation-screen')
+            });
             return;
         }
         

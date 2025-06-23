@@ -12,9 +12,13 @@ class DOMHelper {
     static $(selector) {
         if (typeof selector !== 'string') return null;
         
-        return selector.startsWith('#') ? 
-            document.getElementById(selector.slice(1)) : 
-            document.querySelector(selector);
+        // 如果是简单的ID选择器（只有#和ID名），使用getElementById
+        // 否则使用querySelector处理复杂选择器
+        if (selector.startsWith('#') && !selector.includes(' ') && !selector.includes('.', 1) && !selector.includes('[') && !selector.includes(':')) {
+            return document.getElementById(selector.slice(1));
+        }
+        
+        return document.querySelector(selector);
     }
     
     /**

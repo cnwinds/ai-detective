@@ -39,8 +39,10 @@ class ThemeSelector {
                         </button>
                     </div>
                     <div class="theme-selector-content">
-                        <div class="theme-grid" id="theme-grid">
-                            <!-- 主题选项将在这里动态生成 -->
+                        <div class="theme-grid-container">
+                            <div class="theme-grid" id="theme-grid">
+                                <!-- 主题选项将在这里动态生成 -->
+                            </div>
                         </div>
                         <div class="theme-preview-actions">
                             <button class="btn-theme-action btn-preview-cancel">取消</button>
@@ -105,7 +107,7 @@ class ThemeSelector {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                padding: 20px;
+                padding: 10px 20px;
                 border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             }
 
@@ -136,8 +138,15 @@ class ThemeSelector {
             }
 
             .theme-selector-content {
-                padding: 20px;
-                max-height: 60vh;
+                display: flex;
+                flex-direction: column;
+                height: 60vh;
+                overflow: hidden;
+            }
+
+            .theme-grid-container {
+                flex: 1;
+                padding: 15px 20px 0 20px;
                 overflow-y: auto;
             }
 
@@ -208,7 +217,12 @@ class ThemeSelector {
             .theme-preview-actions {
                 display: flex;
                 gap: 10px;
-                margin-top: 20px;
+                padding: 10px 20px;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                background: var(--theme-primary-bg);
+                position: sticky;
+                bottom: 0;
+                margin-top: auto;
             }
 
             .btn-theme-action {

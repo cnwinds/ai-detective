@@ -173,7 +173,10 @@ class MobileDetectiveApp {
                 e.target.closest('.mobile-screen') ||
                 e.target.closest('.modal-content-body') ||
                 e.target.closest('.accusation-container') ||
-                e.target.closest('.trial-container')) {
+                e.target.closest('.trial-container') ||
+                e.target.closest('.theme-selector-overlay') ||
+                e.target.closest('.theme-selector-panel') ||
+                e.target.closest('.theme-selector-content')) {
                 return;
             }
             e.preventDefault();

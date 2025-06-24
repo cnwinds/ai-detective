@@ -170,10 +170,10 @@ class MobileDetectiveApp {
                 e.target.closest('.cases-container') ||
                 e.target.closest('.chat-content') ||
                 e.target.closest('#case-selection') ||
-                e.target.closest('.mobile-screen') ||
                 e.target.closest('.modal-content-body') ||
                 e.target.closest('.accusation-container') ||
                 e.target.closest('.trial-container') ||
+                e.target.closest('.evaluation-container') ||
                 e.target.closest('.theme-selector-overlay') ||
                 e.target.closest('.theme-selector-panel') ||
                 e.target.closest('.theme-selector-content')) {
@@ -1322,12 +1322,12 @@ class MobileDetectiveApp {
             
         } catch (error) {
             console.error('流式审判失败:', error);
-            trialSteps.innerHTML += `
+            DOMHelper.appendHTML(trialSteps, `
                 <div class="trial-error">
                     <h3><i class="fas fa-exclamation-triangle"></i> 审判过程出现错误</h3>
                     <p>请重试或联系管理员</p>
                 </div>
-            `;
+            `);
         }
     }
     
@@ -1477,7 +1477,6 @@ class MobileDetectiveApp {
                 if (voteElement) {
                     this._finalizeTrialStep(`mobile-vote-content-${finalVoteIndex}`);
                     
-                    voteElement.className += data.vote === '支持' ? ' vote-support' : ' vote-oppose';
                     DOMHelper.setHTML(`#mobile-vote-content-${finalVoteIndex}`, `
                         <div class="vote-result">
                             <span class="vote-decision ${data.vote === '支持' ? 'support' : 'oppose'}">
@@ -1492,13 +1491,13 @@ class MobileDetectiveApp {
             case 'vote_summary':
                 let votingSummaryContainer = DOMHelper.$('#mobile-content-voting');
                 if (votingSummaryContainer) {
-                    DOMHelper.appendHTML('#mobile-content-voting', `
-                        <div class="vote-summary">
-                            <h4>📊 投票统计</h4>
-                            <div class="vote-stats">
-                                <div class="vote-stat support">
-                                    <span class="number">${data.vote_summary.support}</span>
-                                    <span>支持</span>
+                    DOMHelper.appendHTML(votingSummaryContainer, `
+                            <div class="vote-summary">
+                                <h4>📊 投票统计</h4>
+                                <div class="vote-stats">
+                                    <div class="vote-stat support">
+                                        <span class="number">${data.vote_summary.support}</span>
+                                        <span>支持</span>
                                 </div>
                                 <div class="vote-stat oppose">
                                     <span class="number">${data.vote_summary.oppose}</span>
@@ -1546,7 +1545,7 @@ class MobileDetectiveApp {
                 
                 let correctnessContainer = DOMHelper.$('#mobile-content-verdict');
                 if (correctnessContainer) {
-                    DOMHelper.appendHTML('#mobile-content-verdict', `
+                    DOMHelper.appendHTML(correctnessContainer, `
                         <div class="correctness-indicator">
                             <h3>${correctnessText}</h3>
                         </div>

@@ -121,6 +121,18 @@ class DOMHelper {
     }
     
     /**
+     * 追加HTML内容到元素
+     * @param {string|Element} element - 元素ID或元素对象
+     * @param {string} html - 要追加的HTML内容
+     */
+    static appendHTML(element, html) {
+        const el = typeof element === 'string' ? this.$(element) : element;
+        if (el) {
+            el.innerHTML += html;
+        }
+    }
+    
+    /**
      * 创建元素
      * @param {string} tag - 标签名
      * @param {Object} attributes - 属性对象

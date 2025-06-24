@@ -16,7 +16,6 @@
     --theme-border-color: rgba(255, 255, 255, 0.2);
     --theme-shadow-color: rgba(0, 0, 0, 0.1);
     --theme-shadow-light: rgba(0, 0, 0, 0.06);
-    /* --theme-primary-gradient 已被 --theme-primary-bg 替代，由主题管理器动态设置 */
     
     /* 标签专用颜色变量 */
     --badge-text-light: rgba(0, 0, 0, 0.8);
@@ -1611,6 +1610,8 @@ body.theme-forest .badge-top.badge-category {
 .btn.primary {
     background: var(--theme-primary-color);
     color: var(--theme-text-primary);
+    padding: 14px 28px;
+    font-size: 1.1rem;
 }
 
 .btn.primary:hover:not(:disabled) {
@@ -1621,6 +1622,8 @@ body.theme-forest .badge-top.badge-category {
 .btn.secondary {
     background: #6c757d;
     color: white;
+    padding: 14px 28px;
+    font-size: 1.1rem;
 }
 
 .btn.secondary:hover:not(:disabled) {
@@ -1724,9 +1727,13 @@ body.theme-forest .badge-top.badge-category {
     box-shadow: 0 0 0 3px var(--theme-shadow-color);
 }
 
+.form-control::placeholder {
+    color: var(--theme-text-muted);
+}
+
 /* 下拉框选项样式 */
 .form-control option {
-    background: var(--theme-secondary-bg);
+    background: rgba(45, 55, 72, 0.95);
     color: var(--theme-text-primary);
     padding: 8px 12px;
 }
@@ -1846,14 +1853,6 @@ select.form-control:hover {
     font-weight: bold;
     color: var(--theme-text-primary);
     margin-bottom: 8px;
-}
-
-.vote-support {
-    border-left: 4px solid var(--theme-success-color);
-}
-
-.vote-oppose {
-    border-left: 4px solid var(--theme-text-secondary);
 }
 
 .vote-summary {
@@ -2583,14 +2582,6 @@ select.form-control:hover {
     color: var(--theme-text-primary);
 }
 
-.vote-content.vote-support {
-    border-left-color: #28a745;
-}
-
-.vote-content.vote-oppose {
-    border-left-color: #6c757d;
-}
-
 .vote-result {
     margin-bottom: 10px;
 }
@@ -2999,6 +2990,7 @@ select.form-control:hover {
 .star:hover,
 .star.active {
     color: var(--theme-accent-color);
+    transform: scale(1.1);
 }
 
 .rating-text {

@@ -1782,12 +1782,12 @@ class DetectiveGameApp {
             
         } catch (error) {
             console.error('流式审判失败:', error);
-            trialSteps.innerHTML += `
+            DOMHelper.appendHTML(trialSteps, `
                 <div class="trial-error">
                     <h3><i class="fas fa-exclamation-triangle"></i> 审判过程出现错误</h3>
                     <p>请重试或联系管理员</p>
                 </div>
-            `;
+            `);
         }
     }
     
@@ -1979,7 +1979,6 @@ class DetectiveGameApp {
                     this._finalizeTrialStep(`vote-content-${this._getVoterIndex(data.voter_name, trialData)}`);
                     
                     // 然后更新显示内容
-                    voteElement.className += data.vote === '支持' ? ' vote-support' : ' vote-oppose';
                     voteElement.innerHTML = `
                         <div class="vote-result">
                             <span class="vote-decision ${data.vote === '支持' ? 'support' : 'oppose'}">
@@ -2008,7 +2007,7 @@ class DetectiveGameApp {
                     votingSummaryContainer = DOMHelper.$('#content-voting');
                 }
                 
-                votingSummaryContainer.innerHTML += `
+                DOMHelper.appendHTML(votingSummaryContainer, `
                     <div class="vote-summary">
                         <h4>📊 投票统计</h4>
                         <div class="vote-stats">
@@ -2023,7 +2022,7 @@ class DetectiveGameApp {
                         </div>
                         <p>需要过半数(${Math.floor(data.vote_summary.total / 2) + 1}票)支持才能定罪</p>
                     </div>
-                `;
+                `);
                 break;
                 
             case 'verdict':
@@ -2075,11 +2074,11 @@ class DetectiveGameApp {
                     correctnessContainer = DOMHelper.$('#content-verdict');
                 }
                 
-                correctnessContainer.innerHTML += `
+                DOMHelper.appendHTML(correctnessContainer, `
                     <div class="correctness-indicator">
                         <h3>${correctnessText}</h3>
                     </div>
-                `;
+                `);
                 break;
                 
             case 'solution_chunk':
@@ -2107,7 +2106,7 @@ class DetectiveGameApp {
                 this._finalizeTrialStep('content-solution');
                 
                 // 添加操作按钮
-                trialSteps.innerHTML += `
+                DOMHelper.appendHTML(trialSteps, `
                     <div class="trial-actions">
                         <button class="btn primary" onclick="app.goToEvaluation()">
                             <i class="fas fa-star"></i> 游戏评价
@@ -2116,17 +2115,17 @@ class DetectiveGameApp {
                             <i class="fas fa-home"></i> 返回主菜单
                         </button>
                     </div>
-                `;
+                `);
                 console.log('评价按钮已添加');
                 break;
                 
             case 'error':
-                trialSteps.innerHTML += `
+                DOMHelper.appendHTML(trialSteps, `
                     <div class="trial-error">
                         <h3><i class="fas fa-exclamation-triangle"></i> 错误</h3>
                         <p>${data.message}</p>
                     </div>
-                `;
+                `);
                 break;
         }
     }

@@ -2343,7 +2343,7 @@ body.theme-forest .badge-category {
 
 .form-control option {
     padding: 8px;
-    background: var(--theme-secondary-bg);
+    background: rgba(45, 55, 72, 0.95);
     color: var(--theme-text-primary);
 }
 
@@ -2434,6 +2434,7 @@ select.form-control:hover {
 .trial-container {
     height: calc(100% - 60px);
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     padding: 20px;
 }
 
@@ -2593,6 +2594,13 @@ select.form-control:hover {
 
 .thinking-dots span:nth-child(3) {
     animation-delay: 0.6s;
+}
+
+.vote-content {
+    padding: 15px;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+    color: var(--theme-text-primary);
 }
 
 .vote-result {
@@ -2921,7 +2929,7 @@ select.form-control:hover {
 
 .star {
     font-size: 2rem;
-    color: #4a5568;
+    color: var(--theme-text-muted);
     cursor: pointer;
     transition: all 0.2s ease;
     user-select: none;
@@ -2929,8 +2937,8 @@ select.form-control:hover {
 
 .star:hover,
 .star.active {
-    color: #ffd700;
-    transform: scale(1.1);
+    color: var(--theme-accent-color);
+    transform: scale(1.2);
 }
 
 .rating-text {

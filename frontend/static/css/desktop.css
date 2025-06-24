@@ -2615,6 +2615,7 @@ select.form-control:hover {
     align-items: center;
     justify-content: center;
     padding: 20px;
+    background: var(--theme-secondary-bg);
     border-radius: 10px;
     border: 2px dashed #dee2e6;
     margin: 10px 0;
@@ -2654,11 +2655,9 @@ select.form-control:hover {
 
 @keyframes thinkingPulse {
     0%, 100% {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
         border-color: #dee2e6;
     }
     50% {
-        background: linear-gradient(135deg, #e9ecef 0%, #f8f9fa 100%);
         border-color: #ced4da;
     }
 }

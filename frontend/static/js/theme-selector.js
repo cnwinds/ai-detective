@@ -286,21 +286,21 @@ class ThemeSelector {
      */
     bindEvents() {
         // 关闭按钮
-        document.addEventListener('click', (e) => {
+        DOMHelper.bindEvent(document, 'click', (e) => {
             if (e.target.closest('.close-theme-selector')) {
                 this.hide();
             }
         });
 
         // 点击遮罩关闭
-        document.addEventListener('click', (e) => {
+        DOMHelper.bindEvent(document, 'click', (e) => {
             if (e.target.classList.contains('theme-selector-overlay')) {
                 this.hide();
             }
         });
 
         // 主题选项点击
-        document.addEventListener('click', (e) => {
+        DOMHelper.bindEvent(document, 'click', (e) => {
             const themeOption = e.target.closest('.theme-option');
             if (themeOption) {
                 this.selectTheme(themeOption.dataset.theme);
@@ -308,7 +308,7 @@ class ThemeSelector {
         });
 
         // 预览动作按钮
-        document.addEventListener('click', (e) => {
+        DOMHelper.bindEvent(document, 'click', (e) => {
             if (e.target.classList.contains('btn-preview-cancel')) {
                 this.cancelPreview();
             } else if (e.target.classList.contains('btn-preview-apply')) {
@@ -317,7 +317,7 @@ class ThemeSelector {
         });
 
         // ESC键关闭
-        document.addEventListener('keydown', (e) => {
+        DOMHelper.bindEvent(document, 'keydown', (e) => {
             if (e.key === 'Escape' && this.isVisible) {
                 this.hide();
             }

@@ -1537,7 +1537,7 @@ class MobileDetectiveApp {
                     <div class="vote-content" id="mobile-vote-content-${currentVoterIndex}">
                         <div class="thinking-indicator">
                             <i class="fas fa-brain fa-pulse"></i>
-                            <span class="thinking-text">正在分析证据信息，思考中...</span>
+                            <span class="thinking-text">正在分析证据信息，思考中</span>
                             <div class="thinking-dots">
                                 <span>.</span><span>.</span><span>.</span>
                             </div>
@@ -1924,7 +1924,7 @@ class MobileDetectiveApp {
         // 重新获取星级元素并绑定事件
         const newStars = DOMHelper.$$('#evaluation-screen .star');
         newStars.forEach(star => {
-            star.addEventListener('click', () => {
+            DOMHelper.bindEvent(star, 'click', () => {
                 this.selectedRating = parseInt(star.dataset.rating);
                 this.updateStars();
                 ratingText.textContent = ratingTexts[this.selectedRating];
@@ -1936,14 +1936,14 @@ class MobileDetectiveApp {
             });
             
             // 触摸开始时高亮显示
-            star.addEventListener('touchstart', (e) => {
+            DOMHelper.bindEvent(star, 'touchstart', (e) => {
                 e.preventDefault();
                 const rating = parseInt(star.dataset.rating);
                 this.highlightStars(rating);
             });
             
             // 触摸结束时确认选择
-            star.addEventListener('touchend', (e) => {
+            DOMHelper.bindEvent(star, 'touchend', (e) => {
                 e.preventDefault();
                 this.selectedRating = parseInt(star.dataset.rating);
                 this.updateStars();
@@ -1956,7 +1956,7 @@ class MobileDetectiveApp {
             });
             
             // 鼠标悬停效果（适用于支持鼠标的设备）
-            star.addEventListener('mouseover', () => {
+            DOMHelper.bindEvent(star, 'mouseover', () => {
                 const rating = parseInt(star.dataset.rating);
                 this.highlightStars(rating);
             });
@@ -1965,12 +1965,12 @@ class MobileDetectiveApp {
         // 鼠标离开评分区域时恢复到已选择的评分
         const ratingContainer = DOMHelper.$('#evaluation-screen .rating-container');
         if (ratingContainer) {
-            ratingContainer.addEventListener('mouseleave', () => {
+            DOMHelper.bindEvent(ratingContainer, 'mouseleave', () => {
                 this.updateStars();
             });
             
             // 触摸取消时恢复到已选择的评分
-            ratingContainer.addEventListener('touchcancel', () => {
+            DOMHelper.bindEvent(ratingContainer, 'touchcancel', () => {
                 this.updateStars();
             });
         }
@@ -1979,7 +1979,7 @@ class MobileDetectiveApp {
         const form = DOMHelper.$('#mobileEvaluationForm');
         if (form) {
             form.removeEventListener('submit', this.handleEvaluationSubmit);
-            form.addEventListener('submit', (e) => this.handleEvaluationSubmit(e));
+            DOMHelper.bindEvent(form, 'submit', (e) => this.handleEvaluationSubmit(e));
         }
     }
 

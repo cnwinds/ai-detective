@@ -57,14 +57,38 @@ class DOMHelper {
     }
     
     /**
-     * 显示/隐藏元素
+     * 显示元素
      * @param {string|Element} element - 元素ID或元素对象
-     * @param {boolean} show - 是否显示
+     * @param {string} displayType - 显示类型，默认为'block'
      */
-    static toggle(element, show) {
+    static show(element, displayType = 'block') {
         const el = typeof element === 'string' ? this.$(element) : element;
         if (el) {
-            el.style.display = show ? 'block' : 'none';
+            el.style.display = displayType;
+        }
+    }
+    
+    /**
+     * 隐藏元素
+     * @param {string|Element} element - 元素ID或元素对象
+     */
+    static hide(element) {
+        const el = typeof element === 'string' ? this.$(element) : element;
+        if (el) {
+            el.style.display = 'none';
+        }
+    }
+    
+    /**
+     * 切换元素显示/隐藏
+     * @param {string|Element} element - 元素ID或元素对象
+     * @param {boolean} show - 是否显示
+     * @param {string} displayType - 显示类型，默认为'block'
+     */
+    static toggle(element, show, displayType = 'block') {
+        const el = typeof element === 'string' ? this.$(element) : element;
+        if (el) {
+            el.style.display = show ? displayType : 'none';
         }
     }
     
@@ -253,6 +277,79 @@ class APIHelper {
      */
     static delete(url, headers = {}) {
         return this.request(url, { method: 'DELETE', headers });
+    }
+    
+    /**
+     * 通用错误处理方法
+     * @param {Error} error - 错误对象
+     * @param {string} operation - 操作描述
+     * @param {Function} showMessage - 显示消息的回调函数
+     * @param {string} defaultMessage - 默认错误消息
+     */
+    static handleError(error, operation, showMessage, defaultMessage = '操作失败，请重试') {
+        console.error(`${operation}失败:`, error);
+        
+        let message = defaultMessage;
+        if (error.response && error.response.data && error.response.data.detail) {
+            message = error.response.data.detail;
+        } else if (error.message) {
+            message = error.message;
+        }
+        
+        if (typeof showMessage === 'function') {
+            showMessage(message, 'error');
+        }
+    }
+}
+
+/**
+ * 加载状态管理类
+ */
+class LoadingManager {
+    /**
+     * 显示加载状态
+     * @param {string|Element} element - 元素选择器或元素对象
+     * @param {string} text - 加载文本
+     */
+    static show(element, text = '加载中...') {
+        const el = typeof element === 'string' ? DOMHelper.$(element) : element;
+        if (el) {
+            el.disabled = true;
+            const originalText = el.textContent;
+            el.dataset.originalText = originalText;
+            DOMHelper.setText(el, text);
+        }
+    }
+    
+    /**
+     * 隐藏加载状态
+     * @param {string|Element} element - 元素选择器或元素对象
+     */
+    static hide(element) {
+        const el = typeof element === 'string' ? DOMHelper.$(element) : element;
+        if (el) {
+            el.disabled = false;
+            const originalText = el.dataset.originalText;
+            if (originalText) {
+                DOMHelper.setText(el, originalText);
+                delete el.dataset.originalText;
+            }
+        }
+    }
+    
+    /**
+     * 在异步操作期间显示加载状态
+     * @param {string|Element} element - 元素选择器或元素对象
+     * @param {Function} asyncOperation - 异步操作函数
+     * @param {string} loadingText - 加载文本
+     */
+    static async withLoading(element, asyncOperation, loadingText = '加载中...') {
+        this.show(element, loadingText);
+        try {
+            return await asyncOperation();
+        } finally {
+            this.hide(element);
+        }
     }
 }
 

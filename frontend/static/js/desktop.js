@@ -37,6 +37,117 @@ class DetectiveGameApp {
         console.warn(`[${new Date().toLocaleString('zh-CN', { timeZone: this.appTimezone })}] ${message}`, ...args);
     }
     
+    // 统一错误处理
+    handleError(error, userMessage = '操作失败，请重试') {
+        this.logError('Error occurred:', error);
+        this.showMessage('错误', userMessage);
+    }
+    
+    // 统一的异步操作包装
+    async safeAsyncOperation(operation, errorMessage = '操作失败') {
+        try {
+            return await operation();
+        } catch (error) {
+            this.handleError(error, errorMessage);
+            throw error;
+        }
+    }
+    
+    // 统一的按钮状态管理
+    setButtonLoading(button, isLoading, loadingText = '处理中...', originalText = null) {
+        if (isLoading) {
+            button.disabled = true;
+            button.dataset.originalText = originalText || button.innerHTML;
+            button.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${loadingText}`;
+        } else {
+            button.disabled = false;
+            button.innerHTML = button.dataset.originalText || originalText || button.innerHTML;
+        }
+    }
+    
+    // 模板生成器 - 减少重复的HTML字符串
+    templates = {
+        // 加载指示器
+        loadingIndicator: (text = '加载中...') => `
+            <div class="loading-indicator">
+                <i class="fas fa-spinner fa-spin"></i>
+                <span>${text}</span>
+            </div>
+        `,
+        
+        // 错误消息
+        errorMessage: (message) => `
+            <div class="error-message">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>${message}</span>
+            </div>
+        `,
+        
+        // 空状态
+        emptyState: (message, icon = 'fas fa-inbox') => `
+            <div class="empty-state">
+                <i class="${icon}"></i>
+                <p>${message}</p>
+            </div>
+        `,
+        
+        // 按钮
+        button: (text, className = 'btn primary', icon = null, onclick = null) => `
+            <button class="${className}" ${onclick ? `onclick="${onclick}"` : ''}>
+                ${icon ? `<i class="${icon}"></i>` : ''}
+                ${text}
+            </button>
+        `,
+        
+        // 角色卡片
+        characterCard: (data, cardType = 'intro') => {
+            switch (cardType) {
+                case 'intro':
+                    return `
+                        <div class="intro-character-name">${data.name}</div>
+                        <div class="intro-character-occupation">${data.occupation}</div>
+                        <div class="intro-character-type ${data.typeClass}">${data.typeText}</div>
+                    `;
+                case 'intro-empty':
+                    return `
+                        <div class="intro-character-name"></div>
+                        <div class="intro-character-occupation"></div>
+                        <div class="intro-character-type ${data.typeClass}"></div>
+                    `;
+                case 'game':
+                    return `
+                        <div class="character-info-left">
+                            <div class="character-name">${data.name}</div>
+                            <div class="character-occupation">${data.occupation}</div>
+                        </div>
+                        <div class="character-type">${data.typeText}</div>
+                    `;
+                default:
+                     return this.characterCard(data, 'intro');
+             }
+         },
+         
+         // 加载建议
+         loadingSuggestions: () => `
+             <div class="loading-suggestions">
+                 <i class="fas fa-spinner fa-spin"></i>
+                 <p style="font-size: 12px; color: var(--theme-text-secondary);">正在生成参考问题... (您可以直接在输入框中提问，无需等待)</p>
+             </div>
+         `,
+         
+         // 对话项目
+         conversationItem: (question, response = null) => {
+             if (response) {
+                 return `
+                     <div class="question">${question}</div>
+                     <div class="response">${response}</div>
+                 `;
+             } else {
+                 return `<div class="question">${question}</div>`;
+             }
+         }
+     }
+    
     // 加载版本信息
     async loadVersionInfo() {
         try {
@@ -161,7 +272,7 @@ class DetectiveGameApp {
 
         // 模态框关闭
         DOMHelper.$$('.close-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
+            DOMHelper.bindEvent(btn, 'click', (e) => {
                 const modal = e.target.closest('.modal');
                 this.hideModal(modal.id);
             });
@@ -169,7 +280,7 @@ class DetectiveGameApp {
 
         // 点击模态框外部关闭
         DOMHelper.$$('.modal').forEach(modal => {
-            modal.addEventListener('click', (e) => {
+            DOMHelper.bindEvent(modal, 'click', (e) => {
                 if (e.target === modal) {
                     this.hideModal(modal.id);
                 }
@@ -179,26 +290,31 @@ class DetectiveGameApp {
         // 问题输入框回车提交和实时状态更新
         const questionInput = DOMHelper.$('#question-input');
         if (questionInput) {
-            questionInput.addEventListener('keydown', (e) => {
+            DOMHelper.bindEvent(questionInput, 'keydown', (e) => {
                 if (e.key === 'Enter' && e.ctrlKey) {
                     this.askQuestion();
                 }
             });
             
             // 监听输入变化，实时更新发送按钮状态
-            questionInput.addEventListener('input', () => {
+            DOMHelper.bindEvent(questionInput, 'input', () => {
                 this.updateSendButtonState();
             });
         }
     }
     
     // 显示/隐藏加载屏幕
+    // 统一的加载屏幕管理
+    toggleLoadingScreen(show = true) {
+        DOMHelper.toggle('#loading-screen', show);
+    }
+    
     showLoadingScreen() {
-        DOMHelper.toggle('#loading-screen', true);
+        this.toggleLoadingScreen(true);
     }
     
     hideLoadingScreen() {
-        DOMHelper.toggle('#loading-screen', false);
+        this.toggleLoadingScreen(false);
     }
     
     // 屏幕切换
@@ -215,12 +331,20 @@ class DetectiveGameApp {
     }
     
     // 模态框显示/隐藏
+    // 统一的模态框管理
+    toggleModal(modalId, show = true) {
+        const modal = DOMHelper.$(`#${modalId}`);
+        if (modal) {
+            DOMHelper.toggleClass(modal, 'active', show);
+        }
+    }
+    
     showModal(modalId) {
-        DOMHelper.$(`#${modalId}`).classList.add('active');
+        this.toggleModal(modalId, true);
     }
     
     hideModal(modalId) {
-        DOMHelper.$(`#${modalId}`).classList.remove('active');
+        this.toggleModal(modalId, false);
     }
     
     // 显示消息模态框
@@ -346,21 +470,21 @@ class DetectiveGameApp {
     
     // 绑定过滤器事件
     bindFilterEvents() {
-        // 分类过滤器
-        document.querySelectorAll('#category-tags .filter-tag').forEach(tag => {
-            tag.addEventListener('click', () => {
+        // 使用DOMHelper统一绑定过滤器事件
+        const categoryTags = DOMHelper.$$('#category-tags .filter-tag');
+        const difficultyTags = DOMHelper.$$('#difficulty-tags .filter-tag');
+        
+        categoryTags.forEach(tag => {
+            DOMHelper.bindEvent(tag, 'click', () => {
                 this.selectFilterTag('category', tag);
             });
         });
         
-        // 难度过滤器
-        document.querySelectorAll('#difficulty-tags .filter-tag').forEach(tag => {
-            tag.addEventListener('click', () => {
+        difficultyTags.forEach(tag => {
+            DOMHelper.bindEvent(tag, 'click', () => {
                 this.selectFilterTag('difficulty', tag);
             });
         });
-        
-
     }
     
     // 选择过滤标签
@@ -790,10 +914,10 @@ class DetectiveGameApp {
         DOMHelper.setText('#intro-case-title', this.currentCase.title);
         
         // 显示所有区域
-        DOMHelper.$('#case-details-section').style.display = 'block';
-        DOMHelper.$('#description-section').style.display = 'block';
-        DOMHelper.$('#characters-section').style.display = 'block';
-        DOMHelper.$('#goals-section').style.display = 'block';
+        DOMHelper.show('#case-details-section');
+        DOMHelper.show('#description-section');
+        DOMHelper.show('#characters-section');
+        DOMHelper.show('#goals-section');
         
         // 填充所有标题
         DOMHelper.setText(DOMHelper.$('#case-details-title span'), '案件详情');
@@ -1116,12 +1240,12 @@ class DetectiveGameApp {
         }
         
         // 轮次未用完，显示问题输入区域
-        DOMHelper.$('#question-input-area').style.display = 'block';
+        DOMHelper.show('#question-input-area');
         
         // 显示参考问题区域
         const suggestedQuestions = DOMHelper.$('.suggested-questions');
         if (suggestedQuestions) {
-            suggestedQuestions.style.display = 'block';
+            DOMHelper.show(suggestedQuestions);
         }
         
         // 显示参考问题加载状态
@@ -1145,8 +1269,8 @@ class DetectiveGameApp {
             this.log('角色类型:', characterType);
             
             // 隐藏默认标题，显示角色标题
-            DOMHelper.$('#default-header').style.display = 'none';
-            DOMHelper.$('#character-header').style.display = 'block';
+            DOMHelper.hide('#default-header');
+            DOMHelper.show('#character-header');
             
             // 设置角色头像图标
             const avatarIcon = DOMHelper.$('#character-avatar-icon');
@@ -1474,7 +1598,7 @@ class DetectiveGameApp {
         // 隐藏欢迎消息
         const welcomeMessage = conversationArea.querySelector('.welcome-message');
         if (welcomeMessage) {
-            welcomeMessage.style.display = 'none';
+            DOMHelper.hide(welcomeMessage);
         }
         
         const conversationItem = DOMHelper.createElement('div', { className: 'conversation-item' });
@@ -1587,19 +1711,19 @@ class DetectiveGameApp {
         
         // 确保问题输入区域是显示的，并添加轮次结束样式
         if (questionInputArea) {
-            questionInputArea.style.display = 'block';
+            DOMHelper.show(questionInputArea);
             questionInputArea.className = 'question-input-area rounds-ended-area';
         }
         
         // 隐藏整个问题输入框区域
         if (questionInputDiv) {
-            questionInputDiv.style.display = 'none';
+            DOMHelper.hide(questionInputDiv);
         }
         
         // 保持参考问题区域显示，但显示轮次结束提示
         const suggestedQuestions = DOMHelper.$('.suggested-questions');
         if (suggestedQuestions) {
-            suggestedQuestions.style.display = 'block';
+            DOMHelper.show(suggestedQuestions);
         }
         
         // 显示简洁的轮次结束提示
@@ -1635,19 +1759,19 @@ class DetectiveGameApp {
         `;
         
         // 恢复默认标题，隐藏角色标题
-        DOMHelper.$('#default-header').style.display = 'block';
-        DOMHelper.$('#character-header').style.display = 'none';
+        DOMHelper.show('#default-header');
+            DOMHelper.hide('#character-header');
         
         // 收起背景信息
         const expandableArea = DOMHelper.$('#character-background-expandable');
         const toggleBtn = DOMHelper.$('#toggle-background-btn');
-        if (expandableArea) expandableArea.style.display = 'none';
+        if (expandableArea) DOMHelper.hide(expandableArea);
         if (toggleBtn) {
             toggleBtn.classList.remove('expanded');
             toggleBtn.title = '展开背景信息';
         }
         
-        DOMHelper.$('#question-input-area').style.display = 'none';
+        DOMHelper.hide('#question-input-area');
     }
     
     // 添加证据
@@ -2046,7 +2170,7 @@ class DetectiveGameApp {
                     <div class="vote-content" id="vote-content-${data.index}">
                         <div class="thinking-indicator">
                             <i class="fas fa-brain fa-pulse"></i>
-                            <span class="thinking-text">正在分析证据信息，思考中...</span>
+                            <span class="thinking-text">正在分析证据信息，思考中</span>
                             <div class="thinking-dots">
                                 <span>.</span><span>.</span><span>.</span>
                             </div>
@@ -2422,56 +2546,25 @@ class DetectiveGameApp {
         console.log('生成角色卡片:', character);
         const typeClass = character.character_type;
         const typeText = this._getCharacterTypeText(character.character_type);
-        switch (cardType) {
-            case 'intro':
-                return `
-                    <div class="intro-character-name">${character.name}</div>
-                    <div class="intro-character-occupation">${character.occupation}</div>
-                    <div class="intro-character-type ${typeClass}">${typeText}</div>
-                `;
-            case 'intro-empty':
-                return `
-                    <div class="intro-character-name"></div>
-                    <div class="intro-character-occupation"></div>
-                    <div class="intro-character-type ${typeClass}"></div>
-                `;
-            case 'game':
-                return `
-                    <div class="character-info-left">
-                        <div class="character-name">${character.name}</div>
-                        <div class="character-occupation">${character.occupation}</div>
-                    </div>
-                    <div class="character-type">${typeText}</div>
-                `;
-            default:
-                return this._createCharacterCardHTML(character, 'intro');
-        }
+        
+        const characterData = {
+            name: character.name || '',
+            occupation: character.occupation || '',
+            typeClass,
+            typeText
+        };
+        
+        return this.templates.characterCard(characterData, cardType);
     }
 
     // 通用加载建议模板生成函数（内部使用）
     _createLoadingSuggestionsHTML() {
-        return `
-            <div class="loading-suggestions">
-                <i class="fas fa-spinner fa-spin"></i>
-                <p style="font-size: 12px; color: var(--theme-text-secondary);">正在生成参考问题... (您可以直接在输入框中提问，无需等待)</p>
-            </div>
-        `;
+        return this.templates.loadingSuggestions();
     }
 
     // 通用对话项目模板生成函数（内部使用）
     _createConversationItemHTML(question, response = null) {
-        if (response) {
-            // 完整的对话项目（问题+回答）
-            return `
-                <div class="question">${question}</div>
-                <div class="response">${response}</div>
-            `;
-        } else {
-            // 只有问题的对话项目
-            return `
-                <div class="question">${question}</div>
-            `;
-        }
+        return this.templates.conversationItem(question, response);
     }
     
     /**
@@ -2566,7 +2659,7 @@ class DetectiveGameApp {
         }
         
         stars.forEach(star => {
-            star.addEventListener('click', () => {
+            DOMHelper.bindEvent(star, 'click', () => {
                 this.selectedRating = parseInt(star.dataset.rating);
                 this.updateStars();
                 if (ratingText) {
@@ -2574,13 +2667,13 @@ class DetectiveGameApp {
                 }
             });
             
-            star.addEventListener('mouseover', () => {
+            DOMHelper.bindEvent(star, 'mouseover', () => {
                 const rating = parseInt(star.dataset.rating);
                 this.highlightStars(rating);
             });
         });
         
-        ratingContainer.addEventListener('mouseleave', () => {
+        DOMHelper.bindEvent(ratingContainer, 'mouseleave', () => {
             this.updateStars();
         });
     }
@@ -2613,7 +2706,7 @@ class DetectiveGameApp {
      */
     bindEvaluationFormEvents() {
         const form = DOMHelper.$('#desktopEvaluationForm');
-        form.addEventListener('submit', (e) => {
+        DOMHelper.bindEvent(form, 'submit', (e) => {
             e.preventDefault();
             this.submitEvaluation();
         });
@@ -2686,7 +2779,7 @@ class DetectiveGameApp {
     showEvaluationSuccess() {
         DOMHelper.setHTML(DOMHelper.$('#evaluationSuccessMessage'), '评价成功！');
         DOMHelper.setHTML(DOMHelper.$('#evaluationErrorMessage'), '');
-        DOMHelper.$('#desktopEvaluationForm').style.display = 'none';
+        DOMHelper.hide('#desktopEvaluationForm');
     }
     
     /**
@@ -2695,7 +2788,7 @@ class DetectiveGameApp {
     showEvaluationError(message) {
         DOMHelper.setText(DOMHelper.$('#evaluationErrorMessage'), message);
         DOMHelper.setHTML(DOMHelper.$('#evaluationSuccessMessage'), '');
-        DOMHelper.$('#desktopEvaluationForm').style.display = 'block';
+        DOMHelper.show('#desktopEvaluationForm');
     }
 }
 

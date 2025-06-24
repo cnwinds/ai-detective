@@ -2648,6 +2648,7 @@ select.form-control:hover {
     display: flex;
     align-items: center;
     gap: 8px;
+    background: var(--theme-secondary-bg);
     color: var(--theme-text-muted);
     font-style: italic;
 }

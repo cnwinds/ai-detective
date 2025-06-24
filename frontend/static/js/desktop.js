@@ -12,6 +12,7 @@ class DetectiveGameApp {
         this.hintsHistory = []; // 存储获取的提示历史
         this.appTimezone = 'Asia/Shanghai'; // 默认时区
         this.selectedRating = 0; // 初始化评分变量
+        this.isCharacterSpeaking = false; // 跟踪角色是否正在说话
 
         
         // 客户端唯一标识（基于浏览器指纹和localStorage）
@@ -84,6 +85,9 @@ class DetectiveGameApp {
         
             // 确保使用经典主题配色
             this.ensureClassicTheme();
+            
+            // 初始化按钮状态
+            this.updateSendButtonState();
 
             this.hideLoadingScreen();
         } catch (error) {
@@ -172,13 +176,18 @@ class DetectiveGameApp {
             });
         });
 
-        // 问题输入框回车提交
+        // 问题输入框回车提交和实时状态更新
         const questionInput = DOMHelper.$('#question-input');
         if (questionInput) {
             questionInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' && e.ctrlKey) {
                     this.askQuestion();
                 }
+            });
+            
+            // 监听输入变化，实时更新发送按钮状态
+            questionInput.addEventListener('input', () => {
+                this.updateSendButtonState();
             });
         }
     }
@@ -194,6 +203,11 @@ class DetectiveGameApp {
     
     // 屏幕切换
     showScreen(screenId) {
+        // 如果角色正在说话，禁用界面切换
+        if (this.isCharacterSpeaking) {
+            return;
+        }
+        
         DOMHelper.$$('.screen').forEach(screen => {
             screen.classList.remove('active');
         });
@@ -269,6 +283,11 @@ class DetectiveGameApp {
     
     // 显示案例选择
     async showCaseSelection() {
+        // 如果角色正在说话，禁用界面切换
+        if (this.isCharacterSpeaking) {
+            return;
+        }
+        
         this.showLoadingScreen();
         
         try {
@@ -501,6 +520,11 @@ class DetectiveGameApp {
     
     // 开始游戏
     async startGame(caseIndex) {
+        // 如果角色正在说话，禁用案件选择
+        if (this.isCharacterSpeaking) {
+            return;
+        }
+        
         this.showLoadingScreen();
         
         try {
@@ -643,6 +667,11 @@ class DetectiveGameApp {
 
     // 重写案情介绍主流程
     async showCaseIntroduction() {
+        // 如果角色正在说话，禁用界面切换
+        if (this.isCharacterSpeaking) {
+            return;
+        }
+        
         this.showScreen('case-intro-screen');
         this.skipTypewriter = false;
         const introContent = DOMHelper.$('#intro-content');
@@ -880,6 +909,9 @@ class DetectiveGameApp {
         
         // 填充指控选择框
         this.populateAccusationSelect();
+        
+        // 更新发送按钮状态
+        this.updateSendButtonState();
     }
     
     // 更新被害人信息
@@ -967,6 +999,61 @@ class DetectiveGameApp {
                 hintBtn.style.opacity = '1';
             }
         }
+        
+        // 更新发送按钮计数和状态
+        this.updateSendButtonCounter();
+    }
+    
+    // 更新发送按钮计数显示
+    updateSendButtonCounter() {
+        const askBtn = DOMHelper.$('#ask-question-btn');
+        if (askBtn) {
+            const currentRound = this.gameState ? this.gameState.current_round : 0;
+            const maxRounds = this.gameState ? this.gameState.max_rounds : 30;
+            askBtn.innerHTML = `
+                <span class="button-text">
+                    <i class="fas fa-paper-plane"></i>
+                    提问
+                </span>
+                <span class="button-count">(${currentRound}/${maxRounds})</span>
+            `;
+        }
+        this.updateSendButtonState();
+    }
+    
+    // 更新发送按钮状态
+    updateSendButtonState() {
+        const askBtn = DOMHelper.$('#ask-question-btn');
+        const questionInput = DOMHelper.$('#question-input');
+        
+        if (askBtn && questionInput) {
+            const hasContent = questionInput.value.trim().length > 0;
+            const canAskQuestion = this.gameState ? (this.gameState.current_round < this.gameState.max_rounds) : true;
+            const isNotSpeaking = !this.isCharacterSpeaking;
+            const hasSelectedCharacter = !!this.selectedCharacter;
+            const hasGameState = !!this.gameState;
+            
+            // 只有在有内容、未达到轮次限制、角色未在说话且已选择角色时才启用按钮
+            askBtn.disabled = !hasContent || !canAskQuestion || !isNotSpeaking || !hasSelectedCharacter || !hasGameState;
+            
+            // 根据不同状态设置提示信息
+            if (this.isCharacterSpeaking) {
+                DOMHelper.toggleClass(askBtn, 'disabled', true);
+                askBtn.title = '角色正在回答中，请稍候...';
+            } else if (!hasGameState) {
+                DOMHelper.toggleClass(askBtn, 'disabled', true);
+                askBtn.title = '请先开始游戏';
+            } else if (!hasSelectedCharacter) {
+                DOMHelper.toggleClass(askBtn, 'disabled', true);
+                askBtn.title = '请先选择一个角色';
+            } else if (!canAskQuestion) {
+                DOMHelper.toggleClass(askBtn, 'disabled', true);
+                askBtn.title = '已达到最大提问轮次';
+            } else {
+                DOMHelper.toggleClass(askBtn, 'disabled', false);
+                askBtn.title = hasContent ? '发送问题' : '请输入问题';
+            }
+        }
     }
     
     // 渲染角色列表
@@ -1000,6 +1087,11 @@ class DetectiveGameApp {
     
     // 选择角色
     selectCharacter(character) {
+        // 如果角色正在说话，禁用角色选择
+        if (this.isCharacterSpeaking) {
+            return;
+        }
+        
         this.selectedCharacter = character;
         
         // 更新角色卡片状态
@@ -1207,7 +1299,11 @@ class DetectiveGameApp {
             const questionBtn = DOMHelper.createElement('button', { className: 'suggested-question' });
             questionBtn.textContent = question;
             questionBtn.addEventListener('click', () => {
-                DOMHelper.setText('#question-input', question);
+                const questionInput = DOMHelper.$('#question-input');
+                if (questionInput) {
+                    questionInput.value = question;
+                }
+                this.updateSendButtonState();
             });
             questionsList.appendChild(questionBtn);
         });
@@ -1238,6 +1334,9 @@ class DetectiveGameApp {
         askBtn.disabled = true;
         askBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提问中...';
         
+        // 设置角色正在说话状态
+        this.isCharacterSpeaking = true;
+        
         // 清空输入框
         questionInput.value = '';
         
@@ -1247,6 +1346,9 @@ class DetectiveGameApp {
             this.logError('提问失败:', error);
             this.showMessage('错误', '提问失败，请重试');
         } finally {
+            // 重置角色说话状态
+            this.isCharacterSpeaking = false;
+            
             askBtn.disabled = false;
             // 恢复按钮原始格式（两行显示，包含计数）
             askBtn.innerHTML = `
@@ -2219,6 +2321,11 @@ class DetectiveGameApp {
     
     // 跳转到游戏评价页面
     goToEvaluation() {
+        // 如果角色正在说话，禁用界面切换
+        if (this.isCharacterSpeaking) {
+            return;
+        }
+        
         if (this.sessionId) {
             this.showEvaluationScreen();
         } else {
@@ -2228,6 +2335,11 @@ class DetectiveGameApp {
 
     // 开始新游戏
     startNewGame() {
+        // 如果角色正在说话，禁用开始新游戏
+        if (this.isCharacterSpeaking) {
+            return;
+        }
+        
         // 清理当前会话
         if (this.sessionId) {
             fetch(`${this.apiBase}/game/${this.sessionId}`, {
@@ -2241,10 +2353,14 @@ class DetectiveGameApp {
         this.gameState = null;
         this.selectedCharacter = null;
         this.evidenceList = [];
+        this.isCharacterSpeaking = false;
         
         if (this.websocket) {
             this.websocket.close();
         }
+        
+        // 更新发送按钮状态
+        this.updateSendButtonState();
         
         // 显示案例选择
         this.showCaseSelection();

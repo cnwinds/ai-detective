@@ -425,7 +425,8 @@ async def ask_question_stream(request: QuestionRequest):
                     "evidence": {
                         "name": revealed_evidence.name,
                         "description": revealed_evidence.description,
-                        "significance": revealed_evidence.significance
+                        "significance": revealed_evidence.significance,
+                        "evidence_type": revealed_evidence.evidence_type.value
                     }
                 }
                 yield f"data: {json.dumps(evidence_data)}\n\n"

@@ -1652,6 +1652,63 @@ body.theme-forest .badge-category {
     padding: 15px;
     margin-bottom: 15px;
     border: 1px solid var(--theme-border-color);
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.evidence-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    border-color: var(--theme-primary-color);
+}
+
+.evidence-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--theme-border-color);
+}
+
+.evidence-header h4 {
+    color: var(--theme-primary-color);
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
+    flex: 1;
+}
+
+.evidence-type {
+    background: linear-gradient(135deg, var(--theme-accent-color), #FFA726);
+    color: #1a1a1a;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.evidence-type.physical {
+    background: linear-gradient(135deg, #FF5722, #FF7043);
+    color: white;
+}
+
+.evidence-type.document {
+    background: linear-gradient(135deg, #2196F3, #42A5F5);
+    color: white;
+}
+
+.evidence-type.behavioral {
+    background: linear-gradient(135deg, #4CAF50, #66BB6A);
+    color: white;
+}
+
+.evidence-type.testimony {
+    background: linear-gradient(135deg, #9C27B0, #BA68C8);
+    color: white;
 }
 
 .evidence-name {
@@ -1664,8 +1721,24 @@ body.theme-forest .badge-category {
 .evidence-description {
     color: var(--theme-text-primary);
     font-size: 0.9rem;
-    line-height: 1.4;
+    line-height: 1.5;
     margin-bottom: 8px;
+    text-align: justify;
+}
+
+.evidence-relevance {
+    background: rgba(100, 181, 246, 0.1);
+    border-left: 3px solid var(--theme-primary-color);
+    padding: 8px 12px;
+    margin-top: 12px;
+    border-radius: 0 8px 8px 0;
+    font-size: 0.85rem;
+    color: var(--theme-text-secondary);
+}
+
+.evidence-relevance strong {
+    color: var(--theme-primary-color);
+    margin-right: 8px;
 }
 
 .evidence-significance {

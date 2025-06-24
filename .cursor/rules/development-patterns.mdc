@@ -5,6 +5,9 @@ alwaysApply: false
 ---
 # 开发模式和最佳实践
 
+## 代码规范
+加载 docs/DEVELOPER_GUIDE.md 指导代码开发
+
 ## 代码组织原则
 
 ### 前端JavaScript模式

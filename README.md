@@ -84,7 +84,6 @@ ai-detective/
 │   ├── 📄 backup-database.sh  # 数据库备份脚本
 │   ├── 📄 restore-database.sh # 数据库恢复脚本
 │   ├── 📄 wait-for-db.sh      # 数据库等待脚本
-│   ├── 📄 docker.env.template # Docker环境变量模板
 │   ├── 📁 mysql/              # MySQL配置
 │   │   └── 📄 init.sql        # 数据库初始化脚本
 │   └── 📄 README.md           # Docker使用说明
@@ -143,7 +142,7 @@ git clone <repository-url>
 cd ai-detective
 
 # 2. 启动MySQL数据库容器
-docker run --name mysql-container -d -p 3306:3306 -e MYSQL_ROOT_PASSWORD=123456 mysql:5.7
+docker run --name mysql-container -d -p 3306:3306 -e MYSQL_PASSWORD=123456 mysql:5.7
 
 # 3. 安装依赖
 pip install -r requirements.txt

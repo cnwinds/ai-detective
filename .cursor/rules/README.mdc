@@ -1,0 +1,238 @@
+---
+description: 项目开发指引手册
+globs: 
+alwaysApply: false
+---
+# AI侦探推理游戏 - Cursor规则总览
+
+## 规则文件索引
+
+本目录包含AI侦探推理游戏项目的完整Cursor规则集，帮助AI助手更好地理解项目结构、遵循开发规范、掌握核心概念。
+
+**重要提醒**: 在开发过程中，相同的问题超过2次遇到，最终解决后，需要将问题和解决方案记录在 @troubleshooting-guide.mdc 文件中。如果之前有类似问题则进行修正。
+
+### 📋 核心规则文件 (5个)
+
+1. **[ai-detective-game.mdc](mdc:ai-detective-game.mdc)** - 项目核心规则 (9.1KB)
+   - 项目概述和技术栈
+   - 项目架构和模块组织
+   - 游戏机制和数据结构
+   - 核心组件说明
+   - AI交互机制和业务逻辑
+
+2. **[backend-development.mdc](mdc:backend-development.mdc)** - 后端开发规范 (35KB+)
+   - FastAPI应用架构和路由设计
+   - Python异步编程和流式响应
+   - Pydantic数据模型和验证
+   - 错误处理和异常管理
+   - 性能优化和缓存策略
+   - 代码重构模式和最佳实践
+   - 日志监控和性能分析
+
+3. **[frontend-development.mdc](mdc:frontend-development.mdc)** - 前端开发规范 (30KB+)
+   - 原生JavaScript应用架构
+   - CSS组件化和响应式设计
+   - 移动端开发和触摸优化
+   - 主题系统和设备适配
+   - 性能优化和内存管理
+   - HTML语义化和可访问性
+   - 错误处理和用户体验
+
+4. **[api-development.mdc](mdc:api-development.mdc)** - API开发规范 (24KB)
+   - RESTful API设计原则和架构设计
+   - 后端Python实现和前端JavaScript调用
+   - 游戏核心API (问答、指控、提示、会话管理)
+   - WebSocket通信和流式响应处理
+   - 管理员认证和历史记录API
+   - 统一错误处理和性能优化
+   - APIHelper工具类和最佳实践
+
+5. **[troubleshooting-guide.mdc](mdc:troubleshooting-guide.mdc)** - 故障排除和部署指南 (18KB)
+   - 常见问题诊断 (导入、服务器、前端、WebSocket)
+   - 调试技巧 (前端和后端)
+   - 部署指南 (开发环境、Docker、生产环境)
+   - 数据库管理和备份恢复
+   - 性能监控和日志分析
+   - 版本管理和更新策略
+
+## 🎯 使用指南
+
+### 🎯 按角色查看规则
+
+**后端开发者**:
+1. [ai-detective-game.mdc](mdc:ai-detective-game.mdc) - 了解项目整体架构
+2. [backend-development.mdc](mdc:backend-development.mdc) - 掌握Python/FastAPI开发规范
+3. [api-development.mdc](mdc:api-development.mdc) - 学习API设计和实现
+4. [troubleshooting-guide.mdc](mdc:troubleshooting-guide.mdc) - 解决后端问题
+
+**前端开发者**:
+1. [ai-detective-game.mdc](mdc:ai-detective-game.mdc) - 了解项目整体架构
+2. [frontend-development.mdc](mdc:frontend-development.mdc) - 掌握JavaScript/CSS开发规范
+3. [api-development.mdc](mdc:api-development.mdc) - 学习API调用方式
+4. [troubleshooting-guide.mdc](mdc:troubleshooting-guide.mdc) - 解决前端问题
+
+**全栈开发者**:
+按顺序阅读所有文件，获得完整的开发指导
+
+### 🔧 按功能查看规则
+
+**架构设计**: [ai-detective-game.mdc](mdc:ai-detective-game.mdc) → [backend-development.mdc](mdc:backend-development.mdc) → [frontend-development.mdc](mdc:frontend-development.mdc)
+
+**API开发**: [api-development.mdc](mdc:api-development.mdc) → [backend-development.mdc](mdc:backend-development.mdc) → [frontend-development.mdc](mdc:frontend-development.mdc)
+
+**问题解决**: [troubleshooting-guide.mdc](mdc:troubleshooting-guide.mdc) → 相关专业文件
+
+**性能优化**: [backend-development.mdc](mdc:backend-development.mdc) + [frontend-development.mdc](mdc:frontend-development.mdc)
+
+### 🚀 快速开始
+
+1. **新手入门**: 先读 [ai-detective-game.mdc](mdc:ai-detective-game.mdc) 了解项目概况
+2. **开发规范**: 根据你的角色选择对应的开发规范文件
+3. **API集成**: 查看 [api-development.mdc](mdc:api-development.mdc) 学习前后端交互
+4. **问题排查**: 遇到问题时查阅 [troubleshooting-guide.mdc](mdc:troubleshooting-guide.mdc)
+
+### 📊 文档特色
+
+- **前后端分离**: 专门的前端和后端开发规范，避免混淆
+- **实践导向**: 所有规范都基于实际项目经验
+- **完整覆盖**: 从架构设计到具体实现的全方位指导
+- **问题解决**: 详细的故障排除和最佳实践
+- **持续更新**: 规则会随项目演进不断完善
+
+## 🎮 项目特点
+
+- **零框架依赖**: 原生HTML/CSS/JavaScript + Python/FastAPI
+- **双平台支持**: 桌面端和移动端完整适配
+- **AI驱动**: 集成大语言模型的智能游戏体验
+- **模块化架构**: 清晰的代码组织和职责分离
+- **性能优化**: 流式响应、缓存策略、懒加载等优化技术
+
+遵循这些规则能确保代码质量、提升开发效率、保持项目的一致性和可维护性。
+
+## 🏗️ 项目架构概览
+
+```
+AI侦探推理游戏 (零依赖、AI驱动)
+├── 后端服务 (Python + FastAPI)
+│   ├── 游戏引擎 - 核心逻辑处理
+│   ├── AI服务 - OpenAI API集成
+│   ├── 证据系统 - 智能证据发现
+│   ├── 指控系统 - 审判流程生成
+│   └── API路由 - RESTful + WebSocket
+├── 前端界面 (原生Web技术)
+│   ├── 桌面版 - 完整功能体验
+│   ├── 移动版 - 触摸优化界面
+│   ├── 管理后台 - 数据管理界面
+│   └── 主题系统 - 多主题支持
+└── 部署环境
+    ├── 开发环境 - 本地调试
+    ├── Docker容器 - 标准化部署
+    └── 生产环境 - Nginx + SSL
+```
+
+## 🚀 核心特性
+
+### 技术特色
+- **完全AI开发**: 使用Cursor AI完成所有代码编写
+- **零依赖前端**: 原生JavaScript，无框架依赖
+- **流式响应**: 实时AI对话体验
+- **双平台支持**: 桌面和移动端完整体验
+- **模块化架构**: 高内聚低耦合设计
+
+### 游戏特色
+- **智能对话**: AI驱动的角色对话系统
+- **证据发现**: 基于关键词和AI判断的证据系统
+- **审判模拟**: 完整的指控和审判流程
+- **多案例支持**: 可扩展的案例系统
+- **历史回放**: 完整的游戏记录和回放功能
+
+## 📝 开发规范要点
+
+### 代码组织
+- **后端**: 使用相对导入，模块化设计
+- **前端**: ES6类组织，事件驱动架构
+- **样式**: 基础类+修饰符模式，CSS变量，响应式设计
+- **API**: 统一响应格式，RESTful设计
+
+### 性能优化
+- **前端**: 懒加载、虚拟滚动、防抖节流
+- **后端**: 连接池、缓存策略、异步处理
+- **移动端**: 触摸优化、内存管理、资源预加载
+
+### 错误处理
+- **统一格式**: success/data/error/error_code
+- **日志记录**: 详细的错误跟踪和性能监控
+- **用户友好**: 清晰的错误提示和处理流程
+
+## 🔧 开发工具配置
+
+### 推荐环境
+- **Python**: 3.7+ (推荐3.9+)
+- **Node.js**: 用于前端工具 (可选)
+- **Docker**: 生产环境部署
+- **IDE**: Cursor (主要)、VS Code (备选)
+
+### 调试工具
+- **前端**: 浏览器开发者工具、移动端调试器
+- **后端**: Python日志、性能分析器
+- **网络**: Postman、浏览器网络面板
+
+## 📚 学习资源
+
+### 相关技术文档
+- [FastAPI官方文档](mdc:https:/fastapi.tiangolo.com)
+- [OpenAI API文档](mdc:https:/platform.openai.com/docs)
+- [MDN Web文档](mdc:https:/developer.mozilla.org)
+- [Docker官方文档](mdc:https:/docs.docker.com)
+
+### 项目文档
+- [API文档](mdc:../docs/API_DOCUMENTATION.md)
+- [开发者指南](mdc:../docs/DEVELOPER_GUIDE.md)
+- [案件创作指南](mdc:../docs/AI侦探游戏案件创作指南.md)
+
+## 🎨 文档优化亮点
+
+### v2.0 优化成果
+- **精简结构**: 从7个文件优化为5个核心文件
+- **前后端分离**: 专门的前端和后端开发规范文件
+- **内容整合**: 合并重复内容，消除冗余
+- **逻辑清晰**: 按功能模块重新组织内容
+- **导航优化**: 提供清晰的学习路径和快速导航
+
+### 文件大小分布
+- **ai-detective-game.mdc**: 9.1KB (项目概览和业务逻辑)
+- **backend-development.mdc**: 35KB+ (后端开发规范)
+- **frontend-development.mdc**: 30KB+ (前端开发规范)
+- **api-development.mdc**: 24KB (API开发专题)
+- **troubleshooting-guide.mdc**: 18KB (问题排查专题)
+- **README.mdc**: 8.6KB (文档索引和导航)
+
+### 文档结构特点
+- **专业分工**: 前后端规范分离，避免混淆
+- **业务导向**: 项目核心规则包含完整的业务逻辑
+- **实用性强**: 每个文件都有明确的使用场景
+- **易于维护**: 清晰的文档组织便于后续更新
+
+## 🤝 维护指南
+
+### 修改规则
+1. 确保修改符合项目整体架构
+2. 更新相关的交叉引用
+3. 保持中文注释和说明
+4. 测试修改后的规则效果
+
+### 添加新内容
+1. 遵循现有的文件组织结构
+2. 优先在现有文件中扩展内容
+3. 避免创建新文件除非必要
+4. 确保与现有规则的一致性
+
+### 问题记录
+- 开发中遇到的重复问题需要记录在 troubleshooting-guide.mdc 中
+- 包含问题描述、解决方案和预防措施
+- 定期回顾和更新问题库
+
+---
+
+💡 **提示**: 这些规则文件经过精心整合和优化，覆盖了项目开发的所有核心需求。建议收藏本索引页面，作为快速导航和学习的起点。
+

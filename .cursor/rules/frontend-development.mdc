@@ -1,0 +1,988 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 前端开发规范
+
+## 项目架构和设计原则
+
+### 技术栈和架构
+- **核心技术**: 原生HTML/CSS/JavaScript (零框架依赖)
+- **设计理念**: 平台独立、响应式、性能优先
+- **支持平台**: 桌面端 + 移动端双平台
+
+### 命名约定
+- **JavaScript**: 驼峰命名法 (camelCase)
+- **CSS**: BEM命名规范或基础类+修饰符模式
+- **HTML**: 语义化标签，kebab-case属性
+- **文件命名**: 小写字母加连字符，描述性命名
+
+### 开发原则
+- **组件化**: 模块化的JavaScript类和CSS组件
+- **响应式**: 移动端优先的设计
+- **性能优化**: 懒加载、缓存、最小化DOM操作
+- **可访问性**: 语义化HTML，键盘导航支持
+
+## JavaScript开发模式
+
+### 应用架构模式
+```javascript
+// DetectiveGameApp类 - 主应用架构
+class DetectiveGameApp {
+    constructor() {
+        this.sessionId = null;
+        this.gameState = {
+            phase: 'case-selection',
+            selectedCase: null,
+            selectedCharacter: null,
+            evidenceFound: [],
+            conversationHistory: {},
+            rounds: 0
+        };
+        this.apiHelper = new APIHelper();
+        this.themeManager = new ThemeManager();
+        this.initializeApp();
+    }
+
+    // 状态管理
+    updateGameState(newState) {
+        this.gameState = { ...this.gameState, ...newState };
+        this.saveGameState();
+        this.updateUI();
+        this.emitStateChange();
+    }
+
+    // 屏幕切换管理
+    showScreen(screenName) {
+        document.querySelectorAll('.screen').forEach(screen => {
+            screen.style.display = 'none';
+        });
+        document.getElementById(screenName).style.display = 'block';
+        this.gameState.currentScreen = screenName;
+    }
+
+    // 事件系统
+    emitStateChange() {
+        window.dispatchEvent(new CustomEvent('gameStateChanged', {
+            detail: this.gameState
+        }));
+    }
+}
+```
+
+### 工具类架构
+```javascript
+// API工具类
+class APIHelper {
+    constructor() {
+        this.baseURL = '/api';
+        this.defaultHeaders = {
+            'Content-Type': 'application/json'
+        };
+    }
+
+    async makeRequest(endpoint, data, options = {}) {
+        try {
+            const response = await fetch(`${this.baseURL}${endpoint}`, {
+                method: 'POST',
+                headers: this.defaultHeaders,
+                body: JSON.stringify(data),
+                ...options
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            if (!result.success) {
+                throw new Error(result.error || '请求失败');
+            }
+            
+            return result.data;
+        } catch (error) {
+            console.error('API请求失败:', error);
+            throw error;
+        }
+    }
+
+    // 流式响应处理
+    async handleStreamResponse(url, data, onChunk, onComplete) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: this.defaultHeaders,
+                body: JSON.stringify(data)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+                
+                const chunk = decoder.decode(value);
+                const lines = chunk.split('\n');
+                
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        try {
+                            const data = JSON.parse(line.slice(6));
+                            if (data.type === 'chunk') {
+                                onChunk(data.content);
+                            } else if (data.type === 'complete') {
+                                onComplete();
+                                return;
+                            }
+                        } catch (e) {
+                            console.warn('解析流数据失败:', e);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('流式请求失败:', error);
+            throw error;
+        }
+    }
+}
+
+// 主题管理系统
+class ThemeManager {
+    constructor() {
+        this.currentTheme = localStorage.getItem('theme') || 'default';
+        this.themes = {};
+        this.init();
+    }
+
+    async init() {
+        await this.loadThemes();
+        this.applyStoredTheme();
+        this.setupThemeSelector();
+    }
+
+    async loadThemes() {
+        try {
+            const response = await fetch('/static/themes.json');
+            this.themes = await response.json();
+        } catch (error) {
+            console.error('加载主题失败:', error);
+        }
+    }
+
+    applyTheme(themeName) {
+        const theme = this.themes[themeName];
+        if (!theme) return;
+
+        const root = document.documentElement;
+        
+        // 应用颜色变量
+        Object.entries(theme.colors).forEach(([key, value]) => {
+            root.style.setProperty(`--color-${key}`, value);
+        });
+
+        // 应用字体变量
+        if (theme.typography) {
+            Object.entries(theme.typography).forEach(([key, value]) => {
+                root.style.setProperty(`--font-${key}`, value);
+            });
+        }
+
+        this.currentTheme = themeName;
+        localStorage.setItem('theme', themeName);
+        
+        // 触发主题切换事件
+        window.dispatchEvent(new CustomEvent('themeChanged', { 
+            detail: { theme: themeName } 
+        }));
+    }
+}
+```
+
+### 异步操作和错误处理
+```javascript
+// 错误处理类
+class ErrorHandler {
+    static handle(error, context = '') {
+        const errorInfo = {
+            message: error.message,
+            stack: error.stack,
+            context: context,
+            timestamp: new Date().toISOString(),
+            userAgent: navigator.userAgent,
+            url: window.location.href
+        };
+
+        console.error('错误详情:', errorInfo);
+        
+        // 显示用户友好的错误信息
+        this.showUserError(error.message);
+        
+        // 发送错误报告
+        this.reportError(errorInfo);
+    }
+
+    static showUserError(message) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-toast';
+        errorDiv.textContent = message;
+        document.body.appendChild(errorDiv);
+        
+        setTimeout(() => {
+            errorDiv.remove();
+        }, 5000);
+    }
+
+    static async reportError(errorInfo) {
+        try {
+            await fetch('/api/error-report', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(errorInfo)
+            });
+        } catch (e) {
+            console.error('发送错误报告失败:', e);
+        }
+    }
+}
+
+// 全局错误处理
+window.addEventListener('error', (event) => {
+    ErrorHandler.handle(event.error, '全局错误');
+});
+
+window.addEventListener('unhandledrejection', (event) => {
+    ErrorHandler.handle(event.reason, '未处理的Promise拒绝');
+});
+```
+
+### 性能优化工具
+```javascript
+// 防抖和节流
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+function throttle(func, limit) {
+    let inThrottle;
+    return function() {
+        const args = arguments;
+        const context = this;
+        if (!inThrottle) {
+            func.apply(context, args);
+            inThrottle = true;
+            setTimeout(() => inThrottle = false, limit);
+        }
+    }
+}
+
+// 懒加载管理器
+class LazyLoader {
+    constructor() {
+        this.observer = new IntersectionObserver(
+            this.handleIntersection.bind(this),
+            { rootMargin: '50px' }
+        );
+    }
+
+    observe(element) {
+        this.observer.observe(element);
+    }
+
+    handleIntersection(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                this.loadElement(entry.target);
+                this.observer.unobserve(entry.target);
+            }
+        });
+    }
+
+    loadElement(element) {
+        if (element.dataset.src) {
+            element.src = element.dataset.src;
+        }
+        if (element.dataset.background) {
+            element.style.backgroundImage = `url(${element.dataset.background})`;
+        }
+    }
+}
+```
+
+## CSS开发规范
+
+### 平台独立架构
+```css
+/* 设计原则 */
+- desktop.css: 桌面端完整的独立样式文件
+- mobile.css: 移动端完整的独立样式文件
+
+/* 优势 */
+- 每个平台使用完全独立的CSS文件
+- 不提取公共部分，避免复杂的依赖关系
+- 各平台可以自由定制样式而不影响其他平台
+- 便于维护和调试，样式问题定位更准确
+```
+
+### CSS变量系统
+```css
+/* 完整的设计系统变量 */
+:root {
+  /* 颜色系统 */
+  --color-primary: #64b5f6;
+  --color-secondary: #81c784;
+  --color-danger: #f06292;
+  --color-warning: #ffb74d;
+  --color-success: #4caf50;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #eeeeee;
+  --color-neutral-800: #424242;
+  --color-white: #ffffff;
+  --color-black: #000000;
+
+  /* 间距系统 */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-xxl: 3rem;
+
+  /* 字体系统 */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-xxl: 1.5rem;
+
+  /* 边框和圆角 */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* 动画和过渡 */
+  --transition-duration: 0.3s;
+  --transition-timing: ease;
+
+  /* 阴影系统 */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+}
+```
+
+### 组件化CSS架构
+```css
+/* 基础类 + 修饰符模式 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  font-weight: 500;
+  text-decoration: none;
+  transition: all var(--transition-duration) var(--transition-timing);
+  background-color: var(--color-neutral-200);
+  color: var(--color-neutral-800);
+}
+
+/* 颜色修饰符 */
+.btn.primary { background-color: var(--color-primary); color: var(--color-white); }
+.btn.secondary { background-color: var(--color-secondary); color: var(--color-white); }
+.btn.danger { background-color: var(--color-danger); color: var(--color-white); }
+.btn.outline { 
+  background-color: transparent; 
+  border: 2px solid var(--color-primary); 
+  color: var(--color-primary); 
+}
+
+/* 尺寸修饰符 */
+.btn.large { padding: var(--spacing-md) var(--spacing-xl); font-size: var(--font-size-lg); }
+.btn.small { padding: var(--spacing-xs) var(--spacing-sm); font-size: var(--font-size-sm); }
+
+/* 状态类 */
+.btn:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.btn:active { transform: translateY(0); }
+.btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+/* 卡片组件 */
+.card {
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--spacing-lg);
+  transition: all var(--transition-duration) var(--transition-timing);
+}
+
+.card.elevated { box-shadow: var(--shadow-lg); }
+.card.compact { padding: var(--spacing-md); }
+.card.interactive:hover { 
+  transform: translateY(-2px); 
+  box-shadow: var(--shadow-xl); 
+}
+```
+
+### 响应式设计模式
+```css
+/* 移动端优先的断点系统 */
+:root {
+  --breakpoint-sm: 576px;
+  --breakpoint-md: 768px;
+  --breakpoint-lg: 992px;
+  --breakpoint-xl: 1200px;
+}
+
+/* 容器系统 */
+.container {
+  width: 100%;
+  padding: 0 var(--spacing-md);
+  margin: 0 auto;
+}
+
+@media (min-width: 576px) {
+  .container { max-width: 540px; }
+}
+
+@media (min-width: 768px) {
+  .container { max-width: 720px; }
+}
+
+@media (min-width: 992px) {
+  .container { max-width: 960px; }
+}
+
+@media (min-width: 1200px) {
+  .container { max-width: 1140px; }
+}
+
+/* 网格系统 */
+.grid {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.grid.cols-1 { grid-template-columns: 1fr; }
+.grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+@media (max-width: 768px) {
+  .grid.cols-2, .grid.cols-3 { 
+    grid-template-columns: 1fr; 
+  }
+}
+```
+
+## 移动端开发规范
+
+### 设备检测和适配
+```javascript
+// 设备检测机制
+function detectDevice() {
+    const userAgent = navigator.userAgent.toLowerCase();
+    const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+    const isSmallScreen = window.innerWidth <= 768;
+    
+    // URL参数控制
+    const urlParams = new URLSearchParams(window.location.search);
+    const forceDesktop = urlParams.get('desktop') === '1';
+    const forceMobile = urlParams.get('mobile') === '1';
+    
+    if (forceMobile || (!forceDesktop && (isMobile || isSmallScreen))) {
+        if (!window.location.pathname.includes('mobile.html')) {
+            window.location.href = '/mobile.html' + window.location.search;
+        }
+    }
+}
+
+// 设备特性检测
+class DeviceCapabilityDetector {
+    static detect() {
+        return {
+            touchSupport: 'ontouchstart' in window,
+            orientation: screen.orientation || screen.mozOrientation || screen.msOrientation,
+            devicePixelRatio: window.devicePixelRatio || 1,
+            viewport: {
+                width: window.innerWidth,
+                height: window.innerHeight
+            },
+            safeArea: {
+                top: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sat') || '0'),
+                bottom: parseInt(getComputedStyle(document.documentElement).getPropertyValue('--sab') || '0')
+            }
+        };
+    }
+}
+```
+
+### 移动端UI组件
+```css
+/* 浮动操作按钮 (FAB) 系统 */
+.fab-container {
+    position: fixed;
+    bottom: var(--spacing-lg);
+    right: var(--spacing-lg);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.fab {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--color-primary);
+    color: var(--color-white);
+    border: none;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all var(--transition-duration) var(--transition-timing);
+}
+
+.fab:hover { transform: scale(1.1); }
+.fab.character { background: var(--color-secondary); }
+.fab.evidence { background: var(--color-warning); }
+.fab.accusation { background: var(--color-danger); }
+
+/* 移动端布局 */
+.mobile-container {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.case-header {
+    background: var(--color-primary);
+    color: var(--color-white);
+    padding: var(--spacing-md);
+    text-align: center;
+}
+
+.chat-container {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md);
+    padding-bottom: 80px;
+}
+
+.input-area {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-white);
+    border-top: 1px solid var(--color-neutral-200);
+    padding: var(--spacing-md);
+    padding-bottom: calc(var(--spacing-md) + env(safe-area-inset-bottom));
+}
+```
+
+### 触摸优化
+```css
+/* 触摸目标优化 */
+.touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    padding: var(--spacing-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* 防止意外缩放 */
+input, textarea, select {
+    font-size: 16px; /* 防止iOS自动缩放 */
+}
+
+/* 触摸反馈 */
+.btn-mobile {
+    min-height: 48px;
+    padding: var(--spacing-md) var(--spacing-lg);
+    font-size: var(--font-size-base);
+    border-radius: var(--radius-md);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.btn-mobile:active {
+    background-color: var(--color-primary-dark);
+    transform: scale(0.98);
+}
+```
+
+### 手势处理
+```javascript
+// 触摸手势处理类
+class TouchGestureHandler {
+    constructor(element) {
+        this.element = element;
+        this.startX = 0;
+        this.startY = 0;
+        this.setupGestures();
+    }
+
+    setupGestures() {
+        this.element.addEventListener('touchstart', this.handleTouchStart.bind(this));
+        this.element.addEventListener('touchmove', this.handleTouchMove.bind(this));
+        this.element.addEventListener('touchend', this.handleTouchEnd.bind(this));
+    }
+
+    handleTouchStart(e) {
+        this.startX = e.touches[0].clientX;
+        this.startY = e.touches[0].clientY;
+    }
+
+    handleTouchMove(e) {
+        if (this.shouldPreventDefault(e)) {
+            e.preventDefault();
+        }
+    }
+
+    handleTouchEnd(e) {
+        const endX = e.changedTouches[0].clientX;
+        const endY = e.changedTouches[0].clientY;
+        
+        const deltaX = endX - this.startX;
+        const deltaY = endY - this.startY;
+        
+        // 检测滑动方向
+        if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            if (deltaX > 50) {
+                this.onSwipeRight();
+            } else if (deltaX < -50) {
+                this.onSwipeLeft();
+            }
+        } else {
+            if (deltaY > 50) {
+                this.onSwipeDown();
+            } else if (deltaY < -50) {
+                this.onSwipeUp();
+            }
+        }
+    }
+
+    onSwipeLeft() { /* 左滑处理 */ }
+    onSwipeRight() { /* 右滑处理 */ }
+    onSwipeUp() { /* 上滑处理 */ }
+    onSwipeDown() { /* 下滑处理 */ }
+}
+```
+
+## HTML规范和最佳实践
+
+### 标准HTML结构
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="AI侦探推理游戏">
+    <title>AI侦探推理游戏</title>
+    
+    <!-- 预加载关键资源 -->
+    <link rel="preload" href="/static/js/utils.js" as="script">
+    <link rel="preload" href="/static/themes.json" as="fetch">
+    
+    <!-- 平台特定样式 -->
+    <link rel="stylesheet" href="/static/css/desktop.css">
+    
+    <!-- PWA支持 -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#64b5f6">
+</head>
+<body>
+    <!-- 主要内容 -->
+    <main id="app" role="main">
+        <!-- 游戏界面 -->
+        <div class="screen" id="case-selection" role="region" aria-label="案例选择">
+            <!-- 案例选择界面 -->
+        </div>
+        
+        <div class="screen" id="investigation" role="region" aria-label="调查阶段">
+            <!-- 调查界面 -->
+        </div>
+    </main>
+    
+    <!-- 加载指示器 -->
+    <div id="loading-indicator" class="loading-overlay" aria-hidden="true">
+        <div class="spinner"></div>
+        <p>加载中...</p>
+    </div>
+    
+    <!-- 脚本加载顺序 -->
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/theme-manager.js"></script>
+    <script src="/static/js/desktop.js"></script>
+    
+    <!-- 错误边界 -->
+    <script>
+        window.addEventListener('error', function(e) {
+            console.error('全局错误:', e.error);
+        });
+    </script>
+</body>
+</html>
+```
+
+### 语义化HTML
+```html
+<!-- 语义化的游戏界面结构 -->
+<article class="case-card" role="article">
+    <header class="case-header">
+        <h2 class="case-title">神秘的午夜谋杀案</h2>
+        <div class="case-meta">
+            <span class="difficulty" aria-label="难度">中等</span>
+            <span class="category" aria-label="类别">谋杀案</span>
+        </div>
+    </header>
+    
+    <main class="case-content">
+        <p class="case-description">
+            在一个风雨交加的夜晚...
+        </p>
+    </main>
+    
+    <footer class="case-actions">
+        <button class="btn primary" type="button" 
+                aria-describedby="case-description">
+            开始调查
+        </button>
+    </footer>
+</article>
+
+<!-- 对话界面 -->
+<section class="conversation-section" role="region" aria-label="角色对话">
+    <div class="character-info" role="banner">
+        <img src="/static/images/character.jpg" 
+             alt="张三的头像" 
+             class="character-avatar">
+        <div class="character-details">
+            <h3 class="character-name">张三</h3>
+            <p class="character-occupation">酒店经理</p>
+        </div>
+    </div>
+    
+    <div class="conversation-history" 
+         role="log" 
+         aria-label="对话记录"
+         aria-live="polite">
+        <!-- 对话内容 -->
+    </div>
+    
+    <form class="question-form" role="form">
+        <label for="question-input" class="sr-only">输入问题</label>
+        <input type="text" 
+               id="question-input"
+               placeholder="输入你的问题..."
+               aria-describedby="question-help"
+               required>
+        <p id="question-help" class="sr-only">
+            输入你想问角色的问题，然后按回车发送
+        </p>
+        <button type="submit" class="btn primary">发送</button>
+    </form>
+</section>
+```
+
+## 性能优化策略
+
+### 资源加载优化
+```javascript
+// 资源预加载管理器
+class ResourcePreloader {
+    constructor() {
+        this.preloadQueue = [];
+        this.loadedResources = new Set();
+    }
+
+    preloadImage(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => {
+                this.loadedResources.add(src);
+                resolve(img);
+            };
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
+
+    preloadScript(src) {
+        return new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.onload = () => {
+                this.loadedResources.add(src);
+                resolve(script);
+            };
+            script.onerror = reject;
+            script.src = src;
+            document.head.appendChild(script);
+        });
+    }
+
+    async preloadCriticalResources() {
+        const criticalResources = [
+            '/static/js/utils.js',
+            '/static/themes.json',
+            '/static/images/logo.png'
+        ];
+
+        try {
+            await Promise.all(criticalResources.map(resource => {
+                if (resource.endsWith('.js')) {
+                    return this.preloadScript(resource);
+                } else if (resource.match(/\.(png|jpg|jpeg|gif|svg)$/)) {
+                    return this.preloadImage(resource);
+                } else {
+                    return fetch(resource);
+                }
+            }));
+        } catch (error) {
+            console.warn('预加载资源失败:', error);
+        }
+    }
+}
+
+// 虚拟滚动实现
+class VirtualScroller {
+    constructor(container, itemHeight, renderItem) {
+        this.container = container;
+        this.itemHeight = itemHeight;
+        this.renderItem = renderItem;
+        this.visibleItems = [];
+        this.startIndex = 0;
+        this.endIndex = 0;
+        
+        this.setupScrollListener();
+    }
+
+    setupScrollListener() {
+        this.container.addEventListener('scroll', 
+            throttle(this.updateVisibleItems.bind(this), 16)
+        );
+    }
+
+    updateVisibleItems() {
+        const scrollTop = this.container.scrollTop;
+        const containerHeight = this.container.clientHeight;
+        
+        this.startIndex = Math.floor(scrollTop / this.itemHeight);
+        this.endIndex = Math.min(
+            this.startIndex + Math.ceil(containerHeight / this.itemHeight) + 1,
+            this.totalItems
+        );
+        
+        this.renderVisibleItems();
+    }
+
+    renderVisibleItems() {
+        // 清除现有项目
+        this.container.innerHTML = '';
+        
+        // 渲染可见项目
+        for (let i = this.startIndex; i < this.endIndex; i++) {
+            const item = this.renderItem(i);
+            item.style.position = 'absolute';
+            item.style.top = `${i * this.itemHeight}px`;
+            this.container.appendChild(item);
+        }
+    }
+}
+```
+
+### 内存管理
+```javascript
+// 内存管理器
+class MemoryManager {
+    constructor() {
+        this.cache = new Map();
+        this.maxCacheSize = 100;
+        this.cleanupInterval = 300000; // 5分钟
+        
+        this.startCleanupTimer();
+        this.setupMemoryPressureHandling();
+    }
+
+    set(key, value, ttl = 300000) {
+        if (this.cache.size >= this.maxCacheSize) {
+            // 删除最旧的缓存项
+            const firstKey = this.cache.keys().next().value;
+            this.cache.delete(firstKey);
+        }
+        
+        this.cache.set(key, {
+            value,
+            timestamp: Date.now(),
+            ttl
+        });
+    }
+
+    get(key) {
+        const item = this.cache.get(key);
+        if (!item) return null;
+        
+        if (Date.now() - item.timestamp > item.ttl) {
+            this.cache.delete(key);
+            return null;
+        }
+        
+        return item.value;
+    }
+
+    startCleanupTimer() {
+        setInterval(() => {
+            this.cleanup();
+        }, this.cleanupInterval);
+    }
+
+    cleanup() {
+        const now = Date.now();
+        for (const [key, item] of this.cache.entries()) {
+            if (now - item.timestamp > item.ttl) {
+                this.cache.delete(key);
+            }
+        }
+    }
+
+    setupMemoryPressureHandling() {
+        if ('memory' in performance) {
+            setInterval(() => {
+                const memInfo = performance.memory;
+                const usedRatio = memInfo.usedJSHeapSize / memInfo.jsHeapSizeLimit;
+                
+                if (usedRatio > 0.8) {
+                    console.warn('内存使用率过高，清理缓存');
+                    this.cache.clear();
+                }
+            }, 30000);
+        }
+    }
+}
+```
+
+这些前端开发规范确保了原生JavaScript应用的高质量、高性能和良好的用户体验，完整覆盖了桌面端和移动端的开发需求。

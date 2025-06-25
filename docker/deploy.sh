@@ -34,11 +34,7 @@ cd "$(dirname "$0")"
 # 检查环境变量文件
 if [ ! -f ".env" ]; then
     echo "⚠️  未找到.env文件，正在创建示例文件..."
-    if [ -f "docker.env.template" ]; then
-        cp docker.env.template .env
-    else
-        cp ../env.template .env
-    fi
+    cp ../env.template .env
     echo "📝 请编辑.env文件，设置您的API密钥和数据库配置"
     echo "   nano .env"
     echo ""
@@ -177,4 +173,4 @@ else
     echo "   docker compose logs mysql"
     echo ""
     echo "🔍 尝试访问: http://localhost:$APP_PORT/api/health"
-fi 
+fi

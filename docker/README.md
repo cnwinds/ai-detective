@@ -59,7 +59,6 @@ chmod +x *.sh
 ### 配置文件
 - `docker-compose.yml` - MySQL 5.7配置
 - `Dockerfile` - 应用镜像构建文件
-- `docker.env.template` - 环境变量模板
 - `.env` - 实际环境变量文件（需要创建）
 
 ### 文档
@@ -70,10 +69,12 @@ chmod +x *.sh
 ### 1. 创建环境变量文件
 
 ```bash
-# 复制模板文件
-cp docker.env.template .env
+# 复制根目录的模板文件
+cp ../env.template .env
 
-# 编辑配置文件
+# 编辑配置文件，注意修改Docker相关配置：
+# - DB_HOST=mysql（而不是localhost）
+# - DB_USER=gameuser（而不是root）
 # Windows: notepad .env
 # Linux: nano .env
 ```
@@ -193,4 +194,4 @@ docker compose exec mysql mysql -u gameuser -p -e "SELECT table_schema AS 'Datab
 - 🕵️ 沉浸式中文推理体验
 - 🎨 优雅的浅蓝色界面设计
 - 💾 完整的游戏进度保存
-- 📊 详细的游戏数据统计 
+- 📊 详细的游戏数据统计

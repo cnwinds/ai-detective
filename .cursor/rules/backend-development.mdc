@@ -1,0 +1,885 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 后端开发规范
+
+## 项目结构和架构原则
+
+### 后端包结构规范
+- **后端包结构**: 所有后端代码在backend包中，确保`__init__.py`存在
+- **相对导入**: 后端模块间使用相对导入：`from .module_name import ClassName`
+- **启动脚本**: 使用绝对导入：`from backend.module_name import ClassName`
+- **工具脚本**: 所有工具脚本放置在`tools/`目录下
+- **启动方式**: 必须在项目根目录运行 `python start_game.py`
+
+### 开发原则
+- **DRY原则**: 避免重复代码，提取公共逻辑
+- **单一职责**: 每个函数/类只完成一个明确的功能
+- **对象封装**: 使用数据对象简化函数参数
+- **业务逻辑内聚**: 相关逻辑封装在同一个类中
+
+### 命名约定
+- **Python**: 蛇形命名法 (snake_case)
+- **文件命名**: 小写字母加下划线，描述性命名
+- **类命名**: 帕斯卡命名法 (PascalCase)
+- **常量命名**: 全大写加下划线 (UPPER_SNAKE_CASE)
+
+## FastAPI应用架构
+
+### 标准应用结构
+```python
+# backend/app.py - 主应用入口
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from .routes import game, admin, history, websocket, common
+
+app = FastAPI(title="AI侦探游戏", version="1.6.0")
+
+# 中间件配置
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# 路由注册
+app.include_router(game.router, prefix="/api/game", tags=["游戏"])
+app.include_router(admin.router, prefix="/api/admin", tags=["管理"])
+app.include_router(history.router, prefix="/api/history", tags=["历史"])
+app.include_router(websocket.router, prefix="/ws", tags=["WebSocket"])
+app.include_router(common.router, prefix="/api", tags=["通用"])
+
+# 静态文件服务
+app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
+```
+
+### 路由模块化
+```python
+# backend/routes/game.py
+from fastapi import APIRouter, HTTPException, Depends
+from ..models import QuestionRequest, GameResponse
+from ..game_engine import GameEngine
+
+router = APIRouter()
+
+@router.post("/start", response_model=GameResponse)
+async def start_game(case_id: str):
+    """开始新游戏会话"""
+    try:
+        game_engine = GameEngine(case_id)
+        session_id = game_engine.create_session()
+        
+        return GameResponse(
+            success=True,
+            data={"session_id": session_id, "case": game_engine.get_case_info()}
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/question", response_model=GameResponse)
+async def ask_question(request: QuestionRequest):
+    """向角色提问"""
+    try:
+        # 获取游戏会话
+        if request.session_id not in game_sessions:
+            raise HTTPException(status_code=404, detail="游戏会话不存在")
+        
+        game_engine = game_sessions[request.session_id]
+        
+        # 异步处理AI响应
+        response = await game_engine.process_question(
+            request.character_name, 
+            request.question
+        )
+        
+        return GameResponse(success=True, data=response)
+        
+    except Exception as e:
+        logger.error(f"处理问题时出错: {str(e)}")
+        return GameResponse(success=False, error=str(e))
+```
+
+## 异步编程模式
+
+### 异步端点设计
+```python
+# 推荐的异步端点模式
+@router.post("/question")
+async def ask_question(request: QuestionRequest):
+    try:
+        # 获取游戏会话
+        if request.session_id not in game_sessions:
+            raise HTTPException(status_code=404, detail="游戏会话不存在")
+        
+        game_engine = game_sessions[request.session_id]
+        
+        # 异步处理AI响应
+        response = await game_engine.process_question(
+            request.character_name, 
+            request.question
+        )
+        
+        return {"success": True, "data": response}
+        
+    except Exception as e:
+        logger.error(f"处理问题时出错: {str(e)}")
+        return {"success": False, "error": str(e)}
+```
+
+### 流式响应处理
+```python
+# 流式响应生成器模式
+from fastapi.responses import StreamingResponse
+import json
+import asyncio
+
+@router.post("/question-stream")
+async def ask_question_stream(request: QuestionRequest):
+    async def generate_response():
+        try:
+            game_engine = game_sessions[request.session_id]
+            
+            async for chunk in game_engine.process_question_stream(
+                request.character_name, 
+                request.question
+            ):
+                yield f"data: {json.dumps({'type': 'chunk', 'content': chunk})}\n\n"
+                await asyncio.sleep(0.01)  # 确保流畅显示
+            
+            yield f"data: {json.dumps({'type': 'complete'})}\n\n"
+            
+        except Exception as e:
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+    
+    return StreamingResponse(generate_response(), media_type="text/plain")
+
+# AI服务流式调用
+class AIService:
+    async def generate_response_stream(self, prompt: str):
+        """生成流式AI响应"""
+        try:
+            response = await self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                stream=True,
+                temperature=0.7
+            )
+            
+            async for chunk in response:
+                if chunk.choices[0].delta.content:
+                    yield chunk.choices[0].delta.content
+                    
+        except Exception as e:
+            logger.error(f"AI服务流式响应错误: {str(e)}")
+            raise
+```
+
+### 并发处理
+```python
+import asyncio
+from typing import List, Dict, Any
+
+class GameEngine:
+    async def process_multiple_actions(self, actions: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """并发处理多个游戏动作"""
+        tasks = []
+        
+        for action in actions:
+            if action['type'] == 'question':
+                task = self.process_question(action['character'], action['question'])
+            elif action['type'] == 'evidence_check':
+                task = self.check_evidence(action['evidence_id'])
+            else:
+                continue
+            
+            tasks.append(task)
+        
+        # 并发执行所有任务
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        # 处理结果和异常
+        processed_results = []
+        for i, result in enumerate(results):
+            if isinstance(result, Exception):
+                processed_results.append({
+                    "success": False,
+                    "error": str(result),
+                    "action_index": i
+                })
+            else:
+                processed_results.append({
+                    "success": True,
+                    "data": result,
+                    "action_index": i
+                })
+        
+        return processed_results
+```
+
+## 数据模型设计
+
+### Pydantic模型定义
+```python
+from pydantic import BaseModel, Field, validator
+from typing import List, Optional, Dict, Union
+from enum import Enum
+
+class GamePhase(str, Enum):
+    CASE_SELECTION = "case-selection"
+    CASE_INTRODUCTION = "case-introduction"
+    INVESTIGATION = "investigation"
+    ACCUSATION = "accusation"
+    TRIAL = "trial"
+    EVALUATION = "evaluation"
+
+class QuestionRequest(BaseModel):
+    session_id: str = Field(..., description="游戏会话ID")
+    character_name: str = Field(..., description="角色名称")
+    question: str = Field(..., min_length=1, max_length=500, description="问题内容")
+    
+    @validator('question')
+    def validate_question(cls, v):
+        if not v.strip():
+            raise ValueError('问题不能为空')
+        return v.strip()
+
+class AccusationRequest(BaseModel):
+    session_id: str
+    accused_name: str
+    reasoning: str = Field(..., min_length=10, description="指控理由")
+
+class GameResponse(BaseModel):
+    success: bool
+    data: Optional[Dict] = None
+    error: Optional[str] = None
+    error_code: Optional[str] = None
+    timestamp: Optional[str] = None
+
+class Character(BaseModel):
+    name: str
+    occupation: str
+    personality: str
+    background: str
+    type: str  # victim, suspect, witness
+    is_guilty: bool = False
+    relationship_to_victim: str = ""
+
+class Evidence(BaseModel):
+    id: str
+    name: str
+    description: str
+    discovery_conditions: List[str]
+    importance: str  # low, medium, high, critical
+    type: str  # physical, testimony, document
+    found_by: Optional[str] = None
+    found_at: Optional[str] = None
+
+class Case(BaseModel):
+    id: str
+    title: str
+    description: str
+    victim: Character
+    characters: List[Character]
+    evidence: List[Evidence]
+    difficulty: str  # easy, medium, hard
+    category: str  # murder, theft, fraud
+    solution: Dict[str, Any]
+```
+
+### 数据验证和转换
+```python
+from pydantic import BaseModel, validator, root_validator
+from typing import Any, Dict
+
+class GameSession(BaseModel):
+    session_id: str
+    case_id: str
+    phase: GamePhase
+    evidence_found: List[str] = []
+    conversation_history: Dict[str, List[Dict]] = {}
+    rounds: int = 0
+    hints_used: int = 0
+    start_time: str
+    
+    @validator('evidence_found')
+    def validate_evidence_list(cls, v):
+        # 去重并保持顺序
+        return list(dict.fromkeys(v))
+    
+    @root_validator
+    def validate_session_state(cls, values):
+        phase = values.get('phase')
+        rounds = values.get('rounds', 0)
+        
+        # 验证游戏状态一致性
+        if phase == GamePhase.ACCUSATION and rounds < 3:
+            raise ValueError('指控阶段至少需要3轮对话')
+        
+        return values
+
+class AIPromptBuilder:
+    @staticmethod
+    def build_character_prompt(character: Character, question: str, context: Dict) -> str:
+        """构建角色AI提示词"""
+        prompt_parts = [
+            f"你是{character.name}，{character.occupation}。",
+            f"性格特点：{character.personality}",
+            f"背景信息：{character.background}",
+            f"与受害者关系：{character.relationship_to_victim}",
+            "",
+            f"有人问你：{question}",
+            "",
+            "请根据你的角色设定回答这个问题。要保持角色一致性，不要主动透露所有信息。"
+        ]
+        
+        # 添加对话历史上下文
+        if context.get('conversation_history'):
+            prompt_parts.insert(-2, "之前的对话记录：")
+            for entry in context['conversation_history'][-3:]:  # 只取最近3轮
+                prompt_parts.insert(-2, f"问：{entry['question']}")
+                prompt_parts.insert(-2, f"答：{entry['response']}")
+            prompt_parts.insert(-2, "")
+        
+        return "\n".join(prompt_parts)
+```
+
+## 错误处理和异常管理
+
+### 自定义异常类
+```python
+class GameError(Exception):
+    """游戏相关异常基类"""
+    def __init__(self, message: str, error_code: str = "GAME_ERROR"):
+        self.message = message
+        self.error_code = error_code
+        super().__init__(self.message)
+
+class AIServiceError(GameError):
+    """AI服务异常"""
+    def __init__(self, message: str):
+        super().__init__(message, "AI_SERVICE_ERROR")
+
+class SessionNotFoundError(GameError):
+    """会话不存在异常"""
+    def __init__(self, session_id: str):
+        super().__init__(f"会话 {session_id} 不存在", "SESSION_NOT_FOUND")
+
+class InvalidGameStateError(GameError):
+    """无效游戏状态异常"""
+    def __init__(self, current_state: str, expected_state: str):
+        super().__init__(
+            f"当前游戏状态 {current_state} 无效，期望状态 {expected_state}",
+            "INVALID_GAME_STATE"
+        )
+```
+
+### 全局异常处理器
+```python
+from fastapi import Request
+from fastapi.responses import JSONResponse
+import logging
+
+logger = logging.getLogger(__name__)
+
+@app.exception_handler(GameError)
+async def game_error_handler(request: Request, exc: GameError):
+    """处理游戏相关异常"""
+    logger.warning(f"游戏异常: {exc.message}")
+    return JSONResponse(
+        status_code=400,
+        content={
+            "success": False,
+            "error": exc.message,
+            "error_code": exc.error_code
+        }
+    )
+
+@app.exception_handler(SessionNotFoundError)
+async def session_not_found_handler(request: Request, exc: SessionNotFoundError):
+    """处理会话不存在异常"""
+    return JSONResponse(
+        status_code=404,
+        content={
+            "success": False,
+            "error": exc.message,
+            "error_code": exc.error_code
+        }
+    )
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    """处理未捕获的异常"""
+    logger.error(f"未处理的异常: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={
+            "success": False,
+            "error": "服务器内部错误",
+            "error_code": "INTERNAL_SERVER_ERROR"
+        }
+    )
+
+# 错误处理装饰器
+from functools import wraps
+
+def handle_api_errors(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        try:
+            return await func(*args, **kwargs)
+        except HTTPException:
+            raise  # 重新抛出HTTP异常
+        except GameError:
+            raise  # 重新抛出游戏异常
+        except Exception as e:
+            logger.error(f"{func.__name__} 错误: {str(e)}")
+            raise GameError(f"处理请求时发生错误: {str(e)}", "PROCESSING_ERROR")
+    return wrapper
+
+# 使用装饰器
+@handle_api_errors
+async def process_game_action(request):
+    # 业务逻辑
+    pass
+```
+
+## 性能优化
+
+### 缓存策略
+```python
+from functools import wraps
+import time
+from typing import Dict, Any, Optional
+
+class CacheManager:
+    def __init__(self, default_ttl: int = 300):
+        self.cache: Dict[str, Dict[str, Any]] = {}
+        self.default_ttl = default_ttl
+    
+    def get(self, key: str) -> Optional[Any]:
+        if key in self.cache:
+            entry = self.cache[key]
+            if time.time() - entry['timestamp'] < entry['ttl']:
+                return entry['value']
+            else:
+                del self.cache[key]
+        return None
+    
+    def set(self, key: str, value: Any, ttl: Optional[int] = None) -> None:
+        self.cache[key] = {
+            'value': value,
+            'timestamp': time.time(),
+            'ttl': ttl or self.default_ttl
+        }
+    
+    def clear(self) -> None:
+        self.cache.clear()
+
+# 全局缓存实例
+cache_manager = CacheManager()
+
+def cache_result(ttl: int = 300, key_func=None):
+    """缓存函数结果的装饰器"""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            # 生成缓存键
+            if key_func:
+                cache_key = key_func(*args, **kwargs)
+            else:
+                cache_key = f"{func.__name__}:{hash(str(args) + str(kwargs))}"
+            
+            # 尝试从缓存获取
+            cached_result = cache_manager.get(cache_key)
+            if cached_result is not None:
+                return cached_result
+            
+            # 执行函数并缓存结果
+            result = await func(*args, **kwargs)
+            cache_manager.set(cache_key, result, ttl)
+            return result
+        return wrapper
+    return decorator
+
+# 使用示例
+@cache_result(ttl=600)  # 缓存10分钟
+async def get_case_info(case_id: str):
+    # 从数据库或文件加载案例信息
+    pass
+```
+
+### 连接池管理
+```python
+import asyncio
+from typing import Any, Optional
+import aiohttp
+
+class ConnectionPool:
+    def __init__(self, max_connections: int = 10):
+        self.max_connections = max_connections
+        self.connections = []
+        self.in_use = set()
+        self.semaphore = asyncio.Semaphore(max_connections)
+    
+    async def get_connection(self) -> Any:
+        async with self.semaphore:
+            if self.connections:
+                conn = self.connections.pop()
+                self.in_use.add(conn)
+                return conn
+            
+            # 创建新连接
+            conn = await self.create_connection()
+            self.in_use.add(conn)
+            return conn
+    
+    async def return_connection(self, conn: Any) -> None:
+        if conn in self.in_use:
+            self.in_use.remove(conn)
+            if await self.is_connection_valid(conn):
+                self.connections.append(conn)
+            else:
+                await self.close_connection(conn)
+    
+    async def create_connection(self) -> Any:
+        # 创建新的连接实例
+        return aiohttp.ClientSession()
+    
+    async def is_connection_valid(self, conn: Any) -> bool:
+        # 检查连接是否有效
+        return not conn.closed
+    
+    async def close_connection(self, conn: Any) -> None:
+        # 关闭连接
+        await conn.close()
+
+# AI服务连接池
+ai_connection_pool = ConnectionPool(max_connections=5)
+
+class AIService:
+    async def make_request(self, prompt: str) -> str:
+        conn = await ai_connection_pool.get_connection()
+        try:
+            # 使用连接进行API调用
+            async with conn.post(
+                self.api_url,
+                headers=self.headers,
+                json={"prompt": prompt}
+            ) as response:
+                result = await response.json()
+                return result['content']
+        finally:
+            await ai_connection_pool.return_connection(conn)
+```
+
+## 代码重构模式
+
+### 函数职责分离
+```python
+# 重构前 - 职责混乱
+async def process_accusation(session_id, accused_name, reasoning, case, characters, evidence):
+    # 验证会话
+    if session_id not in sessions:
+        raise HTTPException(404, "会话不存在")
+    
+    # 构建上下文
+    context = ""
+    for char in characters:
+        context += f"角色: {char.name}\n"
+        # ... 大量上下文构建代码
+    
+    # 生成AI响应
+    response = await ai_service.generate_response(context)
+    
+    # 解析投票结果
+    votes = []
+    # ... 大量解析代码
+    
+    # 计算最终结果
+    # ... 大量计算代码
+    
+    return result
+
+# 重构后 - 职责分离
+class AccusationSystem:
+    async def process_accusation(self, accusation: Accusation) -> AccusationResult:
+        """处理指控的主要入口点"""
+        context = self._build_context(accusation)
+        ai_response = await self._generate_ai_response(context)
+        votes = self._parse_votes(ai_response)
+        result = self._calculate_result(votes, accusation)
+        return result
+    
+    def _build_context(self, accusation: Accusation) -> str:
+        """构建AI上下文"""
+        context_parts = [
+            f"被指控者: {accusation.accused.name}",
+            f"指控理由: {accusation.reasoning}",
+            "角色信息:"
+        ]
+        
+        for character in accusation.case.characters:
+            context_parts.append(f"- {character.name}: {character.occupation}")
+        
+        return "\n".join(context_parts)
+    
+    async def _generate_ai_response(self, context: str) -> str:
+        """生成AI响应"""
+        return await self.ai_service.generate_response(context)
+    
+    def _parse_votes(self, response: str) -> List[Vote]:
+        """解析投票结果"""
+        # 专注于投票解析逻辑
+        votes = []
+        # 解析逻辑...
+        return votes
+    
+    def _calculate_result(self, votes: List[Vote], accusation: Accusation) -> AccusationResult:
+        """计算最终结果"""
+        support_count = sum(1 for vote in votes if vote.decision == "support")
+        total_votes = len(votes)
+        
+        return AccusationResult(
+            is_guilty=support_count > total_votes / 2,
+            support_votes=support_count,
+            total_votes=total_votes,
+            verdict_details=self._generate_verdict(votes)
+        )
+```
+
+### 对象封装优化
+```python
+# 重构前 - 参数过多
+async def generate_character_response(
+    character_name: str,
+    question: str,
+    case_title: str,
+    case_description: str,
+    victim_name: str,
+    conversation_history: List[Dict],
+    evidence_found: List[str]
+) -> str:
+    # 函数实现
+    pass
+
+# 重构后 - 使用对象封装
+@dataclass
+class ConversationContext:
+    character_name: str
+    question: str
+    case: Case
+    conversation_history: List[Dict]
+    evidence_found: List[Evidence]
+    session_metadata: Dict[str, Any] = None
+
+async def generate_character_response(context: ConversationContext) -> str:
+    """生成角色响应 - 参数清晰，易于扩展"""
+    prompt = AIPromptBuilder.build_character_prompt(
+        character=context.case.get_character(context.character_name),
+        question=context.question,
+        context={
+            'conversation_history': context.conversation_history,
+            'evidence_found': context.evidence_found,
+            'case_info': context.case.get_summary()
+        }
+    )
+    
+    return await ai_service.generate_response(prompt)
+
+# 进一步优化 - 使用建造者模式
+class ConversationContextBuilder:
+    def __init__(self):
+        self.context = ConversationContext(
+            character_name="",
+            question="",
+            case=None,
+            conversation_history=[],
+            evidence_found=[]
+        )
+    
+    def with_character(self, character_name: str):
+        self.context.character_name = character_name
+        return self
+    
+    def with_question(self, question: str):
+        self.context.question = question
+        return self
+    
+    def with_case(self, case: Case):
+        self.context.case = case
+        return self
+    
+    def with_history(self, history: List[Dict]):
+        self.context.conversation_history = history
+        return self
+    
+    def build(self) -> ConversationContext:
+        if not all([self.context.character_name, self.context.question, self.context.case]):
+            raise ValueError("必须设置角色名称、问题和案例")
+        return self.context
+
+# 使用示例
+context = (ConversationContextBuilder()
+    .with_character("张三")
+    .with_question("你昨晚在哪里？")
+    .with_case(current_case)
+    .with_history(conversation_history)
+    .build())
+
+response = await generate_character_response(context)
+```
+
+## 日志和监控
+
+### 结构化日志
+```python
+import logging
+import json
+from datetime import datetime
+from typing import Dict, Any
+
+class StructuredLogger:
+    def __init__(self, name: str):
+        self.logger = logging.getLogger(name)
+        self.logger.setLevel(logging.INFO)
+        
+        # 创建格式化器
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+        )
+        
+        # 创建处理器
+        handler = logging.StreamHandler()
+        handler.setFormatter(formatter)
+        self.logger.addHandler(handler)
+    
+    def log_api_request(self, endpoint: str, method: str, params: Dict[str, Any], 
+                       session_id: str = None, user_id: str = None):
+        """记录API请求"""
+        log_data = {
+            "event_type": "api_request",
+            "endpoint": endpoint,
+            "method": method,
+            "params": params,
+            "session_id": session_id,
+            "user_id": user_id,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        self.logger.info(json.dumps(log_data, ensure_ascii=False))
+    
+    def log_ai_interaction(self, session_id: str, character: str, 
+                          question: str, response: str, duration: float):
+        """记录AI交互"""
+        log_data = {
+            "event_type": "ai_interaction",
+            "session_id": session_id,
+            "character": character,
+            "question_length": len(question),
+            "response_length": len(response),
+            "duration_ms": duration * 1000,
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        self.logger.info(json.dumps(log_data, ensure_ascii=False))
+    
+    def log_error(self, error: Exception, context: Dict[str, Any] = None):
+        """记录错误"""
+        log_data = {
+            "event_type": "error",
+            "error_type": type(error).__name__,
+            "error_message": str(error),
+            "context": context or {},
+            "timestamp": datetime.utcnow().isoformat()
+        }
+        self.logger.error(json.dumps(log_data, ensure_ascii=False))
+
+# 全局日志实例
+app_logger = StructuredLogger("ai_detective_game")
+
+# 日志装饰器
+def log_api_call(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        start_time = time.time()
+        
+        try:
+            result = await func(*args, **kwargs)
+            duration = time.time() - start_time
+            
+            app_logger.log_api_request(
+                endpoint=func.__name__,
+                method="POST",
+                params=kwargs,
+                duration=duration
+            )
+            
+            return result
+        except Exception as e:
+            app_logger.log_error(e, {"function": func.__name__, "args": kwargs})
+            raise
+    return wrapper
+```
+
+### 性能监控
+```python
+import time
+import psutil
+from typing import Dict, Any
+
+class PerformanceMonitor:
+    def __init__(self):
+        self.metrics = {}
+        self.start_time = time.time()
+    
+    def record_metric(self, name: str, value: float, tags: Dict[str, str] = None):
+        """记录性能指标"""
+        self.metrics[name] = {
+            "value": value,
+            "timestamp": time.time(),
+            "tags": tags or {}
+        }
+    
+    def get_system_metrics(self) -> Dict[str, Any]:
+        """获取系统性能指标"""
+        return {
+            "cpu_percent": psutil.cpu_percent(),
+            "memory_percent": psutil.virtual_memory().percent,
+            "disk_usage": psutil.disk_usage('/').percent,
+            "uptime": time.time() - self.start_time
+        }
+    
+    async def monitor_function(self, func, *args, **kwargs):
+        """监控函数执行性能"""
+        start_time = time.time()
+        start_memory = psutil.Process().memory_info().rss
+        
+        try:
+            result = await func(*args, **kwargs)
+            
+            end_time = time.time()
+            end_memory = psutil.Process().memory_info().rss
+            
+            self.record_metric(f"{func.__name__}_duration", end_time - start_time)
+            self.record_metric(f"{func.__name__}_memory_delta", end_memory - start_memory)
+            
+            return result
+        except Exception as e:
+            self.record_metric(f"{func.__name__}_error", 1)
+            raise
+
+# 全局性能监控实例
+performance_monitor = PerformanceMonitor()
+
+# 性能监控装饰器
+def monitor_performance(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        return await performance_monitor.monitor_function(func, *args, **kwargs)
+    return wrapper
+```
+
+这些后端开发规范确保了Python/FastAPI应用的高质量、高性能和可维护性，为AI侦探游戏项目提供了坚实的后端技术基础。

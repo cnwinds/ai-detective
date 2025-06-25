@@ -39,11 +39,7 @@ cd /d "%~dp0"
 REM 检查环境变量文件
 if not exist ".env" (
     echo ⚠️  未找到.env文件，正在创建示例文件...
-    if exist "docker.env.template" (
-        copy "docker.env.template" ".env" >nul
-    ) else (
-        copy "..\env.template" ".env" >nul
-    )
+    copy "..\env.template" ".env" >nul
     echo 📝 请编辑.env文件，设置您的API密钥和数据库配置
     echo    notepad .env
     echo.
@@ -223,4 +219,4 @@ if not errorlevel 1 (
     echo 🔍 尝试访问: http://localhost:%PORT%/api/health
 )
 
-pause 
+pause

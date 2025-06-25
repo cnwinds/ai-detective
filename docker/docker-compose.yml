@@ -4,7 +4,6 @@ services:
     image: mysql:5.7
     container_name: ai-detective-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-password}
       MYSQL_DATABASE: ${DB_NAME:-ai_detective}
       MYSQL_USER: ${DB_USER:-gameuser}
       MYSQL_PASSWORD: ${DB_PASSWORD:-password}

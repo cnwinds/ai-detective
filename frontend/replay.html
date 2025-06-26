@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>游戏回放 - AI侦探推理游戏</title>
+    <script src="/static/js/theme-manager.js"></script>
     <style>
         * {
             margin: 0;
@@ -13,23 +14,27 @@
 
         body {
             font-family: 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--theme-primary-bg);
             min-height: 100vh;
             padding: 20px;
-            color: #333;
+            color: var(--theme-text-primary);
+            transition: all 0.3s ease;
         }
 
         .header {
-            background: white;
+            background: var(--theme-secondary-bg);
+            backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 20px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px var(--theme-shadow-color);
+            border: 1px solid var(--theme-border-color);
         }
 
         .header h1 {
-            color: #333;
+            color: var(--theme-text-primary);
             margin-bottom: 10px;
+            text-shadow: 0 2px 4px var(--theme-shadow-color);
         }
 
         .session-info {
@@ -40,79 +45,38 @@
         }
 
         .info-item {
-            background: #f8f9fa;
+            background: var(--theme-hover-bg);
             padding: 10px;
             border-radius: 8px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid var(--theme-primary-color);
         }
 
         .info-label {
             font-weight: bold;
-            color: #666;
+            color: var(--theme-text-secondary);
             font-size: 12px;
             text-transform: uppercase;
         }
 
         .info-value {
-            color: #333;
+            color: var(--theme-text-primary);
             font-size: 14px;
             margin-top: 2px;
         }
 
-        .controls {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
 
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 20px;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
 
-        .btn-primary {
-            background: #667eea;
-            color: white;
-        }
 
-        .btn-primary:hover {
-            background: #5a6fd8;
-            transform: translateY(-1px);
-        }
 
-        .btn-secondary {
-            background: #6c757d;
-            color: white;
-        }
 
-        .btn-secondary:hover {
-            background: #5a626b;
-        }
-
-        .btn-success {
-            background: #28a745;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-        }
 
         .conversation-container {
-            background: white;
+            background: var(--theme-secondary-bg);
+            backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 5px 15px var(--theme-shadow-color);
+            border: 1px solid var(--theme-border-color);
             max-height: 60vh;
             overflow-y: auto;
         }
@@ -121,72 +85,63 @@
             margin-bottom: 20px;
             padding: 15px;
             border-radius: 10px;
-            border-left: 4px solid #ddd;
-            opacity: 0.3;
-            transition: all 0.5s ease;
-        }
-
-        .conversation-item.active {
+            border-left: 4px solid var(--theme-border-color);
             opacity: 1;
-            transform: scale(1.02);
-        }
-
-        .conversation-item.played {
-            opacity: 0.8;
+            transition: all 0.3s ease;
         }
 
         .conversation-item.player {
-            background: #e1f5fe;
-            border-left-color: #2196f3;
+            background: var(--theme-info-bg);
+            border-left-color: var(--theme-info-color);
         }
 
         .conversation-item.character {
-            background: #f1e6ff;
-            border-left-color: #9c27b0;
+            background: var(--theme-character-suspect-bg);
+            border-left-color: var(--theme-character-suspect-color);
         }
 
         .conversation-item.system {
-            background: #fff8e1;
-            border-left-color: #ff9800;
+            background: var(--theme-badge-accent-bg);
+            border-left-color: var(--theme-accent-color);
         }
 
         .conversation-item.accusation {
-            background: #ffebee;
-            border-left-color: #f44336;
+            background: var(--theme-warning-bg);
+            border-left-color: var(--theme-warning-color);
             font-weight: bold;
         }
 
         .conversation-item.defense {
-            background: #e8f5e8;
-            border-left-color: #4caf50;
+            background: var(--theme-success-bg);
+            border-left-color: var(--theme-success-color);
         }
 
         .conversation-item.testimony {
-            background: #e1f5fe;
-            border-left-color: #2196f3;
+            background: var(--theme-info-bg);
+            border-left-color: var(--theme-info-color);
         }
 
         .conversation-item.vote {
-            background: #f1e6ff;
-            border-left-color: #9c27b0;
+            background: var(--theme-character-witness-bg);
+            border-left-color: var(--theme-character-witness-color);
         }
 
         .conversation-item.verdict {
-            background: #fff3c4;
-            border-left-color: #ffc107;
+            background: var(--theme-badge-accent-bg);
+            border-left-color: var(--theme-accent-color);
             font-weight: bold;
             font-size: 16px;
         }
 
         .conversation-item.solution {
-            background: #e8f5e8;
-            border-left-color: #4caf50;
+            background: var(--theme-success-bg);
+            border-left-color: var(--theme-success-color);
             font-style: italic;
         }
 
         .speaker {
             font-weight: bold;
-            color: #111;
+            color: var(--theme-text-primary);
             margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
@@ -196,12 +151,12 @@
 
         .timestamp {
             font-size: 12px;
-            color: #555;
+            color: var(--theme-text-secondary);
             font-weight: normal;
         }
 
         .content {
-            color: #222;
+            color: var(--theme-text-primary);
             line-height: 1.6;
             font-weight: 500;
         }
@@ -209,25 +164,26 @@
         .loading {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: var(--theme-text-secondary);
         }
 
         .error {
-            background: #f8d7da;
-            color: #721c24;
+            background: var(--theme-warning-bg);
+            color: var(--theme-warning-color);
             padding: 20px;
             border-radius: 10px;
             margin: 20px;
             text-align: center;
+            border: 1px solid var(--theme-warning-color);
         }
 
         .support {
-            color: #28a745;
+            color: var(--theme-success-color);
             font-weight: bold;
         }
 
         .oppose {
-            color: #dc3545;
+            color: var(--theme-warning-color);
             font-weight: bold;
         }
     </style>
@@ -240,11 +196,7 @@
         </div>
     </div>
 
-    <div class="controls">
-        <button class="btn btn-primary" id="playBtn" onclick="togglePlay()">▶️ 播放</button>
-        <button class="btn btn-secondary" onclick="resetReplay()">🔄 重置</button>
-        <button class="btn btn-secondary" onclick="goHome()">🏠 回到首页</button>
-    </div>
+
 
     <div id="evaluationSection" class="header" style="display: none;">
         <h3>🌟 游戏评价</h3>
@@ -267,8 +219,6 @@
 
     <script>
         let replayData = null;
-        let currentIndex = 0;
-        let isPlaying = false;
         let appTimezone = 'Asia/Shanghai'; // 默认时区
 
         // 获取URL参数
@@ -340,7 +290,24 @@
             const container = document.getElementById('sessionInfo');
             
             const startTime = new Date(info.start_time).toLocaleString('zh-CN', { timeZone: appTimezone });
-            const endTime = info.end_time ? new Date(info.end_time).toLocaleString('zh-CN', { timeZone: appTimezone }) : '未完成';
+            
+            // 计算游戏时长
+            let durationText = '未知';
+            if (info.start_time && info.end_time) {
+                const startTimeObj = new Date(info.start_time);
+                const endTimeObj = new Date(info.end_time);
+                const durationMs = endTimeObj - startTimeObj;
+                const minutes = Math.floor(durationMs / (1000 * 60));
+                const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
+                
+                if (minutes > 0) {
+                    durationText = `${minutes}分${seconds}秒`;
+                } else {
+                    durationText = `${seconds}秒`;
+                }
+            } else if (info.start_time && !info.end_time) {
+                durationText = '进行中';
+            }
 
             container.innerHTML = `
                 <div class="info-item">
@@ -352,20 +319,20 @@
                     <div class="info-value">${startTime}</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">结束时间</div>
-                    <div class="info-value">${endTime}</div>
+                    <div class="info-label">游戏时长</div>
+                    <div class="info-value">${durationText}</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">对话轮数</div>
                     <div class="info-value">${calculateConversationRounds()} 轮</div>
                 </div>
                 <div class="info-item">
-                    <div class="info-label">游戏状态</div>
-                    <div class="info-value">${info.is_solved ? '✅ 已解决' : '❌ 未解决'}</div>
-                </div>
-                <div class="info-item">
                     <div class="info-label">使用提示</div>
                     <div class="info-value">${info.hints_used || 0} 次</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">游戏状态</div>
+                    <div class="info-value">${info.is_solved ? '✅ 已解决' : '❌ 未解决'}</div>
                 </div>
                 ${info.client_id ? `
                     <div class="info-item">
@@ -563,76 +530,67 @@
             return content.replace(/\n/g, '<br/>');
         }
 
-        // 播放控制
-        function togglePlay() {
-            const playBtn = document.getElementById('playBtn');
-            
-            if (isPlaying) {
-                isPlaying = false;
-                playBtn.innerHTML = '▶️ 播放';
-            } else {
-                isPlaying = true;
-                playBtn.innerHTML = '⏸️ 暂停';
-                playNext();
-            }
-        }
 
-        // 播放下一个对话
-        function playNext() {
-            if (!isPlaying || !replayData || currentIndex >= replayData.conversations.length) {
-                isPlaying = false;
-                document.getElementById('playBtn').innerHTML = '▶️ 播放';
-                return;
-            }
-
-            // 高亮当前对话
-            const items = document.querySelectorAll('.conversation-item');
-            
-            // 将之前的设为已播放
-            if (currentIndex > 0) {
-                items[currentIndex - 1].classList.remove('active');
-                items[currentIndex - 1].classList.add('played');
-            }
-            
-            // 高亮当前项
-            if (items[currentIndex]) {
-                items[currentIndex].classList.add('active');
-                items[currentIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-
-            currentIndex++;
-
-            // 设置下次播放的延时
-            if (isPlaying) {
-                setTimeout(playNext, 2000);
-            }
-        }
-
-        // 重置播放
-        function resetReplay() {
-            isPlaying = false;
-            currentIndex = 0;
-            
-            // 重置所有对话项的状态
-            const items = document.querySelectorAll('.conversation-item');
-            items.forEach(item => {
-                item.classList.remove('active', 'played');
-            });
-            
-            // 重置播放按钮
-            document.getElementById('playBtn').innerHTML = '▶️ 播放';
-        }
-
-        // 导航功能
-        function goHome() {
-            window.location.href = '/';
-        }
 
         function showError(message) {
             document.getElementById('loadingDiv').style.display = 'none';
             document.getElementById('errorMessage').textContent = message;
             document.getElementById('errorDiv').style.display = 'block';
         }
+
+        // 初始化主题管理器
+        document.addEventListener('DOMContentLoaded', async function() {
+            const themeManager = new ThemeManager();
+            await themeManager.init();
+            
+            // 添加主题选择器
+            const themeSelector = document.createElement('div');
+            themeSelector.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 1000;
+            `;
+            
+            const themeBtn = document.createElement('button');
+            themeBtn.textContent = '🎨';
+            themeBtn.title = '切换主题';
+            themeBtn.style.cssText = `
+                background: var(--theme-secondary-bg);
+                border: 1px solid var(--theme-border-color);
+                color: var(--theme-text-primary);
+                padding: 10px;
+                border-radius: 50%;
+                cursor: pointer;
+                font-size: 16px;
+                backdrop-filter: blur(10px);
+                transition: all 0.3s ease;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            themeBtn.addEventListener('click', () => {
+                themeManager.switchToNextTheme();
+            });
+            
+            themeBtn.addEventListener('mouseenter', () => {
+                themeBtn.style.background = 'var(--theme-hover-bg)';
+                themeBtn.style.borderColor = 'var(--theme-primary-color)';
+                themeBtn.style.transform = 'scale(1.1)';
+            });
+            
+            themeBtn.addEventListener('mouseleave', () => {
+                themeBtn.style.background = 'var(--theme-secondary-bg)';
+                themeBtn.style.borderColor = 'var(--theme-border-color)';
+                themeBtn.style.transform = 'scale(1)';
+            });
+            
+            themeSelector.appendChild(themeBtn);
+            document.body.appendChild(themeSelector);
+        });
     </script>
 </body>
 </html> 

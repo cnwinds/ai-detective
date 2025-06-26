@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理员仪表板 - AI侦探推理游戏</title>
+    <script src="/static/js/theme-manager.js"></script>
     <style>
         * {
             margin: 0;
@@ -13,16 +14,19 @@
 
         body {
             font-family: 'Microsoft YaHei', sans-serif;
-            background: #f5f7fa;
-            color: #333;
+            background: var(--theme-primary-bg);
+            color: var(--theme-text-primary);
             line-height: 1.6;
+            transition: all 0.3s ease;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: var(--theme-secondary-bg);
+            backdrop-filter: blur(10px);
+            color: var(--theme-text-primary);
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px var(--theme-shadow-color);
+            border-bottom: 1px solid var(--theme-border-color);
         }
 
         .header-content {
@@ -35,6 +39,7 @@
 
         .header h1 {
             font-size: 24px;
+            text-shadow: 0 2px 4px var(--theme-shadow-color);
         }
 
         .header-actions {
@@ -44,16 +49,18 @@
 
         .header-btn {
             padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
+            background: var(--theme-hover-bg);
+            color: var(--theme-text-primary);
             text-decoration: none;
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: background 0.3s;
+            border: 1px solid var(--theme-border-color);
+            transition: all 0.3s ease;
         }
 
         .header-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: var(--theme-active-bg);
+            border-color: var(--theme-primary-color);
+            transform: translateY(-1px);
         }
 
         .container {
@@ -70,16 +77,20 @@
         }
 
         .stat-card {
-            background: white;
+            background: var(--theme-secondary-bg);
+            backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px var(--theme-shadow-color);
             text-align: center;
-            transition: transform 0.3s;
+            transition: all 0.3s ease;
+            border: 1px solid var(--theme-border-color);
         }
 
         .stat-card:hover {
             transform: translateY(-2px);
+            box-shadow: 0 8px 25px var(--theme-shadow-color);
+            border-color: var(--theme-primary-color);
         }
 
         .stat-card .icon {
@@ -90,21 +101,24 @@
         .stat-card .value {
             font-size: 32px;
             font-weight: bold;
-            color: #667eea;
+            color: var(--theme-primary-color);
             margin-bottom: 5px;
+            text-shadow: 0 1px 3px var(--theme-shadow-color);
         }
 
         .stat-card .label {
-            color: #666;
+            color: var(--theme-text-secondary);
             font-size: 14px;
         }
 
         .chart-section {
-            background: white;
+            background: var(--theme-secondary-bg);
+            backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px var(--theme-shadow-color);
             margin-bottom: 30px;
+            border: 1px solid var(--theme-border-color);
         }
 
         .chart-header {
@@ -115,7 +129,7 @@
         }
 
         .chart-header h3 {
-            color: #333;
+            color: var(--theme-text-primary);
             font-size: 20px;
         }
 
@@ -126,18 +140,23 @@
 
         .time-btn {
             padding: 6px 12px;
-            border: 1px solid #ddd;
-            background: white;
-            color: #666;
+            border: 1px solid var(--theme-border-color);
+            background: var(--theme-secondary-bg);
+            color: var(--theme-text-secondary);
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
 
         .time-btn.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
+            background: var(--theme-primary-color);
+            color: var(--theme-text-primary);
+            border-color: var(--theme-primary-color);
+        }
+
+        .time-btn:hover:not(.active) {
+            background: var(--theme-hover-bg);
+            border-color: var(--theme-primary-color);
         }
 
         .chart-container {
@@ -155,23 +174,27 @@
         .daily-stats-table td {
             padding: 12px;
             text-align: left;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--theme-border-color);
         }
 
         .daily-stats-table th {
-            background: #f8f9fa;
+            background: var(--theme-hover-bg);
             font-weight: bold;
-            color: #333;
+            color: var(--theme-text-primary);
+        }
+
+        .daily-stats-table td {
+            color: var(--theme-text-secondary);
         }
 
         .daily-stats-table tr:hover {
-            background: #f8f9fa;
+            background: var(--theme-hover-bg);
         }
 
         .progress-bar {
             width: 100%;
             height: 8px;
-            background: #eee;
+            background: var(--theme-border-color);
             border-radius: 4px;
             overflow: hidden;
             margin-top: 5px;
@@ -179,7 +202,7 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #667eea, #764ba2);
+            background: var(--theme-primary-color);
             transition: width 0.3s;
         }
 
@@ -191,10 +214,17 @@
         }
 
         .breakdown-card {
-            background: white;
+            background: var(--theme-secondary-bg);
+            backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px var(--theme-shadow-color);
+            border: 1px solid var(--theme-border-color);
+        }
+
+        .breakdown-card h3 {
+            color: var(--theme-text-primary);
+            margin-bottom: 15px;
         }
 
         .breakdown-item {
@@ -202,7 +232,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 0;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--theme-border-color);
         }
 
         .breakdown-item:last-child {
@@ -211,6 +241,7 @@
 
         .breakdown-label {
             font-weight: 500;
+            color: var(--theme-text-secondary);
         }
 
         .breakdown-stats {
@@ -219,24 +250,24 @@
 
         .breakdown-count {
             font-weight: bold;
-            color: #333;
+            color: var(--theme-text-primary);
         }
 
         .breakdown-rate {
             font-size: 12px;
-            color: #666;
+            color: var(--theme-text-muted);
         }
 
         .loading {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: var(--theme-text-secondary);
         }
 
         .loading-spinner {
-            border: 3px solid #f3f3f3;
+            border: 3px solid var(--theme-border-color);
             border-radius: 50%;
-            border-top: 3px solid #667eea;
+            border-top: 3px solid var(--theme-primary-color);
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
@@ -249,20 +280,28 @@
         }
 
         .error-message {
-            background: #fee;
-            color: #c33;
+            background: var(--theme-warning-bg);
+            color: var(--theme-warning-color);
             padding: 15px;
             border-radius: 8px;
             margin: 20px 0;
             text-align: center;
+            border: 1px solid var(--theme-warning-color);
         }
 
         .activity-section {
-            background: white;
+            background: var(--theme-secondary-bg);
+            backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 25px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px var(--theme-shadow-color);
             margin-bottom: 30px;
+            border: 1px solid var(--theme-border-color);
+        }
+
+        .activity-section h3 {
+            color: var(--theme-text-primary);
+            margin-bottom: 15px;
         }
 
         .activity-tabs {
@@ -273,18 +312,23 @@
 
         .activity-tab {
             padding: 8px 16px;
-            border: 1px solid #ddd;
-            background: white;
-            color: #666;
+            border: 1px solid var(--theme-border-color);
+            background: var(--theme-secondary-bg);
+            color: var(--theme-text-secondary);
             border-radius: 6px;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
 
         .activity-tab.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
+            background: var(--theme-primary-color);
+            color: var(--theme-text-primary);
+            border-color: var(--theme-primary-color);
+        }
+
+        .activity-tab:hover:not(.active) {
+            background: var(--theme-hover-bg);
+            border-color: var(--theme-primary-color);
         }
 
         .activity-content {
@@ -305,9 +349,16 @@
             justify-content: space-between;
             align-items: center;
             padding: 12px;
-            border: 1px solid #eee;
+            border: 1px solid var(--theme-border-color);
             border-radius: 8px;
             margin-bottom: 10px;
+            background: var(--theme-hover-bg);
+            transition: all 0.3s ease;
+        }
+
+        .user-item:hover {
+            border-color: var(--theme-primary-color);
+            background: var(--theme-active-bg);
         }
 
         .user-info {
@@ -317,7 +368,11 @@
         .user-id {
             font-family: 'Courier New', monospace;
             font-size: 12px;
-            color: #666;
+            color: var(--theme-text-muted);
+        }
+
+        .user-info > div:not(.user-id) {
+            color: var(--theme-text-secondary);
         }
 
         .user-stats {
@@ -326,12 +381,42 @@
 
         .user-stats-item {
             font-size: 12px;
-            color: #666;
+            color: var(--theme-text-muted);
             margin-bottom: 2px;
+        }
+
+        /* 主题选择器 */
+        .theme-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .theme-btn {
+            background: var(--theme-secondary-bg);
+            border: 1px solid var(--theme-border-color);
+            color: var(--theme-text-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn:hover {
+            background: var(--theme-hover-bg);
+            border-color: var(--theme-primary-color);
         }
     </style>
 </head>
 <body>
+    <!-- 主题选择器 -->
+    <div class="theme-selector">
+        <button class="theme-btn" onclick="switchTheme()">🎨 切换主题</button>
+    </div>
+
     <div class="header">
         <div class="header-content">
             <h1>📊 管理员仪表板</h1>
@@ -415,9 +500,14 @@
         let statsData = null;
         let trendChart = null;
         let appTimezone = 'Asia/Shanghai'; // 默认时区
+        let themeManager;
 
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', async function() {
+            // 初始化主题管理器
+            themeManager = new ThemeManager();
+            await themeManager.waitForReady();
+            
             checkAuth();
             
             // 获取应用配置（包括时区）
@@ -434,6 +524,13 @@
             initEventListeners();
             loadStatistics();
         });
+
+        // 切换主题
+        function switchTheme() {
+            if (themeManager) {
+                themeManager.switchToNextTheme();
+            }
+        }
 
         // 检查认证状态
         function checkAuth() {
@@ -594,8 +691,13 @@
             const height = canvas.height - 60;
             const maxGames = Math.max(...data.map(d => d.total_games)) || 1;
             
+            // 获取当前主题的颜色
+            const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-primary-color').trim();
+            const borderColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-border-color').trim();
+            const textColor = getComputedStyle(document.documentElement).getPropertyValue('--theme-text-muted').trim();
+            
             // 绘制坐标轴
-            ctx.strokeStyle = '#ddd';
+            ctx.strokeStyle = borderColor || '#ddd';
             ctx.lineWidth = 1;
             ctx.beginPath();
             ctx.moveTo(40, 20);
@@ -604,7 +706,7 @@
             ctx.stroke();
             
             // 绘制数据线
-            ctx.strokeStyle = '#667eea';
+            ctx.strokeStyle = primaryColor || '#667eea';
             ctx.lineWidth = 2;
             ctx.beginPath();
             
@@ -619,7 +721,7 @@
                 }
                 
                 // 绘制数据点
-                ctx.fillStyle = '#667eea';
+                ctx.fillStyle = primaryColor || '#667eea';
                 ctx.beginPath();
                 ctx.arc(x, y, 3, 0, 2 * Math.PI);
                 ctx.fill();
@@ -628,7 +730,7 @@
             ctx.stroke();
             
             // 添加标签
-            ctx.fillStyle = '#666';
+            ctx.fillStyle = textColor || '#666';
             ctx.font = '12px Arial';
             ctx.textAlign = 'center';
             
@@ -702,8 +804,8 @@
                     </div>
                     <div class="user-stats">
                         <div class="user-stats-item">用户数: ${ip.unique_users}</div>
-                                        <div class="user-stats-item">首次访问: ${new Date(ip.first_access).toLocaleDateString('zh-CN', { timeZone: appTimezone })}</div>
-                <div class="user-stats-item">最后访问: ${new Date(ip.last_access).toLocaleDateString('zh-CN', { timeZone: appTimezone })}</div>
+                        <div class="user-stats-item">首次访问: ${new Date(ip.first_access).toLocaleDateString('zh-CN', { timeZone: appTimezone })}</div>
+                        <div class="user-stats-item">最后访问: ${new Date(ip.last_access).toLocaleDateString('zh-CN', { timeZone: appTimezone })}</div>
                     </div>
                 </div>
             `).join('');

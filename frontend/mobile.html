@@ -301,15 +301,13 @@
             <div class="accusation-container">
                 <div class="accusation-form">
                     <div class="form-group">
-                        <label for="mobile-accused-select">选择被指控者：</label>
-                        <select id="mobile-accused-select" class="form-control">
-                            <option value="">请选择...</option>
-                        </select>
+                        <label for="mobile-accused-select-container">选择被指控者：</label>
+                        <div id="mobile-accused-select-container"></div>
                     </div>
                     
                     <div class="form-group">
                         <label for="mobile-accusation-reasoning">指控理由：</label>
-                        <textarea id="mobile-accusation-reasoning" class="form-control" rows="6" 
+                        <textarea id="mobile-accusation-reasoning" class="form-control" rows="8" 
                                 placeholder="详细说明你的指控理由和证据...&#10;&#10;例如：&#10;• 时间线矛盾&#10;• 证词不一致&#10;• 动机充分&#10;• 物理证据支持"></textarea>
                     </div>
                     
@@ -386,13 +384,8 @@
                     
                     <!-- 难度反馈 -->
                     <div class="form-group">
-                        <label class="form-label" for="mobileDifficulty">难度反馈</label>
-                        <select class="form-select" id="mobileDifficulty" name="difficulty">
-                            <option value="">请选择</option>
-                            <option value="too_easy">太简单了</option>
-                            <option value="just_right">难度刚好</option>
-                            <option value="too_hard">太难了</option>
-                        </select>
+                        <label class="form-label" for="mobileDifficulty-container">难度反馈</label>
+                        <div id="mobileDifficulty-container"></div>
                     </div>
                     
                     <!-- 最喜欢的方面 -->

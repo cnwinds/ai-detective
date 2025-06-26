@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>游戏历史 - 管理员</title>
+    <link rel="stylesheet" href="https://cdn.bootcdn.net/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/desktop.css">
+    <script src="/static/js/utils.js"></script>
+    <script src="/static/js/theme-manager.js"></script>
     <style>
         * {
             margin: 0;
@@ -13,16 +17,19 @@
 
         body {
             font-family: 'Microsoft YaHei', sans-serif;
-            background: #f5f7fa;
-            color: #333;
+            background: var(--theme-primary-bg);
+            color: var(--theme-text-primary);
             line-height: 1.6;
+            transition: all 0.3s ease;
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: var(--theme-secondary-bg);
+            backdrop-filter: blur(10px);
+            color: var(--theme-text-primary);
             padding: 20px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px var(--theme-shadow-color);
+            border-bottom: 1px solid var(--theme-border-color);
         }
 
         .header-content {
@@ -44,16 +51,18 @@
 
         .header-btn {
             padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
+            background: var(--theme-hover-bg);
+            color: var(--theme-text-primary);
             text-decoration: none;
             border-radius: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            transition: background 0.3s;
+            border: 1px solid var(--theme-border-color);
+            transition: all 0.3s ease;
         }
 
         .header-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: var(--theme-active-bg);
+            border-color: var(--theme-primary-color);
+            transform: translateY(-1px);
         }
 
         .container {
@@ -63,15 +72,17 @@
         }
 
         .filters {
-            background: white;
+            background: var(--theme-secondary-bg);
+            backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px var(--theme-shadow-color);
             margin-bottom: 20px;
             display: flex;
             gap: 15px;
             align-items: end;
             flex-wrap: wrap;
+            border: 1px solid var(--theme-border-color);
         }
 
         .filter-group {
@@ -83,51 +94,62 @@
 
         .filter-group label {
             font-size: 12px;
-            color: #666;
+            color: var(--theme-text-secondary);
             font-weight: bold;
         }
 
         .filter-group select,
         .filter-group input {
             padding: 8px 12px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--theme-border-color);
             border-radius: 6px;
             font-size: 14px;
-            transition: border-color 0.3s;
+            background: var(--theme-secondary-bg);
+            color: var(--theme-text-primary);
+            transition: all 0.3s ease;
         }
 
         .filter-group select:focus,
         .filter-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--theme-primary-color);
+            box-shadow: 0 0 0 3px var(--theme-focus-ring);
         }
 
         .filter-btn {
             padding: 8px 16px;
-            background: #667eea;
-            color: white;
+            background: var(--theme-primary-color);
+            color: var(--theme-text-primary);
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
         }
 
         .filter-btn:hover {
-            background: #5a6fd8;
+            filter: brightness(1.1);
+            transform: translateY(-1px);
         }
 
         .sessions-container {
-            background: white;
+            background: var(--theme-secondary-bg);
+            backdrop-filter: blur(10px);
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 15px var(--theme-shadow-color);
             overflow: hidden;
+            border: 1px solid var(--theme-border-color);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            overflow-y: visible;
         }
 
         .sessions-header {
-            background: #f8f9fa;
+            background: var(--theme-hover-bg);
             padding: 20px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--theme-border-color);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -136,135 +158,172 @@
         .sessions-table {
             width: 100%;
             border-collapse: collapse;
+            table-layout: fixed;
+            min-width: 1200px;
         }
 
         .sessions-table th,
         .sessions-table td {
-            padding: 12px 8px;
+            padding: 10px 8px;
             text-align: left;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--theme-border-color);
             vertical-align: top;
+            word-wrap: break-word;
+            overflow: hidden;
         }
 
         .sessions-table th {
-            background: #f8f9fa;
+            background: var(--theme-hover-bg);
             font-weight: bold;
-            color: #333;
+            color: var(--theme-text-primary);
             position: sticky;
             top: 0;
-            font-size: 12px;
+            font-size: 13px;
+            white-space: nowrap;
         }
+
+        /* 设置各列的宽度 */
+        .sessions-table th:nth-child(1),
+        .sessions-table td:nth-child(1) { width: 30%; } /* 案件信息 */
+        
+        .sessions-table th:nth-child(2),
+        .sessions-table td:nth-child(2) { width: 8%; }  /* 状态 */
+        
+        .sessions-table th:nth-child(3),
+        .sessions-table td:nth-child(3) { width: 10%; } /* IP地址 */
+        
+        .sessions-table th:nth-child(4),
+        .sessions-table td:nth-child(4) { width: 8%; }  /* 版本 */
+        
+        .sessions-table th:nth-child(5),
+        .sessions-table td:nth-child(5) { width: 12%; } /* 开始时间 */
+        
+        .sessions-table th:nth-child(6),
+        .sessions-table td:nth-child(6) { width: 10%; } /* 游戏时长 */
+        
+        .sessions-table th:nth-child(7),
+        .sessions-table td:nth-child(7) { width: 16%; } /* 游戏评价 */
+        
+        .sessions-table th:nth-child(8),
+        .sessions-table td:nth-child(8) { width: 8%; } /* 操作 */
 
         /* 交替行颜色 */
         .sessions-table tbody tr:nth-child(even) {
-            background: #f9f9fb;
+            background: var(--theme-hover-bg);
         }
 
         .sessions-table tbody tr:nth-child(odd) {
-            background: white;
+            background: var(--theme-secondary-bg);
         }
 
         .sessions-table tbody tr:hover {
-            background: #e3f2fd !important;
+            background: var(--theme-active-bg) !important;
             transition: background 0.2s;
         }
 
         .status-badge {
-            padding: 4px 8px;
+            padding: 3px 8px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: bold;
             text-transform: uppercase;
             white-space: nowrap;
+            display: inline-block;
         }
 
         .status-completed {
-            background: #d4edda;
-            color: #155724;
+            background: var(--theme-success-bg);
+            color: var(--theme-success-color);
+            border: 1px solid var(--theme-success-color);
         }
 
         .status-incomplete {
-            background: #f8d7da;
-            color: #721c24;
+            background: var(--theme-warning-bg);
+            color: var(--theme-warning-color);
+            border: 1px solid var(--theme-warning-color);
         }
 
         .status-solved {
-            background: #cce7ff;
-            color: #0c5460;
+            background: var(--theme-info-bg);
+            color: var(--theme-info-color);
+            border: 1px solid var(--theme-info-color);
         }
 
         .client-id {
             font-family: 'Courier New', monospace;
-            font-size: 10px;
-            background: #f8f9fa;
-            padding: 2px 6px;
+            font-size: 11px;
+            background: var(--theme-hover-bg);
+            padding: 3px 6px;
             border-radius: 4px;
-            color: #666;
+            color: var(--theme-text-secondary);
             word-break: break-all;
+            border: 1px solid var(--theme-border-color);
+            display: inline-block;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .ip-address {
             font-family: 'Courier New', monospace;
-            font-size: 11px;
-            color: #666;
+            font-size: 12px;
+            color: var(--theme-text-secondary);
+            word-break: break-all;
         }
 
         .version-badge {
-            background: #e2e3e5;
-            color: #383d41;
-            padding: 2px 6px;
+            background: var(--theme-hover-bg);
+            color: var(--theme-text-primary);
+            padding: 3px 6px;
             border-radius: 4px;
-            font-size: 10px;
+            font-size: 11px;
+            border: 1px solid var(--theme-border-color);
+            display: inline-block;
+            white-space: nowrap;
         }
 
+
+
         .evaluation-section {
-            max-width: 200px;
+            max-width: 100%;
+            font-size: 11px;
         }
 
         .rating-stars {
-            color: #ffc107;
+            color: var(--theme-warning-color);
             font-size: 14px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
+            line-height: 1.2;
         }
 
         .evaluation-text {
             font-size: 11px;
-            color: #666;
-            line-height: 1.3;
-            max-height: 60px;
+            color: var(--theme-text-secondary);
+            line-height: 1.2;
+            max-height: 40px;
             overflow: hidden;
             text-overflow: ellipsis;
             display: -webkit-box;
-            -webkit-line-clamp: 3;
+            -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
         }
 
         .no-evaluation {
-            color: #999;
+            color: var(--theme-text-muted);
             font-style: italic;
             font-size: 11px;
-        }
-
-        .evaluation-badge {
-            background: #e8f5e8;
-            color: #2e7d2e;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 10px;
-            margin-bottom: 4px;
-            display: inline-block;
         }
 
         .loading {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: var(--theme-text-secondary);
         }
 
         .loading-spinner {
-            border: 3px solid #f3f3f3;
+            border: 3px solid var(--theme-border-color);
             border-radius: 50%;
-            border-top: 3px solid #667eea;
+            border-top: 3px solid var(--theme-primary-color);
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
@@ -277,83 +336,156 @@
         }
 
         .error-message {
-            background: #fee;
-            color: #c33;
+            background: var(--theme-error-bg);
+            color: var(--theme-error-color);
             padding: 15px;
             border-radius: 8px;
             margin: 20px 0;
             text-align: center;
+            border: 1px solid var(--theme-error-color);
         }
 
         .session-link {
-            color: #667eea;
+            color: var(--theme-primary-color);
             text-decoration: none;
-            font-size: 11px;
+            font-size: 12px;
+            white-space: nowrap;
+            font-weight: 500;
         }
 
         .session-link:hover {
             text-decoration: underline;
+            color: var(--theme-accent-color);
         }
 
         .case-info {
-            font-size: 11px;
-            color: #666;
+            font-size: 12px;
+            color: var(--theme-text-secondary);
+            line-height: 1.3;
+            margin: 2px 0;
+        }
+
+        .case-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: var(--theme-text-primary);
+            line-height: 1.3;
+            margin-bottom: 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .time-info {
-            font-size: 11px;
+            font-size: 12px;
+            color: var(--theme-text-primary);
+            line-height: 1.3;
         }
 
         .time-info small {
-            color: #999;
+            color: var(--theme-text-muted);
             display: block;
+            font-size: 11px;
+        }
+
+        .duration-info {
+            font-size: 12px;
+            color: var(--theme-text-primary);
+            font-weight: 500;
+            text-align: left;
         }
 
         .difficulty-feedback {
-            background: #fff3cd;
-            color: #856404;
+            background: var(--theme-warning-bg);
+            color: var(--theme-warning-color);
             padding: 2px 6px;
             border-radius: 4px;
             font-size: 10px;
             margin-bottom: 2px;
             display: inline-block;
+            border: 1px solid var(--theme-warning-color);
         }
 
         .recommend-badge {
-            background: #d1ecf1;
-            color: #0c5460;
+            background: var(--theme-info-bg);
+            color: var(--theme-info-color);
             padding: 2px 6px;
             border-radius: 4px;
             font-size: 10px;
             margin-bottom: 2px;
             display: inline-block;
+            border: 1px solid var(--theme-info-color);
         }
 
         .pagination {
             padding: 20px;
             text-align: center;
-            border-top: 1px solid #eee;
+            border-top: 1px solid var(--theme-border-color);
+            background: var(--theme-secondary-bg);
         }
 
         .pagination button {
             padding: 8px 12px;
             margin: 0 5px;
-            border: 1px solid #ddd;
-            background: white;
-            color: #666;
+            border: 1px solid var(--theme-border-color);
+            background: var(--theme-secondary-bg);
+            color: var(--theme-text-primary);
             border-radius: 4px;
             cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--theme-hover-bg);
+            border-color: var(--theme-primary-color);
         }
 
         .pagination button.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
+            background: var(--theme-primary-color);
+            color: var(--theme-text-primary);
+            border-color: var(--theme-primary-color);
         }
 
         .pagination button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* CustomSelect样式已在desktop.css中定义 */
+        
+        /* 管理页面特定的CustomSelect样式覆盖 */
+        .filter-group .custom-select-container {
+            min-width: 140px;
+        }
+        
+        .filter-group .custom-select-button {
+            padding: 8px 12px;
+            font-size: 14px;
+            min-height: 40px;
+        }
+        
+        .filter-group .custom-select-dropdown {
+            z-index: 9999;
+            max-height: 200px;
+            border: 1px solid var(--theme-border-color);
+            box-shadow: 0 8px 25px var(--theme-shadow-color);
+        }
+        
+        .filter-group .custom-select-option {
+            padding: 10px 12px;
+            font-size: 14px;
+            min-height: auto;
+        }
+        
+        /* 确保下拉菜单在其他元素之上 */
+        .filters {
+            position: relative;
+            z-index: 10;
+        }
+        
+        .sessions-container {
+            position: relative;
+            z-index: 1;
         }
     </style>
 </head>
@@ -373,39 +505,19 @@
         <div class="filters">
             <div class="filter-group">
                 <label>游戏状态</label>
-                <select id="statusFilter">
-                    <option value="">全部</option>
-                    <option value="completed">已完成</option>
-                    <option value="incomplete">未完成</option>
-                    <option value="solved">已解决</option>
-                </select>
+                <div id="statusFilter-container"></div>
             </div>
             <div class="filter-group">
                 <label>评价状态</label>
-                <select id="evaluationFilter">
-                    <option value="">全部</option>
-                    <option value="true">有评价</option>
-                    <option value="false">无评价</option>
-                </select>
+                <div id="evaluationFilter-container"></div>
             </div>
             <div class="filter-group">
                 <label>案件难度</label>
-                <select id="difficultyFilter">
-                    <option value="">全部</option>
-                    <option value="简单">简单</option>
-                    <option value="中等">中等</option>
-                    <option value="困难">困难</option>
-                </select>
+                <div id="difficultyFilter-container"></div>
             </div>
             <div class="filter-group">
                 <label>案件分类</label>
-                <select id="categoryFilter">
-                    <option value="">全部</option>
-                    <option value="谋杀案">谋杀案</option>
-                    <option value="盗窃案">盗窃案</option>
-                    <option value="失踪案">失踪案</option>
-                    <option value="诈骗案">诈骗案</option>
-                </select>
+                <div id="categoryFilter-container"></div>
             </div>
             <div class="filter-group">
                 <button class="filter-btn" onclick="applyFilters()">筛选</button>
@@ -436,10 +548,67 @@
         let totalCount = 0;
         let allSessions = [];
         let appTimezone = 'Asia/Shanghai'; // 默认时区
+        
+        // CustomSelect类已在utils.js中定义，无需重复声明
+
+        // 自定义下拉选择器实例
+        let statusFilterSelect = null;
+        let evaluationFilterSelect = null;
+        let difficultyFilterSelect = null;
+        let categoryFilterSelect = null;
 
         // 页面加载时初始化
         document.addEventListener('DOMContentLoaded', async function() {
             checkAuth();
+            
+            // 初始化主题管理器
+            const themeManager = new ThemeManager();
+            await themeManager.init();
+            
+            // 添加主题选择器
+            const themeSelector = document.createElement('div');
+            themeSelector.className = 'theme-selector';
+            themeSelector.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 999;
+            `;
+            
+            const themeBtn = document.createElement('button');
+            themeBtn.className = 'theme-btn';
+            themeBtn.textContent = '切换主题';
+            themeBtn.style.cssText = `
+                background: var(--theme-secondary-bg);
+                border: 1px solid var(--theme-border-color);
+                color: var(--theme-text-primary);
+                padding: 8px 12px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 12px;
+                backdrop-filter: blur(10px);
+                transition: all 0.3s ease;
+            `;
+            
+            themeBtn.addEventListener('click', () => {
+                themeManager.switchToNextTheme();
+            });
+            
+            themeBtn.addEventListener('mouseenter', () => {
+                themeBtn.style.background = 'var(--theme-hover-bg)';
+                themeBtn.style.borderColor = 'var(--theme-primary-color)';
+            });
+            
+            themeBtn.addEventListener('mouseleave', () => {
+                themeBtn.style.background = 'var(--theme-secondary-bg)';
+                themeBtn.style.borderColor = 'var(--theme-border-color)';
+            });
+            
+            themeSelector.appendChild(themeBtn);
+            document.body.appendChild(themeSelector);
+            
+            // 初始化自定义下拉选择器
+            initializeCustomSelects();
             
             // 获取应用配置（包括时区）
             try {
@@ -454,6 +623,58 @@
             
             loadSessions();
         });
+
+        // 初始化自定义下拉选择器
+        function initializeCustomSelects() {
+            // 游戏状态筛选器
+            statusFilterSelect = new CustomSelect('#statusFilter-container', {
+                placeholder: '全部状态'
+            });
+            statusFilterSelect.setData([
+                { value: '', text: '全部' },
+                { value: 'completed', text: '已完成' },
+                { value: 'incomplete', text: '未完成' },
+                { value: 'solved', text: '已解决' }
+            ]);
+            
+            // 评价状态筛选器
+            evaluationFilterSelect = new CustomSelect('#evaluationFilter-container', {
+                placeholder: '全部评价状态'
+            });
+            evaluationFilterSelect.setData([
+                { value: '', text: '全部' },
+                { value: 'true', text: '有评价' },
+                { value: 'false', text: '无评价' }
+            ]);
+            
+            // 案件难度筛选器
+            difficultyFilterSelect = new CustomSelect('#difficultyFilter-container', {
+                placeholder: '全部难度'
+            });
+            difficultyFilterSelect.setData([
+                { value: '', text: '全部' },
+                { value: 'easy', text: '简单' },
+                { value: 'medium', text: '中等' },
+                { value: 'hard', text: '困难' },
+                { value: 'expert', text: '专家级' }
+            ]);
+            
+            // 案件分类筛选器
+            categoryFilterSelect = new CustomSelect('#categoryFilter-container', {
+                placeholder: '全部分类'
+            });
+            categoryFilterSelect.setData([
+                { value: '', text: '全部' },
+                { value: 'classic_murder', text: '经典谋杀案' },
+                { value: 'locked_room', text: '密室杀人案' },
+                { value: 'revenge', text: '复仇案件' },
+                { value: 'family_drama', text: '家庭纠纷案' },
+                { value: 'kids_friendly', text: '儿童友好案例' },
+                { value: 'supernatural', text: '超自然元素案例' },
+                { value: 'financial_crime', text: '经济犯罪案' },
+                { value: 'missing_person', text: '失踪案件' }
+            ]);
+        }
 
         // 检查认证状态
         function checkAuth() {
@@ -471,12 +692,41 @@
             params.append('offset', ((currentPage - 1) * pageSize).toString());
 
             // 添加过滤条件
-            const evaluationFilter = document.getElementById('evaluationFilter').value;
-            if (evaluationFilter) {
-                params.append('has_evaluation', evaluationFilter);
+            if (statusFilterSelect) {
+                const statusFilter = statusFilterSelect.getValue();
+                if (statusFilter) {
+                    params.append('status', statusFilter);
+                }
+            }
+
+            if (evaluationFilterSelect) {
+                const evaluationFilter = evaluationFilterSelect.getValue();
+                if (evaluationFilter) {
+                    params.append('has_evaluation', evaluationFilter);
+                }
+            }
+
+            if (difficultyFilterSelect) {
+                const difficultyFilter = difficultyFilterSelect.getValue();
+                if (difficultyFilter) {
+                    params.append('difficulty', difficultyFilter);
+                }
+            }
+
+            if (categoryFilterSelect) {
+                const categoryFilter = categoryFilterSelect.getValue();
+                if (categoryFilter) {
+                    params.append('category', categoryFilter);
+                }
             }
 
             return params.toString();
+        }
+
+        // 应用筛选条件
+        function applyFilters() {
+            currentPage = 1; // 重置到第一页
+            loadSessions();
         }
 
         // 加载会话数据
@@ -528,25 +778,25 @@
             }
 
             const tableHTML = `
-                <table class="sessions-table">
-                    <thead>
-                        <tr>
-                            <th>会话ID</th>
-                            <th>玩家</th>
-                            <th>案件信息</th>
-                            <th>状态</th>
-                            <th>客户端ID</th>
-                            <th>IP地址</th>
-                            <th>版本</th>
-                            <th>开始时间</th>
-                            <th>游戏评价</th>
-                            <th>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${sessions.map(session => renderSessionRow(session)).join('')}
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table class="sessions-table">
+                        <thead>
+                            <tr>
+                                <th>案件信息</th>
+                                <th>状态</th>
+                                <th>IP地址</th>
+                                <th>版本</th>
+                                <th>开始时间</th>
+                                <th>游戏时长</th>
+                                <th>游戏评价</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${sessions.map(session => renderSessionRow(session)).join('')}
+                        </tbody>
+                    </table>
+                </div>
             `;
 
             container.innerHTML = tableHTML;
@@ -567,15 +817,15 @@
 
             const clientId = session.client_id ? 
                 `<div class="client-id">${session.client_id.substring(0, 12)}...</div>` : 
-                '<span style="color: #ccc;">-</span>';
+                '<span style="color: var(--theme-text-muted);">-</span>';
 
             const ipAddress = session.ip_address ? 
                 `<div class="ip-address">${session.ip_address}</div>` : 
-                '<span style="color: #ccc;">-</span>';
+                '<span style="color: var(--theme-text-muted);">-</span>';
 
             const version = session.game_version ? 
                 `<span class="version-badge">${session.game_version}</span>` : 
-                '<span style="color: #ccc;">-</span>';
+                '<span style="color: var(--theme-text-muted);">-</span>';
 
             // 渲染评价信息
             let evaluationHTML = '';
@@ -585,7 +835,6 @@
                 
                 evaluationHTML = `
                     <div class="evaluation-section">
-                        <div class="evaluation-badge">已评价</div>
                         <div class="rating-stars">${stars} (${rating}/5)</div>
                         ${session.evaluation.difficulty_feedback ? 
                             `<div class="difficulty-feedback">${getDifficultyText(session.evaluation.difficulty_feedback)}</div>` : ''
@@ -600,22 +849,33 @@
                 evaluationHTML = '<div class="no-evaluation">暂无评价</div>';
             }
 
+            // 计算游戏时长
+            let durationText = '未知';
+            if (session.start_time && session.end_time) {
+                const startTime = new Date(session.start_time);
+                const endTime = new Date(session.end_time);
+                const durationMs = endTime - startTime;
+                const minutes = Math.floor(durationMs / (1000 * 60));
+                const seconds = Math.floor((durationMs % (1000 * 60)) / 1000);
+                
+                if (minutes > 0) {
+                    durationText = `${minutes}分${seconds}秒`;
+                } else {
+                    durationText = `${seconds}秒`;
+                }
+            } else if (session.start_time && !session.end_time) {
+                durationText = '进行中';
+            }
+
             return `
                 <tr>
                     <td>
-                        <a href="/replay.html?session_id=${session.session_id}" 
-                           class="session-link" target="_blank">
-                            ${session.session_id.substring(0, 8)}...
-                        </a>
-                    </td>
-                    <td>${session.player_name || '匿名玩家'}</td>
-                    <td>
-                        <div style="font-weight: bold; font-size: 12px;">${session.case_title}</div>
+                        <div class="case-title" title="${session.case_title}">${session.case_title}</div>
                         <div class="case-info">${session.case_category} · ${session.case_difficulty}</div>
-                        <div class="case-info">轮数: ${session.total_rounds || 0} | 提示: ${session.hints_used || 0}</div>
+                        <div class="case-info">轮数: ${session.total_rounds || 0} | 提示: ${session.hints_used || 0} | 玩家: ${session.player_name || '匿名'}</div>
+                        <div class="case-info">会话: <a href="/replay.html?session_id=${session.session_id}" class="session-link" target="_blank">${session.session_id.substring(0, 8)}...</a></div>
                     </td>
                     <td>${statusBadge}</td>
-                    <td>${clientId}</td>
                     <td>${ipAddress}</td>
                     <td>${version}</td>
                     <td>
@@ -623,6 +883,9 @@
                             ${startTime.toLocaleDateString('zh-CN', { timeZone: appTimezone })}
                             <small>${startTime.toLocaleTimeString('zh-CN', { timeZone: appTimezone })}</small>
                         </div>
+                    </td>
+                    <td>
+                        <div class="duration-info">${durationText}</div>
                     </td>
                     <td>${evaluationHTML}</td>
                     <td>
@@ -718,6 +981,8 @@
             
             window.location.href = '/admin';
         }
+
+
     </script>
 </body>
 </html> 

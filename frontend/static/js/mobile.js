@@ -1366,22 +1366,32 @@ class MobileDetectiveApp {
     }
     
     populateAccusationSelect() {
-        const accusedSelect = DOMHelper.$('#mobile-accused-select');
-        if (!accusedSelect) return;
+        const accusedSelectContainer = DOMHelper.$('#mobile-accused-select-container');
+        if (!accusedSelectContainer) return;
         
-        DOMHelper.setHTML('#mobile-accused-select', '<option value="">请选择...</option>');
+        // 创建自定义下拉选择器
+        if (!this.accusedCustomSelect) {
+            this.accusedCustomSelect = new CustomSelect(accusedSelectContainer, {
+                placeholder: '请选择被指控者...'
+            });
+        }
         
+        // 准备选项数据
+        const options = [];
         if (this.currentCase && this.currentCase.characters) {
             this.currentCase.characters.forEach(character => {
                 // 过滤掉专家和受害者，因为他们不能被指控
                 if (character.character_type !== 'expert' && character.character_type !== 'victim') {
-                    const option = DOMHelper.createElement('option', {
-                        value: character.name
-                    }, `${character.name} (${character.occupation})`);
-                    accusedSelect.appendChild(option);
+                    options.push({
+                        value: character.name,
+                        text: `${character.name} (${character.occupation})`
+                    });
                 }
             });
         }
+        
+        // 设置选项数据
+        this.accusedCustomSelect.setData(options);
     }
     
     async submitAccusation() {
@@ -1404,7 +1414,7 @@ class MobileDetectiveApp {
     }
     
     validateAccusationForm() {
-        const accusedName = DOMHelper.$('#mobile-accused-select').value;
+        const accusedName = this.accusedCustomSelect ? this.accusedCustomSelect.getValue() : null;
         const reasoning = DOMHelper.$('#mobile-accusation-reasoning').value.trim();
         
         if (!accusedName) {
@@ -1619,7 +1629,7 @@ class MobileDetectiveApp {
                     <div class="vote-content" id="mobile-vote-content-${currentVoterIndex}">
                         <div class="thinking-indicator">
                             <i class="fas fa-brain fa-pulse"></i>
-                            <span class="thinking-text">正在分析证据信息，思考中</span>
+                            <span class="thinking-text">正在分析证据，思考中</span>
                             <div class="thinking-dots">
                                 <span>.</span><span>.</span><span>.</span>
                             </div>
@@ -1989,8 +1999,32 @@ class MobileDetectiveApp {
         const stars = DOMHelper.$$('#evaluation-screen .star');
         stars.forEach(star => star.classList.remove('active'));
         
+        // 初始化难度反馈自定义下拉选择器
+        this.initializeDifficultySelect();
+        
         // 绑定评分交互事件
         this.bindEvaluationEvents();
+    }
+
+    initializeDifficultySelect() {
+        const difficultyContainer = DOMHelper.$('#mobileDifficulty-container');
+        if (!difficultyContainer) return;
+        
+        // 创建自定义下拉选择器
+        if (!this.difficultyCustomSelect) {
+            this.difficultyCustomSelect = new CustomSelect(difficultyContainer, {
+                placeholder: '请选择难度反馈...'
+            });
+        }
+        
+        // 设置难度选项
+        const difficultyOptions = [
+            { value: 'too_easy', text: '太简单了' },
+            { value: 'just_right', text: '难度刚好' },
+            { value: 'too_hard', text: '太难了' }
+        ];
+        
+        this.difficultyCustomSelect.setData(difficultyOptions);
     }
 
     bindEvaluationEvents() {
@@ -2140,7 +2174,7 @@ class MobileDetectiveApp {
             sessionId: this.sessionId,
             rating: this.selectedRating,
             reason: reason,
-            difficultyFeedback: DOMHelper.$('#mobileDifficulty').value || null,
+            difficultyFeedback: this.difficultyCustomSelect ? this.difficultyCustomSelect.getValue() : null,
             mostLiked: DOMHelper.$('#mobileMostLiked').value.trim() || null,
             suggestions: DOMHelper.$('#mobileSuggestions').value.trim() || null,
             wouldRecommend: DOMHelper.$('#mobileRecommend').checked
@@ -2274,9 +2308,8 @@ class MobileDetectiveApp {
         DOMHelper.toggle('#unread-badge', false);
         
         // 重置指控相关元素
-        const mobileAccusedSelect = DOMHelper.$('#mobile-accused-select');
-        if (mobileAccusedSelect) {
-            mobileAccusedSelect.selectedIndex = 0;
+        if (this.accusedCustomSelect) {
+            this.accusedCustomSelect.reset();
         }
         
         const mobileAccusationReasoning = DOMHelper.$('#mobile-accusation-reasoning');
@@ -2305,7 +2338,9 @@ class MobileDetectiveApp {
         
         // 重置评价表单字段
         DOMHelper.$('#mobileReason').value = '';
-        DOMHelper.$('#mobileDifficulty').selectedIndex = 0;
+        if (this.difficultyCustomSelect) {
+            this.difficultyCustomSelect.reset();
+        }
         DOMHelper.$('#mobileMostLiked').value = '';
         DOMHelper.$('#mobileSuggestions').value = '';
         DOMHelper.$('#mobileRecommend').checked = false;
@@ -2381,6 +2416,22 @@ class MobileDetectiveApp {
     showModal(title, content) {
         DOMHelper.setText('#modal-title', title);
         DOMHelper.setHTML('#modal-body', content);
+        
+        // 检查是否是智能提示模态框
+        const modal = DOMHelper.$('#modal');
+        const modalContent = modal.querySelector('.modal-content');
+        const modalHeader = modal.querySelector('.modal-header');
+        
+        if (title.includes('💡') || title.includes('智能提示') || title.includes('提示')) {
+            // 为智能提示添加特殊样式标识
+            modalContent.setAttribute('data-hint-modal', 'true');
+            modalHeader.setAttribute('data-hint-header', 'true');
+        } else {
+            // 移除智能提示样式标识
+            modalContent.removeAttribute('data-hint-modal');
+            modalHeader.removeAttribute('data-hint-header');
+        }
+        
         DOMHelper.toggleClass('#modal', 'active', true);
     }
     

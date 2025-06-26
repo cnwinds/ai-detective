@@ -359,9 +359,24 @@ class DetectiveGameApp {
         } else {
             DOMHelper.setText('#message-content', content);
         }
+        
+        // 检查是否是智能提示模态框
+        const modal = document.getElementById('message-modal');
+        const modalContent = modal.querySelector('.modal-content');
+        const modalHeader = modal.querySelector('.modal-header');
+        
+        if (title.includes('💡') || title.includes('智能提示')) {
+            // 为智能提示添加特殊样式标识
+            modalContent.setAttribute('data-hint-modal', 'true');
+            modalHeader.setAttribute('data-hint-header', 'true');
+        } else {
+            // 移除智能提示样式标识
+            modalContent.removeAttribute('data-hint-modal');
+            modalHeader.removeAttribute('data-hint-header');
+        }
+        
         // 如果有回调函数，设置模态框关闭时的回调
         if (callback) {
-            const modal = document.getElementById('message-modal');
             const closeHandler = () => {
                 callback();
                 modal.removeEventListener('hidden.bs.modal', closeHandler);
@@ -1978,23 +1993,35 @@ class DetectiveGameApp {
     
     // 填充指控选择框
     populateAccusationSelect() {
-        const accusedSelect = DOMHelper.$('#accused-select');
-        accusedSelect.innerHTML = '<option value="">请选择...</option>';
+        const accusedSelectContainer = DOMHelper.$('#accused-select-container');
+        if (!accusedSelectContainer) return;
         
+        // 创建自定义下拉选择器
+        if (!this.accusedCustomSelect) {
+            this.accusedCustomSelect = new CustomSelect(accusedSelectContainer, {
+                placeholder: '请选择被指控者...'
+            });
+        }
+        
+        // 准备选项数据
+        const options = [];
         this.currentCase.characters.forEach(character => {
             // 过滤掉专家和受害者，因为他们不能被指控
             if (character.character_type !== 'expert' && character.character_type !== 'victim') {
-                const option = DOMHelper.createElement('option');
-                option.value = character.name;
-                option.textContent = `${character.name} (${character.occupation})`;
-                accusedSelect.appendChild(option);
+                options.push({
+                    value: character.name,
+                    text: `${character.name} (${character.occupation})`
+                });
             }
         });
+        
+        // 设置选项数据
+        this.accusedCustomSelect.setData(options);
     }
     
     // 提交指控
     async submitAccusation() {
-        const accusedName = DOMHelper.$('#accused-select').value;
+        const accusedName = this.accusedCustomSelect ? this.accusedCustomSelect.getValue() : null;
         const reasoning = DOMHelper.$('#accusation-reasoning').value.trim();
         
         if (!accusedName) {
@@ -2247,7 +2274,7 @@ class DetectiveGameApp {
                     <div class="vote-content" id="vote-content-${data.index}">
                         <div class="thinking-indicator">
                             <i class="fas fa-brain fa-pulse"></i>
-                            <span class="thinking-text">正在分析证据信息，思考中</span>
+                            <span class="thinking-text">正在分析证据，思考中</span>
                             <div class="thinking-dots">
                                 <span>.</span><span>.</span><span>.</span>
                             </div>
@@ -2703,11 +2730,38 @@ class DetectiveGameApp {
             errorMessage.style.display = 'none';
         }
         
+        // 初始化难度反馈自定义下拉选择器
+        this.initializeDifficultySelect();
+        
         // 绑定星级评分事件
         this.bindRatingEvents();
         
         // 绑定表单提交事件
         this.bindEvaluationFormEvents();
+    }
+
+    /**
+     * 初始化难度反馈自定义下拉选择器
+     */
+    initializeDifficultySelect() {
+        const difficultyContainer = DOMHelper.$('#desktopDifficulty-container');
+        if (!difficultyContainer) return;
+        
+        // 创建自定义下拉选择器
+        if (!this.difficultyCustomSelect) {
+            this.difficultyCustomSelect = new CustomSelect(difficultyContainer, {
+                placeholder: '请选择难度反馈...'
+            });
+        }
+        
+        // 设置难度选项
+        const difficultyOptions = [
+            { value: 'too_easy', text: '太简单了' },
+            { value: 'just_right', text: '难度刚好' },
+            { value: 'too_hard', text: '太难了' }
+        ];
+        
+        this.difficultyCustomSelect.setData(difficultyOptions);
     }
     
     /**
@@ -2823,7 +2877,7 @@ class DetectiveGameApp {
                     session_id: this.sessionId,
                     rating: this.selectedRating,
                     reason: reason,
-                    difficulty_feedback: DOMHelper.$('#desktopDifficulty').value || null,
+                    difficulty_feedback: this.difficultyCustomSelect ? this.difficultyCustomSelect.getValue() : null,
                     most_liked: DOMHelper.$('#desktopMostLiked').value.trim() || null,
                     suggestions: DOMHelper.$('#desktopSuggestions').value.trim() || null,
                     would_recommend: DOMHelper.$('#desktopRecommend').checked

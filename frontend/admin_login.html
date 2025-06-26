@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管理员登录 - AI侦探推理游戏</title>
+    <script src="/static/js/theme-manager.js"></script>
     <style>
         * {
             margin: 0;
@@ -13,21 +14,24 @@
 
         body {
             font-family: 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--theme-primary-bg);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #333;
+            color: var(--theme-text-primary);
+            transition: all 0.3s ease;
         }
 
         .login-container {
-            background: white;
+            background: var(--theme-secondary-bg);
+            backdrop-filter: blur(10px);
             border-radius: 20px;
             padding: 40px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 20px 40px var(--theme-shadow-heavy);
             width: 400px;
             max-width: 90vw;
+            border: 1px solid var(--theme-border-color);
         }
 
         .login-header {
@@ -36,13 +40,14 @@
         }
 
         .login-header h1 {
-            color: #333;
+            color: var(--theme-text-primary);
             margin-bottom: 10px;
             font-size: 28px;
+            text-shadow: 0 2px 4px var(--theme-shadow-color);
         }
 
         .login-header p {
-            color: #666;
+            color: var(--theme-text-secondary);
             font-size: 14px;
         }
 
@@ -54,38 +59,49 @@
             display: block;
             margin-bottom: 8px;
             font-weight: bold;
-            color: #555;
+            color: var(--theme-text-secondary);
         }
 
         .form-group input {
             width: 100%;
             padding: 12px 16px;
-            border: 2px solid #ddd;
+            border: 2px solid var(--theme-border-color);
             border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--theme-text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input::placeholder {
+            color: var(--theme-text-muted);
         }
 
         .form-group input:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--theme-primary-color);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 3px var(--theme-focus-ring);
         }
 
         .login-btn {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: var(--theme-primary-color);
+            color: var(--theme-text-primary);
             border: none;
             border-radius: 10px;
             font-size: 16px;
             font-weight: bold;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 2px var(--theme-shadow-color);
         }
 
         .login-btn:hover {
             transform: translateY(-2px);
+            box-shadow: 0 4px 15px var(--theme-shadow-color);
+            filter: brightness(1.1);
         }
 
         .login-btn:disabled {
@@ -95,23 +111,25 @@
         }
 
         .error-message {
-            color: #e74c3c;
+            color: var(--theme-warning-color);
             text-align: center;
             margin-top: 15px;
             padding: 10px;
-            background: #ffeaea;
+            background: var(--theme-warning-bg);
             border-radius: 8px;
             display: none;
+            border: 1px solid var(--theme-warning-color);
         }
 
         .success-message {
-            color: #27ae60;
+            color: var(--theme-success-color);
             text-align: center;
             margin-top: 15px;
             padding: 10px;
-            background: #eafaf1;
+            background: var(--theme-success-bg);
             border-radius: 8px;
             display: none;
+            border: 1px solid var(--theme-success-color);
         }
 
         .back-link {
@@ -120,12 +138,14 @@
         }
 
         .back-link a {
-            color: #667eea;
+            color: var(--theme-primary-color);
             text-decoration: none;
             font-size: 14px;
+            transition: color 0.3s ease;
         }
 
         .back-link a:hover {
+            color: var(--theme-accent-color);
             text-decoration: underline;
         }
 
@@ -136,22 +156,57 @@
         }
 
         .loading-spinner {
-            border: 3px solid #f3f3f3;
+            border: 3px solid var(--theme-border-color);
             border-radius: 50%;
-            border-top: 3px solid #667eea;
+            border-top: 3px solid var(--theme-primary-color);
             width: 30px;
             height: 30px;
             animation: spin 1s linear infinite;
             margin: 0 auto;
         }
 
+        .loading p {
+            color: var(--theme-text-secondary);
+            margin-top: 10px;
+        }
+
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* 主题选择器 */
+        .theme-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .theme-btn {
+            background: var(--theme-secondary-bg);
+            border: 1px solid var(--theme-border-color);
+            color: var(--theme-text-primary);
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .theme-btn:hover {
+            background: var(--theme-hover-bg);
+            border-color: var(--theme-primary-color);
+        }
     </style>
 </head>
 <body>
+    <!-- 主题选择器 -->
+    <div class="theme-selector">
+        <button class="theme-btn" onclick="switchTheme()">🎨 切换主题</button>
+    </div>
+
     <div class="login-container">
         <div class="login-header">
             <h1>🔐 管理员登录</h1>
@@ -184,17 +239,30 @@
     </div>
 
     <script>
+        // 初始化主题管理器
+        let themeManager;
+        
+        document.addEventListener('DOMContentLoaded', async function() {
+            // 初始化主题管理器
+            themeManager = new ThemeManager();
+            await themeManager.waitForReady();
+            
+            checkExistingLogin();
+        });
+
+        // 切换主题
+        function switchTheme() {
+            if (themeManager) {
+                themeManager.switchToNextTheme();
+            }
+        }
+
         const loginForm = document.getElementById('loginForm');
         const loginBtn = document.getElementById('loginBtn');
         const loading = document.getElementById('loading');
         const errorMessage = document.getElementById('errorMessage');
         const successMessage = document.getElementById('successMessage');
         const passwordInput = document.getElementById('password');
-
-        // 页面加载时检查是否已登录
-        document.addEventListener('DOMContentLoaded', function() {
-            checkExistingLogin();
-        });
 
         // 检查现有登录状态
         async function checkExistingLogin() {

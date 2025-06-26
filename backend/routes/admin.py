@@ -121,12 +121,15 @@ async def get_admin_statistics(
 async def get_admin_sessions(
     limit: int = 50,
     offset: int = 0,
-    has_evaluation: Optional[str] = None,  # 新增：过滤是否有评价
+    has_evaluation: Optional[str] = None,  # 过滤是否有评价
+    status: Optional[str] = None,  # 新增：游戏状态过滤
+    difficulty: Optional[str] = None,  # 新增：案件难度过滤
+    category: Optional[str] = None,  # 新增：案件分类过滤
     token: str = Depends(verify_admin_auth),
     db: Session = Depends(get_db)
 ):
     """获取游戏会话列表（管理员版本，包含更多信息）"""
-    logger.info(f"管理员获取游戏会话列表 - limit: {limit}, offset: {offset}, has_evaluation: {has_evaluation}")
+    logger.info(f"管理员获取游戏会话列表 - limit: {limit}, offset: {offset}, has_evaluation: {has_evaluation}, status: {status}, difficulty: {difficulty}, category: {category}")
     
     try:
         # 构建查询
@@ -138,12 +141,45 @@ async def get_admin_sessions(
         elif has_evaluation == "false":
             query = query.filter(GameEvaluation.id.is_(None))
         
+        # 应用游戏状态过滤
+        if status:
+            if status == "completed":
+                query = query.filter(GameSession.is_completed == True)
+            elif status == "incomplete":
+                query = query.filter(GameSession.is_completed == False)
+            elif status == "solved":
+                query = query.filter(GameSession.is_solved == True)
+        
+        # 应用案件难度过滤
+        if difficulty:
+            query = query.filter(GameSession.case_difficulty == difficulty)
+        
+        # 应用案件分类过滤
+        if category:
+            query = query.filter(GameSession.case_category == category)
+        
         # 获取总数（应用相同的过滤条件）
         total_query = db.query(GameSession).outerjoin(GameEvaluation)
         if has_evaluation == "true":
             total_query = total_query.filter(GameEvaluation.id.isnot(None))
         elif has_evaluation == "false":
             total_query = total_query.filter(GameEvaluation.id.is_(None))
+        
+        # 应用相同的状态过滤到总数查询
+        if status:
+            if status == "completed":
+                total_query = total_query.filter(GameSession.is_completed == True)
+            elif status == "incomplete":
+                total_query = total_query.filter(GameSession.is_completed == False)
+            elif status == "solved":
+                total_query = total_query.filter(GameSession.is_solved == True)
+        
+        if difficulty:
+            total_query = total_query.filter(GameSession.case_difficulty == difficulty)
+        
+        if category:
+            total_query = total_query.filter(GameSession.case_category == category)
+        
         total_count = total_query.count()
         
         # 应用分页和排序

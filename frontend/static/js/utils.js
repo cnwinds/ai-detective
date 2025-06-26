@@ -517,9 +517,222 @@ class Utils {
     }
 }
 
+// 自定义下拉选择器类
+class CustomSelect {
+    constructor(container, options = {}) {
+        this.container = typeof container === 'string' ? document.querySelector(container) : container;
+        this.options = {
+            placeholder: '请选择...',
+            searchable: false,
+            ...options
+        };
+        this.selectedValue = null;
+        this.selectedText = null;
+        this.isOpen = false;
+        this.data = [];
+        
+        this.init();
+    }
+    
+    init() {
+        this.createElements();
+        this.bindEvents();
+    }
+    
+    createElements() {
+        this.container.innerHTML = `
+            <div class="custom-select-container">
+                <button type="button" class="custom-select-button" tabindex="0">
+                    <span class="custom-select-text custom-select-placeholder">${this.options.placeholder}</span>
+                    <i class="fas fa-chevron-down custom-select-arrow"></i>
+                </button>
+                <div class="custom-select-dropdown">
+                    <div class="custom-select-options"></div>
+                </div>
+            </div>
+        `;
+        
+        this.button = this.container.querySelector('.custom-select-button');
+        this.textSpan = this.container.querySelector('.custom-select-text');
+        this.dropdown = this.container.querySelector('.custom-select-dropdown');
+        this.optionsContainer = this.container.querySelector('.custom-select-options');
+    }
+    
+    bindEvents() {
+        // 点击按钮切换下拉菜单
+        this.button.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.toggle();
+        });
+        
+        // 键盘事件
+        this.button.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                this.toggle();
+            } else if (e.key === 'Escape') {
+                this.close();
+            }
+        });
+        
+        // 点击外部关闭下拉菜单
+        document.addEventListener('click', (e) => {
+            if (!this.container.contains(e.target)) {
+                this.close();
+            }
+        });
+    }
+    
+    setData(data) {
+        this.data = data;
+        this.renderOptions();
+    }
+    
+    renderOptions() {
+        this.optionsContainer.innerHTML = '';
+        
+        this.data.forEach((item, index) => {
+            const option = document.createElement('div');
+            option.className = 'custom-select-option';
+            option.dataset.value = item.value;
+            option.dataset.index = index;
+            option.innerHTML = `<span>${item.text}</span>`;
+            
+            if (item.value === this.selectedValue) {
+                option.classList.add('selected');
+            }
+            
+            option.addEventListener('click', () => {
+                this.selectOption(item.value, item.text);
+            });
+            
+            this.optionsContainer.appendChild(option);
+        });
+    }
+    
+    selectOption(value, text) {
+        // 更新选中状态
+        this.selectedValue = value;
+        this.selectedText = text;
+        
+        // 更新按钮文本
+        this.textSpan.textContent = text;
+        this.textSpan.classList.remove('custom-select-placeholder');
+        
+        // 更新选项的选中状态
+        this.optionsContainer.querySelectorAll('.custom-select-option').forEach(option => {
+            option.classList.remove('selected');
+            if (option.dataset.value === value) {
+                option.classList.add('selected');
+            }
+        });
+        
+        // 关闭下拉菜单
+        this.close();
+        
+        // 触发change事件
+        this.triggerChange();
+    }
+    
+    getValue() {
+        return this.selectedValue;
+    }
+    
+    getText() {
+        return this.selectedText;
+    }
+    
+    setValue(value) {
+        const item = this.data.find(item => item.value === value);
+        if (item) {
+            this.selectOption(item.value, item.text);
+        }
+    }
+    
+    reset() {
+        this.selectedValue = null;
+        this.selectedText = null;
+        this.textSpan.textContent = this.options.placeholder;
+        this.textSpan.classList.add('custom-select-placeholder');
+        
+        this.optionsContainer.querySelectorAll('.custom-select-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+        
+        this.triggerChange();
+    }
+    
+    toggle() {
+        if (this.isOpen) {
+            this.close();
+        } else {
+            this.open();
+        }
+    }
+    
+    open() {
+        if (this.isOpen) return;
+        
+        this.isOpen = true;
+        this.button.classList.add('active');
+        this.dropdown.classList.add('show');
+        
+        // 确保下拉菜单在视口内
+        this.adjustDropdownPosition();
+    }
+    
+    close() {
+        if (!this.isOpen) return;
+        
+        this.isOpen = false;
+        this.button.classList.remove('active');
+        this.dropdown.classList.remove('show');
+    }
+    
+    adjustDropdownPosition() {
+        const rect = this.dropdown.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        
+        if (rect.bottom > viewportHeight) {
+            this.dropdown.style.top = 'auto';
+            this.dropdown.style.bottom = '100%';
+            this.dropdown.style.marginTop = '0';
+            this.dropdown.style.marginBottom = '4px';
+        } else {
+            this.dropdown.style.top = '100%';
+            this.dropdown.style.bottom = 'auto';
+            this.dropdown.style.marginTop = '4px';
+            this.dropdown.style.marginBottom = '0';
+        }
+    }
+    
+    triggerChange() {
+        const event = new CustomEvent('customSelectChange', {
+            detail: {
+                value: this.selectedValue,
+                text: this.selectedText
+            }
+        });
+        this.container.dispatchEvent(event);
+    }
+    
+    on(eventName, callback) {
+        if (eventName === 'change') {
+            this.container.addEventListener('customSelectChange', (e) => {
+                callback(e.detail.value, e.detail.text);
+            });
+        }
+    }
+    
+    destroy() {
+        // 清理事件监听器和DOM
+        this.container.innerHTML = '';
+    }
+}
+
 // 导出工具类（如果使用模块系统）
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { DOMHelper, APIHelper, StorageHelper, Utils };
+    module.exports = { DOMHelper, APIHelper, StorageHelper, Utils, CustomSelect };
 }
 
 // 全局暴露（用于浏览器环境）
@@ -528,4 +741,5 @@ if (typeof window !== 'undefined') {
     window.APIHelper = APIHelper;
     window.StorageHelper = StorageHelper;
     window.Utils = Utils;
+    window.CustomSelect = CustomSelect;
 }

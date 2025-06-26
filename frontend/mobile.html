@@ -100,7 +100,7 @@
         </div>
 
         <!-- 案例选择页面 -->
-        <div class="mobile-screen" id="case-selection">
+        <div class="mobile-screen with-padding" id="case-selection">
             <div class="screen-header">
                 <button class="back-btn" id="back-to-menu">
                     <i class="fas fa-arrow-left"></i>
@@ -111,6 +111,38 @@
             <div class="cases-container">
                 <div class="cases-list" id="cases-list">
                     <!-- 案例列表将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 神秘案件加载界面 -->
+        <div class="mobile-screen" id="case-loading-screen">
+            <div class="mobile-case-loading-container">
+                <div class="mobile-case-loading-content">
+                    <div class="mobile-case-loading-icon">
+                        🔍
+                        <div class="mobile-loading-ripple">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                    </div>
+                    <h2 class="mobile-case-loading-title">正在进入案发现场</h2>
+                    <p class="mobile-case-loading-subtitle">请稍候，我们正在为您准备案件资料</p>
+                    <div class="mobile-case-loading-steps">
+                        <div class="mobile-loading-step active" data-step="1">
+                            <i class="fas fa-file-alt"></i>
+                            <span>分析案件档案</span>
+                        </div>
+                        <div class="mobile-loading-step" data-step="2">
+                            <i class="fas fa-users"></i>
+                            <span>准备角色信息</span>
+                        </div>
+                        <div class="mobile-loading-step" data-step="3">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>构建案发现场</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -258,7 +290,7 @@
         </div>
 
         <!-- 指控界面 -->
-        <div class="mobile-screen" id="accusation-screen">
+        <div class="mobile-screen with-padding" id="accusation-screen">
             <div class="screen-header">
                 <button class="back-btn" id="back-from-accusation">
                     <i class="fas fa-arrow-left"></i>
@@ -296,7 +328,7 @@
         </div>
 
         <!-- 审判结果界面 -->
-        <div class="mobile-screen" id="trial-result-screen">
+        <div class="mobile-screen with-padding" id="trial-result-screen">
             <div class="screen-header">
                 <h2><i class="fas fa-balance-scale"></i> 审判结果</h2>
                 <div class="header-spacer"></div>
@@ -309,7 +341,7 @@
         </div>
 
         <!-- 游戏评价界面 -->
-        <div class="mobile-screen" id="evaluation-screen">
+        <div class="mobile-screen with-padding" id="evaluation-screen">
             <div class="screen-header">
                 <button class="back-btn" onclick="mobileApp.showScreen('main-menu')">
                     <i class="fas fa-arrow-left"></i>

@@ -84,6 +84,9 @@ class ThemeManager {
         // 更新角色类型颜色
         this.updateCharacterColors(themeName);
 
+        // 更新案件加载界面专用变量
+        this.updateCaseLoadingColors(themeName);
+
         // 更新当前主题
         this.currentTheme = themeName;
         
@@ -116,6 +119,74 @@ class ThemeManager {
         Object.entries(characterColors).forEach(([type, color]) => {
             root.style.setProperty(`--theme-${type}-color`, color);
         });
+    }
+
+    /**
+     * 更新案件加载界面专用颜色变量
+     * @param {string} themeName - 主题名称
+     */
+    updateCaseLoadingColors(themeName) {
+        const theme = this.themes[themeName];
+        if (!theme || !theme.colors) {
+            return;
+        }
+
+        const root = document.documentElement;
+        const accentColor = theme.colors.accentColor;
+        const successColor = theme.colors.successColor;
+
+        // 根据主题强调色生成案件加载界面的专用颜色
+        if (accentColor) {
+            // 提取RGB值（如果是十六进制颜色）
+            let r, g, b;
+            if (accentColor.startsWith('#')) {
+                const hex = accentColor.slice(1);
+                r = parseInt(hex.substr(0, 2), 16);
+                g = parseInt(hex.substr(2, 2), 16);
+                b = parseInt(hex.substr(4, 2), 16);
+            } else if (accentColor.startsWith('rgb')) {
+                // 解析rgb()或rgba()格式
+                const matches = accentColor.match(/\d+/g);
+                if (matches && matches.length >= 3) {
+                    r = parseInt(matches[0]);
+                    g = parseInt(matches[1]);
+                    b = parseInt(matches[2]);
+                }
+            } else {
+                // 对于其他格式，使用默认值
+                r = 255; g = 215; b = 0;
+            }
+
+            if (r !== undefined && g !== undefined && b !== undefined) {
+                root.style.setProperty('--case-loading-accent-bg', `rgba(${r}, ${g}, ${b}, 0.1)`);
+                root.style.setProperty('--case-loading-accent-shadow', `rgba(${r}, ${g}, ${b}, 0.2)`);
+                root.style.setProperty('--case-loading-accent-glow', `rgba(${r}, ${g}, ${b}, 0.3)`);
+            }
+        }
+
+        // 根据主题成功色生成完成状态的颜色
+        if (successColor) {
+            let r, g, b;
+            if (successColor.startsWith('#')) {
+                const hex = successColor.slice(1);
+                r = parseInt(hex.substr(0, 2), 16);
+                g = parseInt(hex.substr(2, 2), 16);
+                b = parseInt(hex.substr(4, 2), 16);
+            } else if (successColor.startsWith('rgb')) {
+                const matches = successColor.match(/\d+/g);
+                if (matches && matches.length >= 3) {
+                    r = parseInt(matches[0]);
+                    g = parseInt(matches[1]);
+                    b = parseInt(matches[2]);
+                }
+            } else {
+                r = 76; g = 175; b = 80;
+            }
+
+            if (r !== undefined && g !== undefined && b !== undefined) {
+                root.style.setProperty('--case-loading-success-bg', `rgba(${r}, ${g}, ${b}, 0.1)`);
+            }
+        }
     }
 
     /**
@@ -192,7 +263,11 @@ class ThemeManager {
             '--theme-warning-color': '#f44336',
             '--theme-text-primary': '#ffffff',
             '--theme-text-secondary': 'rgba(255, 255, 255, 0.9)',
-            '--theme-text-muted': 'rgba(255, 255, 255, 0.7)'
+            '--theme-text-muted': 'rgba(255, 255, 255, 0.7)',
+            '--case-loading-accent-bg': 'rgba(255, 215, 0, 0.1)',
+            '--case-loading-accent-shadow': 'rgba(255, 215, 0, 0.2)',
+            '--case-loading-accent-glow': 'rgba(255, 215, 0, 0.3)',
+            '--case-loading-success-bg': 'rgba(76, 175, 80, 0.1)'
         };
 
         Object.entries(defaultColors).forEach(([key, value]) => {
@@ -248,6 +323,9 @@ class ThemeManager {
 
         // 更新角色类型颜色
         this.updateCharacterColors(themeName);
+
+        // 更新案件加载界面专用变量
+        this.updateCaseLoadingColors(themeName);
 
         // 添加预览类名
         document.body.classList.add('theme-preview');

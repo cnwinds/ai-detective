@@ -48,6 +48,9 @@ class MobileDetectiveApp {
                 this.hideLoadingScreen();
             }
             
+            // 确保案件加载屏幕被正确隐藏
+            this.ensureCaseLoadingScreenHidden();
+            
         } catch (error) {
             console.error('初始化失败:', error);
             // 错误情况下也要检查是否还在加载屏幕
@@ -55,6 +58,7 @@ class MobileDetectiveApp {
             if (loadingScreen && DOMHelper.hasClass(loadingScreen, 'active')) {
                 this.hideLoadingScreen();
             }
+            this.ensureCaseLoadingScreenHidden();
         }
     }
     
@@ -245,6 +249,9 @@ class MobileDetectiveApp {
             return;
         }
         
+        // 先显示神秘的案件加载界面
+        this.showCaseLoadingScreen();
+        
         try {
             const data = await APIHelper.post(`${this.apiBase}/game/start`, {
                     case_index: caseIndex,
@@ -258,15 +265,90 @@ class MobileDetectiveApp {
                 
                 // 自动应用案件对应的主题
                 this.applyThemeForCase();
-                
+
+                // 显示氛围窗口
+                await this.waitForLoadingComplete();
+                await this.hideCaseLoadingScreen();
+
                 // 显示案件介绍
                 this.showCaseIntroduction();
             } else {
                 this.showToast('启动游戏失败', 'error');
+                await this.hideCaseLoadingScreen();
+                this.showScreen('case-selection');
             }
    } catch (error) {
             this.handleNetworkError(error, '启动游戏失败');
+            await this.hideCaseLoadingScreen();
+            this.showScreen('case-selection');
         }
+    }
+    
+    // 显示神秘案件加载界面
+    showCaseLoadingScreen() {
+        const loadingScreen = DOMHelper.$('#case-loading-screen');
+        if (loadingScreen) {
+            // 重置所有状态
+            loadingScreen.classList.remove('fade-out');
+            loadingScreen.style.display = '';  // 清除内联样式
+        }
+        this.showScreen('case-loading-screen');
+        // 开始加载步骤动画
+        this.startLoadingStepsAnimation();
+    }
+    
+    // 隐藏神秘案件加载界面（带淡出效果）
+    async hideCaseLoadingScreen() {
+        const loadingScreen = DOMHelper.$('#case-loading-screen');
+        if (loadingScreen) {
+            // 添加淡出类
+            loadingScreen.classList.add('fade-out');
+            // 等待淡出动画完成（0.8秒）
+            await new Promise(resolve => setTimeout(resolve, 800));
+            // 淡出完成后，移除active类并设置display:none，确保屏幕完全隐藏
+            loadingScreen.classList.remove('active');
+            loadingScreen.style.display = 'none';
+        }
+    }
+    
+    // 启动加载步骤动画
+    startLoadingStepsAnimation() {
+        const steps = ['1', '2', '3'];
+        let currentStep = 0;
+
+        const animateStep = () => {
+            if (currentStep > 0) {
+                // 标记前一步为完成
+                const prevStep = DOMHelper.$(`[data-step="${currentStep}"]`);
+                if (prevStep) {
+                    prevStep.classList.remove('active');
+                    prevStep.classList.add('completed');
+                }
+            }
+
+            if (currentStep < steps.length) {
+                // 激活当前步骤
+                const currentStepElement = DOMHelper.$(`[data-step="${steps[currentStep]}"]`);
+                if (currentStepElement) {
+                    currentStepElement.classList.add('active');
+                }
+                currentStep++;
+                
+                // 每个步骤间隔600ms
+                setTimeout(animateStep, 600);
+            }
+        };
+
+        // 开始动画
+        setTimeout(animateStep, 300);
+    }
+    
+    // 等待加载完成
+    async waitForLoadingComplete() {
+        // 等待1.8秒（3个步骤 * 600ms + 额外等待时间）
+        return new Promise(resolve => {
+            setTimeout(resolve, 1800);
+        });
     }
     
     async initializeGame() {
@@ -2777,6 +2859,18 @@ class MobileDetectiveApp {
         // 初始化游戏并进入游戏界面
         await this.initializeGame();
         this.showScreen('game-screen');
+    }
+
+    // 确保案件加载屏幕被隐藏（用于初始化时）
+    ensureCaseLoadingScreenHidden() {
+        const loadingScreen = DOMHelper.$('#case-loading-screen');
+        if (loadingScreen) {
+            // 移除所有相关类
+            loadingScreen.classList.remove('active', 'fade-out');
+            // 强制隐藏
+            loadingScreen.style.display = 'none';
+            console.log('移动版案件加载屏幕已强制隐藏');
+        }
     }
 }
 

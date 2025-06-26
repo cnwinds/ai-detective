@@ -50,7 +50,7 @@
         </div>
 
         <!-- 案例选择 -->
-        <div id="case-selection" class="screen">
+        <div id="case-selection" class="screen with-padding">
             <div class="container">
                 <h2><i class="fas fa-folder-open"></i> 选择案件</h2>
                 
@@ -68,8 +68,40 @@
             </div>
         </div>
 
+        <!-- 神秘案件加载界面 -->
+        <div id="case-loading-screen" class="screen with-padding">
+            <div class="case-loading-container">
+                <div class="case-loading-content">
+                    <div class="case-loading-icon">
+                        <i class="fas fa-search"></i>
+                        <div class="loading-ripple">
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                        </div>
+                    </div>
+                    <h2 class="case-loading-title">正在进入案发现场...</h2>
+                    <p class="case-loading-subtitle">请稍候，我们正在为您准备案件资料</p>
+                    <div class="case-loading-steps">
+                        <div class="loading-step active" data-step="1">
+                            <i class="fas fa-file-alt"></i>
+                            <span>分析案件档案</span>
+                        </div>
+                        <div class="loading-step" data-step="2">
+                            <i class="fas fa-users"></i>
+                            <span>准备角色信息</span>
+                        </div>
+                        <div class="loading-step" data-step="3">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>构建案发现场</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 案情介绍界面 -->
-        <div id="case-intro-screen" class="screen">
+        <div id="case-intro-screen" class="screen with-padding">
             <div class="container">
                 <div class="intro-container">
                     <!-- 案情内容区域 -->
@@ -93,7 +125,7 @@
         </div>
 
         <!-- 游戏界面 -->
-        <div id="game-screen" class="screen">
+        <div id="game-screen" class="screen with-padding">
             <!-- 游戏头部 -->
             <div class="game-header">
                 <div class="case-info">
@@ -229,7 +261,7 @@
         </div>
 
         <!-- 指控界面 -->
-        <div id="accusation-screen" class="screen">
+        <div id="accusation-screen" class="screen with-padding">
             <div class="container">
                 <h2><i class="fas fa-gavel"></i> 进行指控</h2>
                 
@@ -262,7 +294,7 @@
         </div>
 
         <!-- 审判结果界面 -->
-        <div id="trial-result-screen" class="screen">
+        <div id="trial-result-screen" class="screen with-padding">
             <div class="container">
                 <h2><i class="fas fa-balance-scale"></i> 审判结果</h2>
                 <div id="trial-result-content">
@@ -272,7 +304,7 @@
         </div>
 
         <!-- 游戏评价界面 -->
-        <div id="evaluation-screen" class="screen">
+        <div id="evaluation-screen" class="screen with-padding">
             <div class="container">
                 <div class="evaluation-container">
                     <h2 class="evaluation-title"><i class="fas fa-star"></i> 游戏评价</h2>

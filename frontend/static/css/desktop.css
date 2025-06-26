@@ -34,6 +34,12 @@
     --theme-warning-bg: rgba(244, 67, 54, 0.1);
     --theme-dark-bg: #1a1a2e;
     --theme-text-light: #ffffff;
+    
+    /* 案件加载界面专用变量 */
+    --case-loading-accent-bg: rgba(255, 215, 0, 0.1);
+    --case-loading-accent-shadow: rgba(255, 215, 0, 0.2);
+    --case-loading-accent-glow: rgba(255, 215, 0, 0.3);
+    --case-loading-success-bg: rgba(76, 175, 80, 0.1);
 }
 
 * {
@@ -60,6 +66,10 @@ body {
 .screen {
     display: none;
     min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.screen.with-padding {
     padding: 20px;
 }
 
@@ -126,6 +136,10 @@ body {
 }
 
 /* 主菜单 */
+#main-menu {
+    overflow: hidden;
+}
+
 .menu-container {
     display: flex;
     flex-direction: column;
@@ -196,6 +210,229 @@ body {
     padding-top: 12px;
 }
 
+/* 神秘案件加载界面 */
+#case-loading-screen {
+    background: var(--theme-primary-bg);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    transition: opacity 0.8s ease-out;
+    overflow: hidden;
+}
+
+#case-loading-screen.fade-out {
+    pointer-events: none;
+}
+
+/* 淡出效果：直接对内容容器设置透明度过渡 */
+.case-loading-content {
+    transition: opacity 0.8s ease-out;
+}
+
+#case-loading-screen.fade-out .case-loading-content {
+    opacity: 0;
+}
+
+.case-loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+}
+
+.case-loading-content {
+    text-align: center;
+    max-width: 500px;
+    padding: 40px;
+    background: var(--theme-secondary-bg);
+    border-radius: 20px;
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--theme-secondary-bg);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    animation: caseLoadingFadeIn 0.8s ease-out;
+}
+
+.case-loading-icon {
+    position: relative;
+    margin-bottom: 30px;
+    display: inline-block;
+}
+
+.case-loading-icon i {
+    font-size: 4rem;
+    color: var(--theme-accent-color);
+    animation: caseIconPulse 2s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
+}
+
+.loading-ripple {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100px;
+    height: 100px;
+}
+
+.loading-ripple div {
+    position: absolute;
+    border: 2px solid var(--theme-accent-color);
+    opacity: 1;
+    border-radius: 50%;
+    animation: caseRipple 2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.loading-ripple div:nth-child(2) {
+    animation-delay: -0.5s;
+}
+
+.loading-ripple div:nth-child(3) {
+    animation-delay: -1.0s;
+}
+
+.case-loading-title {
+    font-size: 1.8rem;
+    color: var(--theme-text-primary);
+    margin-bottom: 10px;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    animation: caseTextGlow 3s ease-in-out infinite alternate;
+}
+
+.case-loading-subtitle {
+    font-size: 1rem;
+    color: var(--theme-text-secondary);
+    margin-bottom: 40px;
+    opacity: 0.9;
+}
+
+.case-loading-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.loading-step {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    background: var(--theme-secondary-bg);
+    border-radius: 25px;
+    border: 1px solid var(--theme-secondary-bg);
+    opacity: 0.5;
+    transition: all 0.5s ease;
+    transform: translateX(-20px);
+}
+
+.loading-step.active {
+    opacity: 1;
+    background: var(--case-loading-accent-bg);
+    border-color: var(--theme-accent-color);
+    transform: translateX(0);
+    box-shadow: 0 0 20px var(--case-loading-accent-shadow);
+}
+
+.loading-step.completed {
+    opacity: 0.8;
+    background: var(--case-loading-success-bg);
+    border-color: var(--theme-success-color);
+    transform: translateX(0);
+}
+
+.loading-step i {
+    margin-right: 15px;
+    font-size: 1.2rem;
+    color: var(--theme-accent-color);
+    min-width: 20px;
+}
+
+.loading-step.completed i {
+    color: var(--theme-success-color);
+}
+
+.loading-step span {
+    font-size: 1rem;
+    color: var(--theme-text-primary);
+    font-weight: 500;
+}
+
+/* 动画定义 */
+@keyframes caseLoadingFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes caseIconPulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
+@keyframes caseRipple {
+    0% {
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        opacity: 1;
+    }
+    100% {
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        opacity: 0;
+    }
+}
+
+@keyframes caseTextGlow {
+    0% {
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+    100% {
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5), 0 0 10px var(--case-loading-accent-glow);
+    }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+    .case-loading-content {
+        margin: 20px;
+        padding: 30px 20px;
+    }
+    
+    .case-loading-title {
+        font-size: 1.5rem;
+    }
+    
+    .case-loading-steps {
+        gap: 12px;
+    }
+    
+    .loading-step {
+        padding: 10px 15px;
+    }
+    
+    .loading-step span {
+        font-size: 0.9rem;
+    }
+}
+
 /* 案情介绍界面 */
 .case-intro-content {
     background: var(--theme-secondary-bg);
@@ -243,16 +480,6 @@ body {
 
 .case-intro-body {
     margin-bottom: 40px;
-}
-
-/* 美化案情介绍分段样式，保证行高一致 */
-.intro-section {
-    margin-bottom: 28px;
-    opacity: 0;
-    animation: fadeInUp 0.7s ease-out forwards;
-}
-.intro-section:last-child {
-    margin-bottom: 0;
 }
 
 .intro-title {
@@ -454,22 +681,10 @@ body {
 .case-intro-content {
     animation: fadeInUp 0.8s ease-out;
 }
-
+/* 美化案情介绍分段样式，保证行高一致 */
 .intro-section {
+    margin-bottom: 5px;
     opacity: 1;
-    animation: slideInFromLeft 0.6s ease-out;
-}
-
-.intro-section:nth-child(2) {
-    animation-delay: 0.2s;
-}
-
-.intro-section:nth-child(3) {
-    animation-delay: 0.4s;
-}
-
-.intro-section:nth-child(4) {
-    animation-delay: 0.6s;
 }
 
 @keyframes fadeInUp {

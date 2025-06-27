@@ -17,11 +17,13 @@
 
 **🎮 Vibe Coding | 🧠 AI智能对话系统 | 📱 全平台支持**
 
+**🎯 [立即体验游戏 →](http://110.40.185.74/)**
+
 </div>
 
 > **🚀 开源AI游戏研究项目 | 欢迎加入我们的开发团队！**
 
-这是一个AI驱动侦探推理游戏研究项目，我们正在探索人工智能在互动娱乐领域的无限可能。如果你对AI技术、游戏开发或推理逻辑感兴趣，我们诚挚邀请你加入我们的开发团队，一起创造下一代智能游戏体验！
+这是一个AI驱动侦探推理游戏研究项目，我们正在探索人工智能在互动娱乐领域的无限可能。如果你对AI技术、游戏开发或推理逻辑感兴趣，我们一起探索AI游戏开发新范式！
 
 > **💡 零代码开发**：整个项目完全使用 **Cursor** 开发完成，没有手写一行代码！这展示了AI辅助开发的强大潜力，证明了未来软件开发的新范式。
 
@@ -236,44 +238,49 @@ cd docker
 
 ## 🛠️ 开发指南
 
-### 📋 开发规范
+### 🎯 Vibe Coding 开发方式
 
-在开始开发前，请务必阅读项目开发规范：
+本项目采用 **Vibe Coding** 开发模式，这是一种AI辅助的全新开发范式：
 
-- **[开发规范总览](./rules/README.md)** - 完整的开发规范体系
-- **[主题色规范](./rules/主题色规范.md)** - 前端主题色彩设计标准
+#### 核心理念
 
-### 环境搭建
+- **AI主导编码**：开发人员专注于需求分析，AI负责完整的代码实现
+- **探索性实践**：通过实际项目验证AI开发的可行性和边界
+- **协作新模式**：重新定义人机协作在软件开发中的角色分工
 
-#### Ubuntu环境启动游戏
+#### 探索目标
 
-```bash
-python3 -m venv myenv       # 创建虚拟环境
-source myenv/bin/activate  # 激活环境（Linux/macOS）
-# Windows 使用 `myenv\Scripts\activate`
-pip install -r requirements.txt
-```
+我们正在探索以下关键问题：
 
-#### 调试模式
+1. **🤖 AI能力边界**
+   - 完全由AI编写代码能达到什么程度？
+   - 复杂业务逻辑的AI实现质量如何？
 
-启用调试模式获取详细日志：
+2. **👨‍💻 开发者角色**
+   - 对开发人员的能力要求发生了什么变化？
+   - 需求表达和架构设计的重要性如何？
 
-```bash
-python start_game.py --debug
-```
+3. **🔄 流程变革**
+   - 传统开发流程需要哪些调整？
+   - 代码审查和质量控制如何适应？
 
-### 代码贡献指南
+4. **📊 效率评估**
+   - AI开发的速度和质量表现如何？
+   - 与传统开发方式的对比优势在哪里？
 
-1. **遵循规范**：确保代码符合项目开发规范
-2. **主题适配**：所有UI组件必须使用主题变量
-3. **测试验证**：在深色和浅色主题下测试功能
-4. **文档更新**：及时更新相关文档
+#### 开发规范文档
 
-### 添加新案例
+所有开发相关的规范和指南都存放在 `/.cursor/rules/` 目录中：
 
-1. 在 `backend/case_data.py` 中定义新案例
-2. 包含角色、证据、时间线等完整信息
-3. 测试角色对话和证据揭露逻辑
+| 文档 | 说明 |
+|------|------|
+| **[README.mdc](/.cursor/rules/README.mdc)** | 规则总览和使用指南 |
+| **[ai-detective-game.mdc](/.cursor/rules/ai-detective-game.mdc)** | 项目核心规则和架构 |
+| **[backend-development.mdc](/.cursor/rules/backend-development.mdc)** | 后端开发规范 |
+| **[frontend-development.mdc](/.cursor/rules/frontend-development.mdc)** | 前端开发规范 |
+| **[api-development.mdc](/.cursor/rules/api-development.mdc)** | API开发规范 |
+| **[theme-color-standards.mdc](/.cursor/rules/theme-color-standards.mdc)** | 主题色彩规范 |
+| **[troubleshooting-guide.mdc](/.cursor/rules/troubleshooting-guide.mdc)** | 故障排除指南 |
 
 ## 📝 配置说明
 
@@ -299,27 +306,6 @@ cp env.template .env
 # 编辑配置文件
 # 必须设置 OPENAI_API_KEY
 # 其他参数可根据需要调整
-```
-
-## 🔢 版本管理
-
-### 版本号规则
-
-- 格式：`主版本.次版本.修订版本` (例如: 1.6.0)
-- 主版本：重大功能更新或架构变更
-- 次版本：新功能添加
-- 修订版本：Bug修复或小改进
-
-### 版本管理操作
-
-#### 查看当前版本
-```bash
-python update_version.py
-```
-
-#### 更新版本号
-```bash
-python update_version.py 1.7.0
 ```
 
 ## 🐛 故障排除
@@ -351,16 +337,21 @@ python update_version.py 1.7.0
 
 本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
 
-## 🤝 贡献
+## 💬 交流反馈
+- 🎮 **游戏体验反馈**：游戏机制、难度、用户体验建议
+- 🛠️ **技术讨论**：AI开发、Vibe Coding模式探讨
+- 🚀 **功能建议**：新功能想法、改进方案
+- 🐛 **问题报告**：bug反馈或技术问题
+- 📖 **案例创作**：新推理案例想法和创意
 
-欢迎提交Issue和Pull Request来改进这个项目！
+**请在 GitHub Issues 中提出您的想法，我们会认真考虑每一个反馈！**
 
 ## 📞 联系方式
 
 如有问题或建议，请通过以下方式联系：
 
-- 提交 GitHub Issue
-- 发送邮件至项目维护者
+- 💬 **优先推荐**：在 [GitHub Issues](../../issues) 中讨论交流
+- 📧 **邮件联系**：发送邮件至项目维护者
 
 ---
 

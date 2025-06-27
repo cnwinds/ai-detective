@@ -1,4 +1,23 @@
-# 🕵️ AI侦探推理游戏 - 智能推理的未来
+# 🕵️ AI侦探推理游戏 - Vibe Coding
+
+<div align="center">
+
+<table>
+<tr>
+<td align="center" width="30%">
+<img src="images/mobile1.png" alt="移动端界面" width="100%">
+<br><b>📱 移动端体验</b>
+</td>
+<td align="center" width="70%">
+<img src="images/desktop2.png" alt="桌面版界面" width="100%">
+<br><b>🖥️ 桌面版体验</b>
+</td>
+</tr>
+</table>
+
+**🎮 Vibe Coding | 🧠 AI智能对话系统 | 📱 全平台支持**
+
+</div>
 
 > **🚀 开源AI游戏研究项目 | 欢迎加入我们的开发团队！**
 
@@ -8,7 +27,7 @@
 
 ## ✨ 项目亮点
 
-### 🧠 革命性AI推理交互
+### 🧠 AI推理交互
 - **深度AI对话系统**：每个角色都拥有独特的AI人格，能够进行复杂的推理对话
 - **智能证据分析**：AI自动识别和关联证据，构建完整的推理链条
 - **动态剧情生成**：根据玩家选择实时调整故事走向
@@ -16,8 +35,16 @@
 ### 🎨 多平台精美体验
 - **💻 PC桌面版**：完整功能的桌面体验，支持复杂操作
 - **📱 移动端适配**：专为手机优化的触控界面
+- **🔧 管理后台**：强大的数据分析和管理功能
 - **🎭 动态主题系统**：根据不同案件自动切换颜色主题和氛围
 - **🌈 沉浸式视觉**：每个案件都有独特的视觉风格
+
+### 📊 智能数据分析
+- **🎯 用户行为分析**：深度追踪玩家游戏习惯和偏好
+- **📈 游戏数据统计**：实时监控游戏进度、通关率、热门案件
+- **🔍 推理路径分析**：分析玩家的推理思路和决策模式
+- **📋 历史记录管理**：完整的游戏记录存储和回放功能
+- **⚡ 性能监控**：系统性能指标和用户体验质量跟踪
 
 ### 🔮 未来发展方向
 - **🤖 AI案件生成器**：计划支持AI自动创建新案件
@@ -28,110 +55,89 @@
 ### 🛠️ 技术特色
 - **流式AI对话**：实时显示AI思考过程，增强沉浸感
 - **模块化架构**：易于扩展和维护的现代化设计
+- **数据分析后台**：完整的用户行为分析和游戏数据统计
 - **Docker部署**：一键部署，支持多环境运行
 - **规范化开发**：完整的开发规范体系，确保代码质量和一致性
 - **主题系统**：统一的主题色彩管理，支持深色/浅色模式无缝切换
 - **开源协作**：完全开源，欢迎社区贡献
 
-## 📁 项目结构
+## 📸 游戏截图
 
-本项目采用清晰的模块化结构，便于维护和扩展：
+### 🖥️ 桌面版界面
 
-```
-ai-detective/
-├── 📁 .cursor/                # Cursor IDE配置
-│   └── 📁 rules/              # 开发规则配置
-├── 📁 .trae/                  # Trae AI配置
-│   └── 📁 rules/              # AI开发规则
-├── 📁 .ide/                   # IDE相关配置
-│
-├── 📁 rules/                  # 📋 项目开发规范
-│   ├── 📄 README.md           # 规范体系总览
-│   └── 📄 主题色规范.md        # 前端主题色设计规范
-│
-├── 📁 backend/                # 后端核心代码
-│   ├── 📄 app.py              # FastAPI主应用
-│   ├── 📄 game_engine.py      # 游戏引擎核心
-│   ├── 📄 ai_service.py       # AI服务接口
-│   ├── 📄 models.py           # 数据模型定义
-│   ├── 📄 database.py         # 数据库操作
-│   ├── 📄 case_data.py        # 案例数据管理
-│   ├── 📄 evidence_system.py  # 证据系统
-│   ├── 📄 accusation_system.py # 指控系统
-│   ├── 📄 game_recorder.py    # 游戏记录系统
-│   ├── 📄 statistics_service.py # 统计服务
-│   ├── 📄 admin_auth.py       # 管理员认证
-│   ├── 📄 config.py           # 配置管理
-│   ├── 📄 version.py          # 版本管理
-│   └── 📁 routes/             # API路由模块
-│       ├── 📄 game.py         # 游戏相关API
-│       ├── 📄 admin.py        # 管理员API
-│       ├── 📄 history.py      # 历史记录API
-│       ├── 📄 websocket.py    # WebSocket连接
-│       └── 📄 common.py       # 通用API
-│
-├── 📁 frontend/               # 前端界面
-│   ├── 📄 desktop.html        # PC桌面版界面
-│   ├── 📄 mobile.html         # 移动端界面
-│   ├── 📄 admin_dashboard.html # 管理员仪表板
-│   ├── 📄 admin_history.html  # 管理员历史记录
-│   ├── 📄 admin_login.html    # 管理员登录
-│   ├── 📄 replay.html         # 游戏回放界面
-│   └── 📁 static/             # 静态资源
-│       ├── 📁 css/            # 样式文件
-│       ├── 📁 js/             # JavaScript文件
-│       └── 📄 themes.json     # 主题配置
-│
-├── 📁 docker/                 # Docker部署
-│   ├── 📄 Dockerfile          # Docker镜像构建
-│   ├── 📄 docker-compose.yml  # Docker Compose配置
-│   ├── 📄 deploy.sh           # Linux/macOS部署脚本
-│   ├── 📄 deploy.bat          # Windows部署脚本
-│   ├── 📄 backup-database.sh  # 数据库备份脚本
-│   ├── 📄 restore-database.sh # 数据库恢复脚本
-│   ├── 📄 wait-for-db.sh      # 数据库等待脚本
-│   ├── 📁 mysql/              # MySQL配置
-│   │   └── 📄 init.sql        # 数据库初始化脚本
-│   └── 📄 README.md           # Docker使用说明
-│
-├── 📁 docs/                   # 项目文档
-│   ├── 📄 DEVELOPER_GUIDE.md  # 开发者指南
-│   ├── 📄 API_DOCUMENTATION.md # API文档
-│   ├── 📄 AI侦探游戏案件创作指南.md # 案件创作指南
-│   └── 📄 案件创作快速参考卡.md # 创作参考卡
-│
-├── 📁 tools/                  # 开发工具
-│   ├── 📄 setup_database.py   # 数据库设置工具
-│   └── 📄 update_version.py   # 版本更新工具
-│
-├── 📄 start_game.py           # 游戏启动脚本
-├── 📄 requirements.txt        # Python依赖包
-├── 📄 env.template            # 环境变量模板
-├── 📄 README.md               # 项目说明文档
-├── 📄 LICENSE                 # 开源许可证
-└── 📄 .gitignore              # Git忽略文件
-```
+<div align="center">
 
-## 🔢 版本管理
+<table>
+<tr>
+<td align="center" width="50%">
+<img src="images/desktop1.png" alt="桌面版主界面" width="100%">
+</td>
+<td align="center" width="50%">
+<img src="images/desktop2.png" alt="桌面版游戏界面" width="100%">
+</td>
+</tr>
+<tr>
+<td align="center" width="50%">
+<img src="images/desktop3.png" alt="桌面版审判界面" width="100%">
+</td>
+<td align="center" width="50%">
+<img src="images/desktop4.png" alt="桌面版分析界面" width="100%">
+</td>
+</tr>
+</table>
 
-### 版本号规则
+</div>
 
-- 格式：`主版本.次版本.修订版本` (例如: 1.6.0)
-- 主版本：重大功能更新或架构变更
-- 次版本：新功能添加
-- 修订版本：Bug修复或小改进
+### 📱 移动端界面
 
-### 版本管理操作
+<div align="center">
 
-#### 查看当前版本
-```bash
-python update_version.py
-```
+<table>
+<tr>
+<td align="center" width="50%">
+<img src="images/mobile1.png" alt="移动端主界面" width="100%">
+</td>
+<td align="center" width="50%">
+<img src="images/mobile2.png" alt="移动端对话界面" width="100%">
+</td>
+</tr>
+<tr>
+<td align="center" width="50%">
+<img src="images/mobile3.png" alt="移动端证据界面" width="100%">
+</td>
+<td align="center" width="50%">
+<img src="images/mobile4.png" alt="移动端案情界面" width="100%">
+</td>
+</tr>
+</table>
 
-#### 更新版本号
-```bash
-python update_version.py 1.7.0
-```
+</div>
+
+### 🔧 管理后台界面
+
+<div align="center">
+
+<table>
+<tr>
+<td align="center" width="50%">
+<img src="images/admin1.png" alt="管理后台仪表板" width="100%">
+</td>
+<td align="center" width="50%">
+<img src="images/admin2.png" alt="用户行为分析" width="100%">
+</td>
+</tr>
+<tr>
+<td align="center" width="50%">
+<img src="images/admin3.png" alt="游戏记录管理" width="100%">
+</td>
+<td align="center" width="50%">
+<img src="images/admin4.png" alt="系统管理界面" width="100%">
+</td>
+</tr>
+</table>
+
+</div>
+
 
 ## 🚀 快速部署
 
@@ -293,6 +299,27 @@ cp env.template .env
 # 编辑配置文件
 # 必须设置 OPENAI_API_KEY
 # 其他参数可根据需要调整
+```
+
+## 🔢 版本管理
+
+### 版本号规则
+
+- 格式：`主版本.次版本.修订版本` (例如: 1.6.0)
+- 主版本：重大功能更新或架构变更
+- 次版本：新功能添加
+- 修订版本：Bug修复或小改进
+
+### 版本管理操作
+
+#### 查看当前版本
+```bash
+python update_version.py
+```
+
+#### 更新版本号
+```bash
+python update_version.py 1.7.0
 ```
 
 ## 🐛 故障排除

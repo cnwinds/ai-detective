@@ -690,6 +690,11 @@ class DetectiveGameApp {
             await this.waitForLoadingComplete();
             await this.hideCaseLoadingScreen();
             
+            // 神秘界面消失后，额外增加1.5秒延迟，增加神秘感
+            await new Promise(resolve => {
+                setTimeout(resolve, 1000);
+            });
+            
             // 显示案件介绍
             this.showCaseIntroduction();
         } catch (error) {

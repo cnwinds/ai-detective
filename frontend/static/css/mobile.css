@@ -295,29 +295,7 @@ html, body {
     font-size: 1.2rem;
 }
 
-.download-hint {
-    margin-top: 15px;
-    margin-bottom: 10px;
-    padding: 12px;
-    background: var(--theme-secondary-bg);
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--theme-border-color);
-    animation: fadeInUp 1s ease-out 0.9s both;
-    transition: background 0.3s ease;
-}
 
-.download-hint p {
-    color: var(--theme-text-secondary);
-    font-size: 0.9rem;
-    line-height: 1.4;
-    margin-bottom: 10px;
-}
-
-.download-hint .hint-icon {
-    color: var(--theme-accent-color);
-    margin-right: 8px;
-}
 
 .footer-info {
     position: fixed;
